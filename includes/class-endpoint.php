@@ -85,42 +85,17 @@ class EDD_HS_Endpoint {
 			$order['id']             = $result->post_id;
 			$order['status']         = $result->post_status;
 			$order['amount']         = edd_get_payment_amount( $result->post_id );
-			$order['payment_method'] = edd_get_payment_gateway( $result->post_id );
-
-			if ( 'paypal' === $order['payment_method'] ) {
-				// Grab the PayPal transaction ID and link the transaction to PayPal
-				$notes = edd_get_payment_notes( $result->post_id );
-				foreach ( $notes as $note ) {
-
-					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$order['payment_method'] = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
-						break;
-					}
-
-				}
-
-			} else if ( 'stripe' === $order['payment_method'] ) {
-				// Grab the PayPal transaction ID and link the transaction to PayPal
-				$notes = edd_get_payment_notes( $result->post_id );
-				foreach ( $notes as $note ) {
-					if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$order['payment_method'] = '<a href="https:/stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
-						break;
-					}
-				}
-			}
+			$order['payment_method'] = $this->get_payment_method( $result->post_id );
 
 			$downloads = edd_get_payment_meta_downloads( $result->post_id );
 			if ( $downloads ) {
+
+				$licensing = new EDD_Software_Licensing();
 				$license_keys = '';
+
 				foreach ( $downloads as $download ) {
 
 					$id = isset( $purchase['cart_details'] ) ? $download['id'] : $download;
-
-					$licensing = new EDD_Software_Licensing();
-
 					if ( get_post_meta( $id, '_edd_sl_enabled', true ) ) {
 						$license = $licensing->get_license_by_purchase( $order['id'], $id );
 						$license_keys .= '<strong>' . get_the_title( $id ) . "</strong><br/>"
@@ -158,6 +133,42 @@ class EDD_HS_Endpoint {
 		}
 
 		$this->respond( $output );
+	}
+
+	private function get_payment_method( $payment_id ) {
+		$payment_method = edd_get_payment_gateway( $payment_id );
+
+		// create link to transaction if stripe or paypal was used
+		if( in_array( $payment_method, array( 'stripe', 'paypal' ) ) ) {
+
+			$notes = edd_get_payment_notes( $payment_id );
+
+			switch( $payment_method ) {
+				case 'paypal':
+
+					foreach ( $notes as $note ) {
+						if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+							$transaction_id = $match[1];
+							$payment_method = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
+							break;
+						}
+					}
+					break;
+
+				case 'stripe':
+					foreach ( $notes as $note ) {
+						if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+							$transaction_id = $match[1];
+							$payment_method = '<a href="https:/stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
+							break;
+						}
+					}
+					break;
+			}
+
+		}
+
+		return $payment_method;
 	}
 
 	/**
