@@ -45,7 +45,7 @@ class EDD_HS {
 		spl_autoload_register( array( $this, 'autoload') );
 
 		// load plugin files on later hook
-		add_action( 'init', array( $this, 'load' ) );
+		add_action( 'plugins_loaded', array( $this, 'load' ), 90 );
 	}
 
 	public function load() {
