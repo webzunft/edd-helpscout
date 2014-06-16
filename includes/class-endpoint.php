@@ -91,17 +91,31 @@ class EDD_HS_Endpoint {
 				// Grab the PayPal transaction ID and link the transaction to PayPal
 				$notes = edd_get_payment_notes( $result->post_id );
 				foreach ( $notes as $note ) {
-					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) )
-						$order['paypal_transaction_id'] = $match[1];
+
+					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+						$transaction_id = $match[1];
+						$order['payment_method'] = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
+						break;
+					}
+
 				}
 
-				$order['payment_method'] = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . $order['paypal_transaction_id'] . '" target="_blank">PayPal</a>';
+			} else if ( 'stripe' === $order['payment_method'] ) {
+				// Grab the PayPal transaction ID and link the transaction to PayPal
+				$notes = edd_get_payment_notes( $result->post_id );
+				foreach ( $notes as $note ) {
+					if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+						$transaction_id = $match[1];
+						$order['payment_method'] = '<a href="https:/stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
+						break;
+					}
+				}
 			}
 
-			$downloads = maybe_unserialize( $purchase['downloads'] );
+			$downloads = edd_get_payment_meta_downloads( $result->post_id );
 			if ( $downloads ) {
 				$license_keys = '';
-				foreach ( maybe_unserialize( $purchase['downloads'] ) as $download ) {
+				foreach ( $downloads as $download ) {
 
 					$id = isset( $purchase['cart_details'] ) ? $download['id'] : $download;
 
@@ -132,7 +146,7 @@ class EDD_HS_Endpoint {
 			}
 
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
-			$output .= '$' . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
+			$output .= edd_get_currency() . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
 			$output .= '<p><i class="icon-pointer"></i><a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&edd-action=email_links&purchase_id=' . $order['id'] ) . '">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
 
 			// buid list of items with license keys
