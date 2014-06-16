@@ -56,12 +56,12 @@ class EDD_HS_Endpoint {
 		}
 
 		// query by email(s)
-		$query   = "SELECT pm2.post_id, pm2.meta_value, p.post_status FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID AND p.post_status NOT IN ('failed','revoked') ORDER BY pm.post_id DESC";
+		$query   = "SELECT pm2.post_id, pm2.meta_value, p.post_status FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
 		$results = $wpdb->get_results( $query );
 
 		if ( ! $results && ! empty( $data['customer']['fname'] ) && ! empty( $data['customer']['fname'] ) ) {
 			// query by LIKE firstname AND LIKE lastname
-			$query   = "SELECT pm.post_id, pm.meta_value, p.post_status FROM $wpdb->postmeta pm, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_meta' AND pm.meta_value LIKE '%%" . $data['customer']['fname'] . "%%' AND pm.meta_value LIKE '%%" . $data['customer']['lname'] . "%%' AND pm.post_id = p.ID AND p.post_status NOT IN ('failed','revoked') ORDER BY pm.post_id DESC";
+			$query   = "SELECT pm.post_id, pm.meta_value, p.post_status FROM $wpdb->postmeta pm, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_meta' AND pm.meta_value LIKE '%%" . $data['customer']['fname'] . "%%' AND pm.meta_value LIKE '%%" . $data['customer']['lname'] . "%%' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
 			$results = $wpdb->get_results( $query );
 		}
 
@@ -87,7 +87,7 @@ class EDD_HS_Endpoint {
 			$order['amount']         = edd_get_payment_amount( $result->post_id );
 			$order['payment_method'] = edd_get_payment_gateway( $result->post_id );
 
-			if ( 'paypal' == $order['payment_method'] ) {
+			if ( 'paypal' === $order['payment_method'] ) {
 				// Grab the PayPal transaction ID and link the transaction to PayPal
 				$notes = edd_get_payment_notes( $result->post_id );
 				foreach ( $notes as $note ) {
@@ -126,11 +126,16 @@ class EDD_HS_Endpoint {
 		$output = '';
 		foreach ( $orders as $order ) {
 			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong>';
-			if ( $order['status'] != 'publish' )
+
+			if ( $order['status'] !== 'publish' ) {
 				$output .= ' - <span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
+			}
+
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
 			$output .= '$' . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
 			$output .= '<p><i class="icon-pointer"></i><a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&edd-action=email_links&purchase_id=' . $order['id'] ) . '">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
+
+			// buid list of items with license keys
 			$output .= '<ul>';
 			foreach ( $order['downloads'] as $download ) {
 				$output .= '<li>' . $download . '</li>';
