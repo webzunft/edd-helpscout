@@ -136,7 +136,7 @@ class EDD_HS_Endpoint {
 	}
 
 	/**
-	 * Get the payment used for the given payment_id. Returns a link to the transaction in Stripe or PayPal if possible.
+	 * Get the payment method used for the given $payment_id. Returns a link to the transaction in Stripe or PayPal if possible.
 	 *
 	 * @param int $payment_id
 	 *
