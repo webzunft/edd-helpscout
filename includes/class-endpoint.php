@@ -11,8 +11,6 @@ if( ! defined("EDD_HS::VERSION") ) {
  */
 class EDD_HS_Endpoint {
 
-	const SECRET_KEY = 'ABRowClEq8OCBFxhw1eBu7AAakk2HswKdeIC4JWf';
-
 	/**
 	 * @var string
 	 */
@@ -148,7 +146,10 @@ class EDD_HS_Endpoint {
 	 * @return bool
 	 */
 	private function is_signature_valid() {
-		$expected_signature = base64_encode( hash_hmac( 'sha1', $this->input, self::SECRET_KEY, true ) );
+
+		$secret_key = defined( 'HELPSCOUT_SECRET_KEY' ) ? HELPSCOUT_SECRET_KEY : '';
+
+		$expected_signature = base64_encode( hash_hmac( 'sha1', $this->input, $secret_key, true ) );
 
 		if( $expected_signature !== $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) {
 			return false;

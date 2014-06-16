@@ -65,7 +65,7 @@ class EDD_HS {
 			$include_path = dirname( __FILE__ ) . '/includes/';
 
 			$classes = array(
-				'edd_hs_endpoint' => $include_path . 'class-endpoint.php',
+				'edd_hs_endpoint'   => $include_path . 'class-endpoint.php',
 			);
 		}
 
