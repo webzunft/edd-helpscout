@@ -135,6 +135,13 @@ class EDD_HS_Endpoint {
 		$this->respond( $output );
 	}
 
+	/**
+	 * Get the payment used for the given payment_id. Returns a link to the transaction in Stripe or PayPal if possible.
+	 *
+	 * @param int $payment_id
+	 *
+	 * @return string
+	 */
 	private function get_payment_method( $payment_id ) {
 		$payment_method = edd_get_payment_gateway( $payment_id );
 
