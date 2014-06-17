@@ -56,12 +56,12 @@ class EDD_HS_Endpoint {
 		}
 
 		// query by email(s)
-		$query   = "SELECT pm2.post_id, pm2.meta_value, p.post_status FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
+		$query   = "SELECT pm2.post_id, p.post_status, p.post_date FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
 		$results = $wpdb->get_results( $query );
 
 		if ( ! $results && ! empty( $data['customer']['fname'] ) && ! empty( $data['customer']['lname'] ) ) {
 			// query by LIKE firstname AND LIKE lastname
-			$query   = "SELECT pm.post_id, pm.meta_value, p.post_status FROM $wpdb->postmeta pm, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_meta' AND pm.meta_value LIKE '%%" . $data['customer']['fname'] . "%%' AND pm.meta_value LIKE '%%" . $data['customer']['lname'] . "%%' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
+			$query   = "SELECT pm.post_id, p.post_status, p.post_date FROM $wpdb->postmeta pm, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_meta' AND pm.meta_value LIKE '%%" . $data['customer']['fname'] . "%%' AND pm.meta_value LIKE '%%" . $data['customer']['lname'] . "%%' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
 			$results = $wpdb->get_results( $query );
 		}
 
@@ -75,43 +75,38 @@ class EDD_HS_Endpoint {
 		foreach( $results as $result ) {
 
 			$order = array();
-			$order['link'] = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->post_id ) . '">#' . $result->post_id . '</a>';
-
-			$post = get_post( $result->post_id );
-			$order['date'] = $post->post_date;
-			unset( $post );
-
-			$purchase = maybe_unserialize( $result->meta_value );
 			$order['id']             = $result->post_id;
 			$order['status']         = $result->post_status;
+			$order['date'] = $result->post_date;
+			$order['link'] = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->post_id ) . '">#' . $result->post_id . '</a>';
 			$order['amount']         = edd_get_payment_amount( $result->post_id );
 			$order['payment_method'] = $this->get_payment_method( $result->post_id );
 
 			$downloads = edd_get_payment_meta_downloads( $result->post_id );
-			if ( $downloads ) {
-
-				$licensing = new EDD_Software_Licensing();
-				$license_keys = '';
+			if ( is_array( $downloads ) ) {
 
 				foreach ( $downloads as $download ) {
 
-					$id = isset( $purchase['cart_details'] ) ? $download['id'] : $download;
-					if ( get_post_meta( $id, '_edd_sl_enabled', true ) ) {
-						$license = $licensing->get_license_by_purchase( $order['id'], $id );
-						$license_keys .= '<strong>' . get_the_title( $id ) . "</strong><br/>"
-						                 . edd_get_price_option_name( $id, $download['options']['price_id'] ) . '<br/>'
-						                 . '<a href="' . admin_url( 'edit.php?post_type=download&page=edd-licenses&action=manage_sites&license_id=' . $license->ID ). '">' . get_post_meta( $license->ID, '_edd_sl_key', true ) . '</a><br/><br/>';
-					}
-				}
-			}
+					$id = $download['id'];
 
-			if( isset( $license_keys ) && ! empty( $license_keys ) ) {
-				$order['downloads'][] = $license_keys;
+					// generate download string
+					$download_details = '<strong>' . get_the_title( $id ) . "</strong><br/>";
+					$download_details .= edd_get_price_option_name( $id, $download['options']['price_id'] );
+
+					if ( get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
+						$license = edd_software_licensing()->get_license_by_purchase( $order['id'], $id );
+						$download_details .= '<br /><a href="' . admin_url( 'edit.php?post_type=download&page=edd-licenses&action=manage_sites&license_id=' . $license->ID ). '">' . get_post_meta( $license->ID, '_edd_sl_key', true ) . '</a>';
+					}
+
+					$order['downloads'][] = $download_details . '<br /><br />';
+				}
+
 			}
 
 			$orders[]             = $order;
 		}
 
+		// build HTML output
 		$output = '';
 		foreach ( $orders as $order ) {
 			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong>';
