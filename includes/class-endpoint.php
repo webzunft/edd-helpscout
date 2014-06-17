@@ -160,7 +160,6 @@ class EDD_HS_Endpoint {
 				case 'stripe':
 					foreach ( $notes as $note ) {
 						if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-							var_dump( $match ); die();
 							$transaction_id = $match[1];
 							$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
 							break;
