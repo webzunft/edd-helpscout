@@ -81,6 +81,7 @@ class EDD_HS_Endpoint {
 			$order['link'] = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->post_id ) . '">#' . $result->post_id . '</a>';
 			$order['amount']         = edd_get_payment_amount( $result->post_id );
 			$order['payment_method'] = $this->get_payment_method( $result->post_id );
+			$order['downloads'] = array();
 
 			$downloads = edd_get_payment_meta_downloads( $result->post_id );
 			if ( is_array( $downloads ) ) {
@@ -90,12 +91,39 @@ class EDD_HS_Endpoint {
 					$id = $download['id'];
 
 					// generate download string
-					$download_details = '<strong>' . get_the_title( $id ) . "</strong><br/>";
+					$download_details = '<strong>' . get_the_title( $id ) . "</strong><br />";
 					$download_details .= edd_get_price_option_name( $id, $download['options']['price_id'] );
 
 					if ( get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
-						$license = edd_software_licensing()->get_license_by_purchase( $order['id'], $id );
-						$download_details .= '<br /><a href="' . admin_url( 'edit.php?post_type=download&page=edd-licenses&action=manage_sites&license_id=' . $license->ID ). '">' . get_post_meta( $license->ID, '_edd_sl_key', true ) . '</a>';
+						$edd_sl = edd_software_licensing();
+
+						// get license key
+						$license = $edd_sl->get_license_by_purchase( $order['id'], $id );
+
+						if( is_object( $license ) ) {
+
+							// add link to manage_sites for this license
+							$manage_license_url = admin_url( 'edit.php?post_type=download&page=edd-licenses&action=manage_sites&license_id=' . $license->ID );
+							$download_details .= '<br /><a href="' . $manage_license_url . '">' . get_post_meta( $license->ID, '_edd_sl_key', true ) . '</a>';
+
+							// get active sites for this license
+							$sites = $edd_sl->get_sites( $license->ID );
+
+							if( is_array( $sites ) ) {
+
+								// add active sites to the download HTML
+								$download_details .= '<br /><em>Active sites:</em><ol>';
+								foreach( $sites as $site ) {
+									$download_details .= '<li><a href="'. esc_attr( $site ) .'" target="_blank">'. esc_html( $site ) .'</a> <a href="'. wp_nonce_url( add_query_arg( array( 'edd_action' => 'deactivate_site', 'site_url' => $site ), $manage_license_url ), 'edd_deactivate_site_nonce' ) .'"><small>(deactivate)</small></a></li>';
+								}
+								$download_details .= '</ol>';
+
+
+							}
+
+						}
+
+
 					}
 
 					$order['downloads'][] = $download_details . '<br /><br />';
@@ -119,12 +147,14 @@ class EDD_HS_Endpoint {
 			$output .= edd_get_currency() . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
 			$output .= '<p><i class="icon-pointer"></i><a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&edd-action=email_links&purchase_id=' . $order['id'] ) . '">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
 
-			// buid list of items with license keys
-			$output .= '<ul>';
-			foreach ( $order['downloads'] as $download ) {
-				$output .= '<li>' . $download . '</li>';
+			if( ! empty( $order['downloads'] ) ) {
+				// buid list of items with license keys
+				$output .= '<ul>';
+				foreach ( $order['downloads'] as $download ) {
+					$output .= '<li>' . $download . '</li>';
+				}
+				$output .= '</ul>';
 			}
-			$output .= '</ul>';
 		}
 
 		$this->respond( $output );
