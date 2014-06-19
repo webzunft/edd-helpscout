@@ -10,11 +10,12 @@ Activating the plugin and configuring the integration will add the following inf
 - All purchased "downloads"
 - The payment method used. Links to the transaction in PayPal or Stripe.
 - License keys, if any. Links to the Site Manager in Easy Digital Downloads.
+- Active sites, with a link to deactivate the license for the given site.
 
 
 ### Installation
 
-To get this up an running, you'll need to configure a few things in both WordPress as HelpScout.
+To get this up an running, you'll need to configure a few things in WordPress and HelpScout.
 
 ##### WordPress
 1. Upload the contents of `edd-helpscout.zip` to your plugins directory, which usually is `/wp-content/plugins/`.
