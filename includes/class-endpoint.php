@@ -58,7 +58,7 @@ class EDD_HS_Endpoint {
 		}
 
 		// query by email(s)
-		$query   = "SELECT pm2.post_id, p.post_status, p.post_date FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
+		$query   = "SELECT pm2.post_id, p.post_status, p.post_date FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID GROUP BY pm.post_id ORDER BY pm.post_id DESC";
 		$results = $wpdb->get_results( $query );
 
 		if ( ! $results ) {
