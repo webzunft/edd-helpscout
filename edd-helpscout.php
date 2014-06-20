@@ -28,7 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 // Prevent direct file access
-if( ! defined( 'ABSPATH' ) ) {
+if ( ! defined( 'ABSPATH' ) ) {
 	header( 'Status: 403 Forbidden' );
 	header( 'HTTP/1.1 403 Forbidden' );
 	exit;
@@ -42,7 +42,7 @@ class EDD_HS {
 	public function __construct() {
 
 		// register autoloader
-		spl_autoload_register( array( $this, 'autoload') );
+		spl_autoload_register( array( $this, 'autoload' ) );
 
 		// load plugin files on later hook
 		add_action( 'plugins_loaded', array( $this, 'load' ), 90 );
@@ -51,8 +51,12 @@ class EDD_HS {
 	public function load() {
 
 		// if this is a HelpScout Request, load the Endpoint class
-		if( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+		if ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 			new EDD_HS_Endpoint();
+		}
+
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+			new EDD_HS_Ajax();
 		}
 
 	}
@@ -60,19 +64,21 @@ class EDD_HS {
 	public function autoload( $class ) {
 		static $classes = null;
 
-		if( $classes === null ) {
+		if ( $classes === null ) {
 
 			$include_path = dirname( __FILE__ ) . '/includes/';
 
 			$classes = array(
-				'edd_hs_endpoint'   => $include_path . 'class-endpoint.php',
+				'edd_hs_endpoint' => $include_path . 'class-endpoint.php',
+				'edd_hs_ajax'     => $include_path . 'class-ajax.php',
 			);
 		}
 
 		$class_name = strtolower( $class );
 
-		if( isset( $classes[$class_name] ) ) {
-			require_once $classes[$class_name];
+		if ( isset( $classes[ $class_name ] ) ) {
+			require_once $classes[ $class_name ];
+
 			return true;
 		}
 
