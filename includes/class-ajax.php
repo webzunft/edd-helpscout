@@ -28,13 +28,16 @@ class EDD_HS_Ajax {
 		wp_set_current_user( 0 );
 
 		// Use wp_verify_nonce and check for a 1 return, which means a nonce is valid for 12 hours instead of the default 24
-		if ( 1 !== wp_verify_nonce( $_REQUEST['nonce'], 'hs-edd-integration' ) ) {
+		if ( 1 !== wp_verify_nonce( $_REQUEST['nonce'], 'hs-edd-' . $_REQUEST['hs_action'] ) ) {
 			die( '-1' );
 		}
 
 		switch ( $_REQUEST['hs_action'] ) {
 			case 'deactivate':
 				$this->handle_deactivation_request();
+				break;
+			case 'purchase-receipt':
+				$this->handle_purchase_receipt_resend();
 				break;
 			default:
 				break;
@@ -47,5 +50,29 @@ class EDD_HS_Ajax {
 	 */
 	private function handle_deactivation_request() {
 		echo edd_software_licensing()->delete_site( $_REQUEST['license_id'], $_REQUEST['site_url'] );
+	}
+
+	/**
+	 * Handle resending the purchase email.
+	 */
+	private function handle_purchase_receipt_resend() {
+		$purchase_id = (int) $_REQUEST['order'];
+
+		edd_email_purchase_receipt( $purchase_id, false );
+
+		// Grab all downloads of the purchase and update their file download limits, if needed
+		// This allows admins to resend purchase receipts to grant additional file downloads
+		$downloads = edd_get_payment_meta_downloads( $purchase_id );
+
+		if ( is_array( $downloads ) ) {
+			foreach ( $downloads as $download ) {
+				$limit = edd_get_file_download_limit( $download['id'] );
+				if ( ! empty( $limit ) ) {
+					edd_set_file_download_limit_override( $download['id'], $purchase_id );
+				}
+			}
+		}
+
+		echo '1';
 	}
 }
