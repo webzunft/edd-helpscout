@@ -42,14 +42,15 @@ class EDD_HS_Ajax {
 			default:
 				break;
 		}
-		die();
+
+		die('<script>window.close();</script>');
 	}
 
 	/**
 	 * Deactivates a site
 	 */
 	private function handle_deactivation_request() {
-		echo edd_software_licensing()->delete_site( $_REQUEST['license_id'], $_REQUEST['site_url'] );
+		edd_software_licensing()->delete_site( $_REQUEST['license_id'], $_REQUEST['site_url'] );
 	}
 
 	/**
@@ -73,6 +74,5 @@ class EDD_HS_Ajax {
 			}
 		}
 
-		echo '1';
 	}
 }
