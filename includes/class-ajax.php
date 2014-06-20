@@ -42,6 +42,8 @@ class EDD_HS_Ajax {
 			default:
 				break;
 		}
+
+		echo '<script>window.close();</script>';
 		die();
 	}
 
@@ -72,7 +74,5 @@ class EDD_HS_Ajax {
 				}
 			}
 		}
-
-		echo '1';
 	}
 }
