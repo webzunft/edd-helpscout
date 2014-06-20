@@ -150,10 +150,19 @@ class EDD_HS_Endpoint {
 		// build HTML output
 		$output = '';
 		foreach ( $orders as $order ) {
-			$class = '';
-			if ( $order['status'] == 'publish' ) {
-				$class = ' open';
 
+			$class = '';
+
+			// open completed purchases by default
+			if ( $order['status'] === 'publish' ) {
+				$class = ' open';
+			}
+
+			$output .= '<div class="toggleGroup' . $class . '">';
+			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
+			if ( $order['status'] !== 'publish' ) {
+				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
+			} else {
 				$args        = array(
 					'action'    => 'hs_action',
 					'nonce'     => wp_create_nonce( 'hs-edd-purchase-receipt' ),
@@ -161,13 +170,7 @@ class EDD_HS_Endpoint {
 					'order'     => $order['id'],
 				);
 				$resend_link = '<a style="float:right" href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
-
-			}
-			$output .= '<div class="toggleGroup' . $class . '">';
-
-			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>' . $resend_link;
-			if ( $order['status'] !== 'publish' ) {
-				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
+				$output .=  $resend_link;
 			}
 
 			$output .= '<div class="toggle indent">';
