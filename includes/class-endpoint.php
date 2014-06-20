@@ -202,39 +202,34 @@ class EDD_HS_Endpoint {
 	 * @return string
 	 */
 	private function get_payment_method( $payment_id ) {
+
 		$payment_method = edd_get_payment_gateway( $payment_id );
 
-		// create link to transaction if stripe or paypal was used
-		if ( in_array( $payment_method, array( 'stripe', 'paypal' ) ) ) {
-
-			$notes = edd_get_payment_notes( $payment_id );
-
-			switch ( $payment_method ) {
-				case 'paypal':
-
-					foreach ( $notes as $note ) {
-						if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-							$transaction_id = $match[1];
-							$payment_method = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
-							break;
-						}
+		switch ( $payment_method ) {
+			case 'paypal':
+				$notes = edd_get_payment_notes( $payment_id );
+				foreach ( $notes as $note ) {
+					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+						$transaction_id = $match[1];
+						$payment_method = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
+						break;
 					}
-					break;
+				}
+				break;
 
-				case 'stripe':
-					foreach ( $notes as $note ) {
-						if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-							$transaction_id = $match[1];
-							$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
-							break;
-						}
+			case 'stripe':
+				$notes = edd_get_payment_notes( $payment_id );
+				foreach ( $notes as $note ) {
+					if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+						$transaction_id = $match[1];
+						$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
+						break;
 					}
-					break;
-				case 'manual_purchases':
-					$payment_method = 'manual';
-					break;
-			}
-
+				}
+				break;
+			case 'manual_purchases':
+				$payment_method = 'manual';
+				break;
 		}
 
 		return $payment_method;
