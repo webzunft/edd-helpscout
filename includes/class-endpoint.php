@@ -94,7 +94,8 @@ class EDD_HS_Endpoint {
 					$download_details = '<strong>' . get_the_title( $id ) . "</strong><br />";
 					$download_details .= edd_get_price_option_name( $id, $download['options']['price_id'] );
 
-					if ( get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
+					// query license keys if order is completed and has licensing enabled
+					if ( $order['status'] === 'publish' &&  get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
 						$edd_sl = edd_software_licensing();
 
 						// get license key
