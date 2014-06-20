@@ -160,6 +160,8 @@ class EDD_HS_Endpoint {
 
 			$output .= '<div class="toggleGroup' . $class . '">';
 			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
+
+			// show status if order wasn't completed. otherwise, show resend receipt icon.
 			if ( $order['status'] !== 'publish' ) {
 				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
 			} else {
@@ -175,7 +177,7 @@ class EDD_HS_Endpoint {
 
 			$output .= '<div class="toggle indent">';
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
-			$output .= edd_get_currency() . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
+			$output .= trim( edd_currency_filter( $order['amount'] ) ) . ( ( isset( $order['payment_method'] ) && '' !== $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ) . '</p>';
 
 			if ( ! empty( $order['downloads'] ) && count( $order['downloads'] ) > 0 ) {
 				// buid list of items with license keys
@@ -227,6 +229,9 @@ class EDD_HS_Endpoint {
 							break;
 						}
 					}
+					break;
+				case 'manual_purchases':
+					$payment_method = 'manual';
 					break;
 			}
 
