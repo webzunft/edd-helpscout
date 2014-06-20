@@ -152,10 +152,19 @@ class EDD_HS_Endpoint {
 			$class = '';
 			if ( $order['status'] == 'publish' ) {
 				$class = ' open';
+
+				$args        = array(
+					'action'    => 'hs_action',
+					'nonce'     => wp_create_nonce( 'hs-edd-purchase-receipt' ),
+					'hs_action' => 'purchase-receipt',
+					'order'     => $order['id'],
+				);
+				$resend_link = '<a style="float:right" href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
+
 			}
 			$output .= '<div class="toggleGroup' . $class . '">';
 
-			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
+			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>' . $resend_link;
 			if ( $order['status'] !== 'publish' ) {
 				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
 			}
@@ -163,16 +172,6 @@ class EDD_HS_Endpoint {
 			$output .= '<div class="toggle indent">';
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
 			$output .= edd_get_currency() . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
-
-			if ( $order['status'] == 'publish' ) {
-				$args = array(
-					'action'    => 'hs_action',
-					'nonce'     => wp_create_nonce( 'hs-edd-purchase-receipt' ),
-					'hs_action' => 'purchase-receipt',
-					'order'     => $order['id'],
-				);
-				$output .= '<p><i class="icon-doc"></i><a href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
-			}
 
 			if ( ! empty( $order['downloads'] ) && count( $order['downloads'] ) > 0 ) {
 				// buid list of items with license keys
