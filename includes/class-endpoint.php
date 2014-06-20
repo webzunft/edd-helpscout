@@ -58,10 +58,10 @@ class EDD_HS_Endpoint {
 		}
 
 		// query by email(s)
-		$query   = "SELECT pm2.post_id, p.post_status, p.post_date FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID GROUP BY pm.post_id ORDER BY pm.post_id DESC";
+		$query   = "SELECT p.ID, p.post_status, p.post_date FROM {$wpdb->posts} p, {$wpdb->postmeta} pm WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value {$email_query} AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
 		$results = $wpdb->get_results( $query );
 
-		if ( ! $results ) {
+		if ( ! is_array( $results ) || count( $results ) === 0 ) {
 			// No purchase data was found
 			$this->respond( 'No purchase data found.' );
 		}
@@ -71,15 +71,15 @@ class EDD_HS_Endpoint {
 		foreach ( $results as $result ) {
 
 			$order                   = array();
-			$order['id']             = $result->post_id;
+			$order['id']             = $result->ID;
 			$order['status']         = $result->post_status;
 			$order['date']           = $result->post_date;
-			$order['link']           = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->post_id ) . '">#' . $result->post_id . '</a>';
-			$order['amount']         = edd_get_payment_amount( $result->post_id );
-			$order['payment_method'] = $this->get_payment_method( $result->post_id );
+			$order['link']           = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->ID ) . '">#' . $result->ID . '</a>';
+			$order['amount']         = edd_get_payment_amount( $result->ID );
+			$order['payment_method'] = $this->get_payment_method( $result->ID );
 			$order['downloads']      = array();
 
-			$downloads = edd_get_payment_meta_downloads( $result->post_id );
+			$downloads = edd_get_payment_meta_downloads( $result->ID );
 			if ( is_array( $downloads ) && count( $downloads ) > 0 ) {
 
 				foreach ( $downloads as $download ) {
