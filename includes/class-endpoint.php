@@ -123,8 +123,7 @@ class EDD_HS_Endpoint {
 
 
 					}
-
-					$order['downloads'][] = $download_details . '<br /><br />';
+					$order['downloads'][] = $download_details;
 				}
 
 			}
@@ -135,12 +134,20 @@ class EDD_HS_Endpoint {
 		// build HTML output
 		$output = '';
 		foreach ( $orders as $order ) {
-			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong>';
+			$class = '';
+			if ( $order['status'] == 'publish' ) {
+				$class = ' open';
+			}
+			$output .= '<div class="toggleGroup'.$class.'">';
 
+			$output .= '<div class="toggleBtn"><strong><i class="icon-cart"></i> ' . $order['link'] . '</strong>';
 			if ( $order['status'] !== 'publish' ) {
 				$output .= ' - <span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
 			}
 
+			$output .= '</div>';
+
+			$output .= '<div class="toggle">';
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
 			$output .= edd_get_currency() . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
 			$output .= '<p><i class="icon-pointer"></i><a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&edd-action=email_links&purchase_id=' . $order['id'] ) . '">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
@@ -153,6 +160,8 @@ class EDD_HS_Endpoint {
 				}
 				$output .= '</ul>';
 			}
+			$output .= '</div></div>';
+			$output .= '<div class="divider"></div>';
 		}
 
 		$this->respond( $output );
