@@ -111,7 +111,7 @@ class EDD_HS_Endpoint {
 							// get active sites for this license
 							$sites = $edd_sl->get_sites( $license->ID );
 
-							if ( is_array( $sites ) ) {
+							if ( is_array( $sites ) && count( $sites ) > 0 ) {
 
 								// add active sites to the download HTML
 								$download_details .= '<div class="toggleGroup">';
@@ -121,7 +121,7 @@ class EDD_HS_Endpoint {
 								foreach ( $sites as $site ) {
 									$args = array(
 										'action'     => 'hs_action',
-										'nonce'      => wp_create_nonce( 'hs-edd-integration' ),
+										'nonce'      => wp_create_nonce( 'hs-edd-deactivate' ),
 										'hs_action'  => 'deactivate',
 										'license_id' => $license->ID,
 										'site_url'   => $site,
@@ -163,7 +163,16 @@ class EDD_HS_Endpoint {
 			$output .= '<div class="toggle indent">';
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
 			$output .= edd_get_currency() . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
-			$output .= '<p><i class="icon-pointer"></i><a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&edd-action=email_links&purchase_id=' . $order['id'] ) . '">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
+
+			if ( $order['status'] == 'publish' ) {
+				$args = array(
+					'action'    => 'hs_action',
+					'nonce'     => wp_create_nonce( 'hs-edd-purchase-receipt' ),
+					'hs_action' => 'purchase-receipt',
+					'order'     => $order['id'],
+				);
+				$output .= '<p><i class="icon-doc"></i><a href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
+			}
 
 			if ( ! empty( $order['downloads'] ) && count( $order['downloads'] ) > 0 ) {
 				// buid list of items with license keys
