@@ -106,11 +106,15 @@ class EDD_HS_Endpoint {
 							if( is_array( $sites ) ) {
 
 								// add active sites to the download HTML
-								$download_details .= '<br /><em>Active sites:</em><ol>';
+								$download_details .= '<div class="toggleGroup">';
+								$download_details .= '<a class="toggleBtn">Active sites ↓</a>';
+								$download_details .= '<div class="toggle">';
+								$download_details .= '<ol>';
 								foreach( $sites as $site ) {
-									$download_details .= '<li><a href="'. esc_attr( $site ) .'" target="_blank">'. esc_html( $site ) .'</a> <a href="'. wp_nonce_url( add_query_arg( array( 'edd_action' => 'deactivate_site', 'site_url' => $site ), $manage_license_url ), 'edd_deactivate_site_nonce' ) .'"><small>(deactivate)</small></a></li>';
+									$download_details .= '<li><a href="'. esc_attr( $site ) .'" target="_blank">'. esc_html( $site ) .'</a> <a href="'. wp_nonce_url( add_query_arg( array( 'edd_action' => 'deactivate_site', 'site_url' => $site ), $manage_sites_url ), 'edd_deactivate_site_nonce' ) .'"><small>(deactivate)</small></a></li>';
 								}
 								$download_details .= '</ol>';
+								$download_details .= '</div></div>';
 
 
 							}
