@@ -59,12 +59,6 @@ class EDD_HS_Endpoint {
 		$query   = "SELECT pm2.post_id, p.post_status, p.post_date FROM $wpdb->postmeta pm, $wpdb->postmeta pm2, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value $email_query AND pm.post_id = pm2.post_id AND pm2.meta_key = '_edd_payment_meta' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
 		$results = $wpdb->get_results( $query );
 
-		if ( ! $results && ! empty( $data['customer']['fname'] ) && ! empty( $data['customer']['lname'] ) ) {
-			// query by LIKE firstname AND LIKE lastname
-			$query   = "SELECT pm.post_id, p.post_status, p.post_date FROM $wpdb->postmeta pm, $wpdb->posts p WHERE pm.meta_key = '_edd_payment_meta' AND pm.meta_value LIKE '%%" . $data['customer']['fname'] . "%%' AND pm.meta_value LIKE '%%" . $data['customer']['lname'] . "%%' AND pm.post_id = p.ID ORDER BY pm.post_id DESC";
-			$results = $wpdb->get_results( $query );
-		}
-
 		if ( ! $results ) {
 			// No purchase data was found
 			$this->respond( 'No purchase data found.' );
