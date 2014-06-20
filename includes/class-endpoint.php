@@ -1,6 +1,6 @@
 <?php
 
-if( ! defined("EDD_HS::VERSION") ) {
+if ( ! defined( "EDD_HS::VERSION" ) ) {
 	header( 'Status: 403 Forbidden' );
 	header( 'HTTP/1.1 403 Forbidden' );
 	exit;
@@ -29,6 +29,8 @@ class EDD_HS_Endpoint {
 	 *  - Validate signature
 	 *  - Find purchase data
 	 *  - Generate response
+	 *
+	 * @link http://developer.helpscout.net/custom-apps/style-guide/ HelpScout Custom Apps Style Guide
 	 */
 	private function process() {
 
@@ -37,7 +39,7 @@ class EDD_HS_Endpoint {
 		$this->input = file_get_contents( 'php://input' );
 
 		// check signature
-		if( ! $this->is_signature_valid() ) {
+		if ( ! $this->is_signature_valid() ) {
 			$this->respond( 'Invalid signature' );
 		}
 
@@ -66,23 +68,27 @@ class EDD_HS_Endpoint {
 
 		// build array of purchases
 		$orders = array();
-		foreach( $results as $result ) {
+		foreach ( $results as $result ) {
 
-			$order = array();
+			$order                   = array();
 			$order['id']             = $result->post_id;
 			$order['status']         = $result->post_status;
-			$order['date'] = $result->post_date;
-			$order['link'] = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->post_id ) . '">#' . $result->post_id . '</a>';
+			$order['date']           = $result->post_date;
+			$order['link']           = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->post_id ) . '">#' . $result->post_id . '</a>';
 			$order['amount']         = edd_get_payment_amount( $result->post_id );
 			$order['payment_method'] = $this->get_payment_method( $result->post_id );
-			$order['downloads'] = array();
+			$order['downloads']      = array();
 
 			$downloads = edd_get_payment_meta_downloads( $result->post_id );
-			if ( is_array( $downloads ) ) {
+			if ( is_array( $downloads ) && count( $downloads ) > 0 ) {
 
 				foreach ( $downloads as $download ) {
 
 					$id = $download['id'];
+
+					if ( ! $id || empty( $id ) ) {
+						continue;
+					}
 
 					// generate download string
 					$download_details = '<strong>' . get_the_title( $id ) . "</strong><br />";
@@ -94,26 +100,35 @@ class EDD_HS_Endpoint {
 						// get license key
 						$license = $edd_sl->get_license_by_purchase( $order['id'], $id );
 
-						if( is_object( $license ) ) {
+						if ( is_object( $license ) ) {
+
+							$license_key = get_post_meta( $license->ID, '_edd_sl_key', true );
 
 							// add link to manage_sites for this license
-							$manage_license_url = admin_url( 'edit.php?post_type=download&page=edd-licenses&action=manage_sites&license_id=' . $license->ID );
-							$download_details .= '<br /><a href="' . $manage_license_url . '">' . get_post_meta( $license->ID, '_edd_sl_key', true ) . '</a>';
+							$manage_license_url = admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license_key );
+							$download_details .= '<br /><a href="' . $manage_license_url . '">' . $license_key . '</a>';
 
 							// get active sites for this license
 							$sites = $edd_sl->get_sites( $license->ID );
 
-							if( is_array( $sites ) ) {
+							if ( is_array( $sites ) ) {
 
 								// add active sites to the download HTML
 								$download_details .= '<div class="toggleGroup">';
-								$download_details .= '<a class="toggleBtn">Active sites ↓</a>';
-								$download_details .= '<div class="toggle">';
-								$download_details .= '<ol>';
-								foreach( $sites as $site ) {
-									$download_details .= '<li><a href="'. esc_attr( $site ) .'" target="_blank">'. esc_html( $site ) .'</a> <a href="'. wp_nonce_url( add_query_arg( array( 'edd_action' => 'deactivate_site', 'site_url' => $site ), $manage_sites_url ), 'edd_deactivate_site_nonce' ) .'"><small>(deactivate)</small></a></li>';
+								$download_details .= '<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites</a>';
+								$download_details .= '<div class="toggle indent">';
+								$download_details .= '<ul class="unstyled">';
+								foreach ( $sites as $site ) {
+									$args = array(
+										'action'     => 'hs_action',
+										'nonce'      => wp_create_nonce( 'hs-edd-integration' ),
+										'hs_action'  => 'deactivate',
+										'license_id' => $license->ID,
+										'site_url'   => $site,
+									);
+									$download_details .= '<li><a href="' . esc_attr( $site ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank"><small>(deactivate)</small></a></li>';
 								}
-								$download_details .= '</ol>';
+								$download_details .= '</ul>';
 								$download_details .= '</div></div>';
 
 
@@ -128,7 +143,7 @@ class EDD_HS_Endpoint {
 
 			}
 
-			$orders[]             = $order;
+			$orders[] = $order;
 		}
 
 		// build HTML output
@@ -138,23 +153,21 @@ class EDD_HS_Endpoint {
 			if ( $order['status'] == 'publish' ) {
 				$class = ' open';
 			}
-			$output .= '<div class="toggleGroup'.$class.'">';
+			$output .= '<div class="toggleGroup' . $class . '">';
 
-			$output .= '<div class="toggleBtn"><strong><i class="icon-cart"></i> ' . $order['link'] . '</strong>';
+			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
 			if ( $order['status'] !== 'publish' ) {
-				$output .= ' - <span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
+				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
 			}
 
-			$output .= '</div>';
-
-			$output .= '<div class="toggle">';
+			$output .= '<div class="toggle indent">';
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
 			$output .= edd_get_currency() . $order['amount'] . ' - ' . $order['payment_method'] . '</p>';
 			$output .= '<p><i class="icon-pointer"></i><a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&edd-action=email_links&purchase_id=' . $order['id'] ) . '">' . __( 'Resend Purchase Receipt', 'edd' ) . '</a></p>';
 
-			if( ! empty( $order['downloads'] ) ) {
+			if ( ! empty( $order['downloads'] ) && count( $order['downloads'] ) > 0 ) {
 				// buid list of items with license keys
-				$output .= '<ul>';
+				$output .= '<ul class="unstyled">';
 				foreach ( $order['downloads'] as $download ) {
 					$output .= '<li>' . $download . '</li>';
 				}
@@ -178,11 +191,11 @@ class EDD_HS_Endpoint {
 		$payment_method = edd_get_payment_gateway( $payment_id );
 
 		// create link to transaction if stripe or paypal was used
-		if( in_array( $payment_method, array( 'stripe', 'paypal' ) ) ) {
+		if ( in_array( $payment_method, array( 'stripe', 'paypal' ) ) ) {
 
 			$notes = edd_get_payment_notes( $payment_id );
 
-			switch( $payment_method ) {
+			switch ( $payment_method ) {
 				case 'paypal':
 
 					foreach ( $notes as $note ) {
@@ -221,7 +234,7 @@ class EDD_HS_Endpoint {
 
 		$expected_signature = base64_encode( hash_hmac( 'sha1', $this->input, $secret_key, true ) );
 
-		if( $expected_signature !== $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) {
+		if ( $expected_signature !== $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) {
 			return false;
 		}
 
@@ -237,7 +250,7 @@ class EDD_HS_Endpoint {
 		$response = array( 'html' => $response );
 
 		// clear output, some plugins might have thrown errors by now.
-		if( ob_get_level() > 0 ) {
+		if ( ob_get_level() > 0 ) {
 			ob_end_clean();
 		}
 
