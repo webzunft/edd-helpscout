@@ -92,10 +92,11 @@ class EDD_HS_Endpoint {
 
 					// generate download string
 					$download_details = '<strong>' . get_the_title( $id ) . "</strong><br />";
-					$download_details .= edd_get_price_option_name( $id, $download['options']['price_id'] );
+					if ( isset( $download['options']['price_id'] ) ) {
+						$download_details .= edd_get_price_option_name( $id, $download['options']['price_id'] );
+					}
 
-					// query license keys if order is completed and has licensing enabled
-					if ( $order['status'] === 'publish' &&  get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
+					if ( get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
 						$edd_sl = edd_software_licensing();
 
 						// get license key
@@ -150,21 +151,13 @@ class EDD_HS_Endpoint {
 		// build HTML output
 		$output = '';
 		foreach ( $orders as $order ) {
-
 			$class = '';
-
-			// open completed purchases by default
-			if ( $order['status'] === 'publish' ) {
-				$class = ' open';
+			if ( $order['payment_method'] == 'manual_purchases' ) {
+				$order['payment_method'] = 'manual';
 			}
+			if ( $order['status'] == 'publish' ) {
+				$class = ' open';
 
-			$output .= '<div class="toggleGroup' . $class . '">';
-			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
-
-			// show status if order wasn't completed. otherwise, show resend receipt icon.
-			if ( $order['status'] !== 'publish' ) {
-				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
-			} else {
 				$args        = array(
 					'action'    => 'hs_action',
 					'nonce'     => wp_create_nonce( 'hs-edd-purchase-receipt' ),
@@ -172,12 +165,18 @@ class EDD_HS_Endpoint {
 					'order'     => $order['id'],
 				);
 				$resend_link = '<a style="float:right" href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
-				$output .=  $resend_link;
+
+			}
+			$output .= '<div class="toggleGroup' . $class . '">';
+
+			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>' . $resend_link;
+			if ( $order['status'] !== 'publish' ) {
+				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
 			}
 
 			$output .= '<div class="toggle indent">';
 			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
-			$output .= trim( edd_currency_filter( $order['amount'] ) ) . ( ( isset( $order['payment_method'] ) && '' !== $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ) . '</p>';
+			$output .= trim( edd_currency_filter( $order['amount'] ) ) . ( ( isset( $order['payment_method'] ) && '' != $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ) . '</p>';
 
 			if ( ! empty( $order['downloads'] ) && count( $order['downloads'] ) > 0 ) {
 				// buid list of items with license keys
@@ -202,34 +201,36 @@ class EDD_HS_Endpoint {
 	 * @return string
 	 */
 	private function get_payment_method( $payment_id ) {
-
 		$payment_method = edd_get_payment_gateway( $payment_id );
 
-		switch ( $payment_method ) {
-			case 'paypal':
-				$notes = edd_get_payment_notes( $payment_id );
-				foreach ( $notes as $note ) {
-					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$payment_method = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
-						break;
-					}
-				}
-				break;
+		// create link to transaction if stripe or paypal was used
+		if ( in_array( $payment_method, array( 'stripe', 'paypal' ) ) ) {
 
-			case 'stripe':
-				$notes = edd_get_payment_notes( $payment_id );
-				foreach ( $notes as $note ) {
-					if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
-						break;
+			$notes = edd_get_payment_notes( $payment_id );
+
+			switch ( $payment_method ) {
+				case 'paypal':
+
+					foreach ( $notes as $note ) {
+						if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+							$transaction_id = $match[1];
+							$payment_method = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
+							break;
+						}
 					}
-				}
-				break;
-			case 'manual_purchases':
-				$payment_method = 'manual';
-				break;
+					break;
+
+				case 'stripe':
+					foreach ( $notes as $note ) {
+						if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
+							$transaction_id = $match[1];
+							$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
+							break;
+						}
+					}
+					break;
+			}
+
 		}
 
 		return $payment_method;
