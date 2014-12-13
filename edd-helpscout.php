@@ -61,7 +61,7 @@ class EDD_HS {
 		spl_autoload_register( array( $this, 'autoload' ) );
 
 		// if this is a HelpScout Request, load the Endpoint class
-		if ( isset( $_GET['edd_hs'] ) || isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+		if ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 			new EDD_HS_Endpoint();
 		}
 
