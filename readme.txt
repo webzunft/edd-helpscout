@@ -1,6 +1,6 @@
-=== MailChimp for WordPress ===
+=== Easy Digital Downloads - HelpScout integration ===
 Contributors: DvanKooten
-Donate link: http://dannyvankooten.com/donate/
+Donate link: https://dannyvankooten.com/donate/
 Tags: easy-digital-downloads,helpscout,edd,support
 Requires at least: 3.8
 Tested up to: 3.9.2

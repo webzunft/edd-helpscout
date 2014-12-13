@@ -36,54 +36,70 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class EDD_HS {
 
+	/**
+	 * @const VERSION
+	 */
 	const VERSION = "1.0";
+
+	/**
+	 * @const FILE
+	 */
 	const FILE = __FILE__;
 
+
+	/**
+	 * Constructor
+	 */
 	public function __construct() {
+
+		// do nothing if EDD is not activated
+		if( ! class_exists( 'Easy_Digital_Downloads', false ) ) {
+			return;
+		}
 
 		// register autoloader
 		spl_autoload_register( array( $this, 'autoload' ) );
 
-		// load plugin files on later hook
-		add_action( 'plugins_loaded', array( $this, 'load' ), 90 );
-	}
-
-	public function load() {
-
 		// if this is a HelpScout Request, load the Endpoint class
-		if ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+		if ( isset( $_GET['edd_hs'] ) || isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 			new EDD_HS_Endpoint();
 		}
 
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			new EDD_HS_Ajax();
 		}
-
 	}
 
+	/**
+	 * @param string $class
+	 *
+	 * @return bool
+	 */
 	public function autoload( $class ) {
-		static $classes = null;
 
-		if ( $classes === null ) {
-
-			$include_path = dirname( __FILE__ ) . '/includes/';
-
-			$classes = array(
-				'edd_hs_endpoint' => $include_path . 'class-endpoint.php',
-				'edd_hs_ajax'     => $include_path . 'class-ajax.php',
-			);
+		// only act on classnames with this prefix
+		if( strpos( $class, 'EDD_HS_' ) !== 0 ) {
+			return false;
 		}
 
-		$class_name = strtolower( $class );
+		$filename = dirname( __FILE__ ) . '/includes/class-' . strtolower( substr( $class, 7 ) ) . '.php';
 
-		if ( isset( $classes[ $class_name ] ) ) {
-			require_once $classes[ $class_name ];
-
+		if( file_exists( $filename ) ) {
+			require_once( $filename );
 			return true;
 		}
 
 		return false;
 	}
+
 }
 
-new EDD_HS;
+/**
+ * Initiate the EDD_HS class
+ */
+function __load_edd_helpscout() {
+	new EDD_HS;
+}
+
+add_action( 'plugins_loaded', '__load_edd_helpscout', 90 );
+

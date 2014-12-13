@@ -11,10 +11,6 @@ if ( ! defined( "EDD_HS::VERSION" ) ) {
  */
 class EDD_HS_Endpoint {
 
-	/**
-	 * @var string
-	 */
-	private $input = '';
 
 	/**
 	 * Constructor
@@ -36,14 +32,16 @@ class EDD_HS_Endpoint {
 
 		global $wpdb;
 
-		$this->input = file_get_contents( 'php://input' );
+		$data_string = file_get_contents( 'php://input' );
+		$data = json_decode( $data_string, true );
+
+		$request = new EDD_HS_Request( $data );
 
 		// check signature
-		if ( ! $this->is_signature_valid() ) {
+		if ( ! isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) || ! $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 			$this->respond( 'Invalid signature' );
+			exit;
 		}
-
-		$data = json_decode( $this->input, true );
 
 		// if customer has more than one known email, perform an IN( email1, email 2) query
 		if ( isset( $data['customer']['emails'] ) && is_array( $data['customer']['emails'] ) && count( $data['customer']['emails'] ) > 1 ) {
@@ -95,7 +93,7 @@ class EDD_HS_Endpoint {
 					$download_details .= edd_get_price_option_name( $id, $download['options']['price_id'] );
 
 					// query license keys if order is completed and has licensing enabled
-					if ( $order['status'] === 'publish' &&  get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
+					if ( $order['status'] === 'publish' &&  get_post_meta( $download['id'], '_edd_sl_enabled', true ) && function_exists( 'edd_software_licensing' ) ) {
 						$edd_sl = edd_software_licensing();
 
 						// get license key
@@ -119,16 +117,18 @@ class EDD_HS_Endpoint {
 								$download_details .= '<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites</a>';
 								$download_details .= '<div class="toggle indent">';
 								$download_details .= '<ul class="unstyled">';
+
 								foreach ( $sites as $site ) {
 									$args = array(
 										'action'     => 'hs_action',
-										'nonce'      => wp_create_nonce( 'hs-edd-deactivate' ),
 										'hs_action'  => 'deactivate',
-										'license_id' => $license->ID,
+										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
 									);
-									$download_details .= '<li><a href="' . esc_attr( $site ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank"><small>(deactivate)</small></a></li>';
+									$request = new EDD_HS_Request( $args );
+									$download_details .= '<li><a href="' . esc_attr( $site ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><small>(deactivate)</small></a></li>';
 								}
+
 								$download_details .= '</ul>';
 								$download_details .= '</div></div>';
 
@@ -165,13 +165,20 @@ class EDD_HS_Endpoint {
 			if ( $order['status'] !== 'publish' ) {
 				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
 			} else {
-				$args        = array(
+
+				// was this a renewaL?
+				if( '' !== (string) get_post_meta( $order['id'], '_edd_sl_is_renewal', true ) ) {
+					$output .= '<span style="color:#008000;font-weight:bold;">renewal</span>';
+				}
+
+				// add icon to resend purchase receipt
+				$args = array(
 					'action'    => 'hs_action',
-					'nonce'     => wp_create_nonce( 'hs-edd-purchase-receipt' ),
 					'hs_action' => 'purchase-receipt',
-					'order'     => $order['id'],
+					'order'     => (string) $order['id'],
 				);
-				$resend_link = '<a style="float:right" href="' . add_query_arg( $args, admin_url( 'admin-ajax.php' ) ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
+				$request = new EDD_HS_Request( $args );
+				$resend_link = '<a style="float:right" href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
 				$output .=  $resend_link;
 			}
 
@@ -228,29 +235,11 @@ class EDD_HS_Endpoint {
 				}
 				break;
 			case 'manual_purchases':
-				$payment_method = 'manual';
+				$payment_method = 'Manual';
 				break;
 		}
 
 		return $payment_method;
-	}
-
-	/**
-	 * Test if the provided signature is valid
-	 *
-	 * @return bool
-	 */
-	private function is_signature_valid() {
-
-		$secret_key = defined( 'HELPSCOUT_SECRET_KEY' ) ? HELPSCOUT_SECRET_KEY : '';
-
-		$expected_signature = base64_encode( hash_hmac( 'sha1', $this->input, $secret_key, true ) );
-
-		if ( $expected_signature !== $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) {
-			return false;
-		}
-
-		return true;
 	}
 
 	/**
