@@ -1,11 +1,11 @@
 <?php
 /*
 Plugin Name: Easy Digital Downloads integration for HelpScout
-Plugin URI: http://dannyvankooten.com/helpscout-edd
+Plugin URI: https://dannyvankooten.com/helpscout-edd
 Description: Easy Digital Downloads integration for HelpScout
-Version: 1.0
+Version: 1.0.1
 Author: Danny van Kooten
-Author URI: http://dannyvankooten.com
+Author URI: https://dannyvankooten.com
 Text Domain: helpscout-edd
 Domain Path: /languages
 License: GPL v3
@@ -39,7 +39,7 @@ class EDD_HS {
 	/**
 	 * @const VERSION
 	 */
-	const VERSION = "1.0";
+	const VERSION = "1.0.1";
 
 	/**
 	 * @const FILE
