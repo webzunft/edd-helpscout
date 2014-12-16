@@ -11,73 +11,161 @@ if ( ! defined( "EDD_HS::VERSION" ) ) {
  */
 class EDD_HS_Endpoint {
 
+	/**
+	 * @var array|mixed
+	 */
+	private $data;
+
+	/**
+	 * @var array
+	 */
+	private $customer_emails = array();
+
+	/**
+	 * @var array
+	 */
+	private $customer_payments = array();
 
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->process();
-	}
 
-	/**
-	 * Process the request
-	 *  - Read input
-	 *  - Validate signature
-	 *  - Find purchase data
-	 *  - Generate response
-	 *
-	 * @link http://developer.helpscout.net/custom-apps/style-guide/ HelpScout Custom Apps Style Guide
-	 */
-	private function process() {
+		// get request data
+		$this->data = $this->parse_data();
 
-		global $wpdb;
-
-		$data_string = file_get_contents( 'php://input' );
-		$data = json_decode( $data_string, true );
-
-		$request = new EDD_HS_Request( $data );
-
-		// check signature
-		if ( ! isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) || ! $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+		// validate request
+		if( ! $this->validate() ) {
 			$this->respond( 'Invalid signature' );
 			exit;
 		}
 
-		// if customer has more than one known email, perform an IN( email1, email 2) query
-		if ( isset( $data['customer']['emails'] ) && is_array( $data['customer']['emails'] ) && count( $data['customer']['emails'] ) > 1 ) {
-			$email_query = "IN (";
-			foreach ( $data['customer']['emails'] as $email ) {
-				$email_query .= "'" . $email . "',";
-			}
-			$email_query = rtrim( $email_query, ',' );
-			$email_query .= ')';
-		} else {
-			$email_query = "= '" . $data['customer']['email'] . "'";
+		// get customer email(s)
+		$this->customer_emails = $this->get_customer_emails();
+
+		// get customer payment(s)
+		$this->customer_payments = $this->query_customer_payments();
+
+		// build the final response HTML for HelpScout
+		$html = $this->build_response_html();
+
+		// respond with the built HTML string
+		$this->respond( $html );
+	}
+
+	/**
+	 * @return array|mixed
+	 */
+	private function parse_data() {
+
+		$data_string = file_get_contents( 'php://input' );
+		$data = json_decode( $data_string, true );
+
+		return $data;
+	}
+
+	/**
+	 * Validate the request
+	 *
+	 * - Validates the payload
+	 * - Validates the request signature
+	 *
+	 * @return bool
+	 */
+	private function validate() {
+
+		// we need at least this
+		if ( ! isset( $this->data['customer']['email'] ) && ! isset( $this->data['customer']['emails'] ) ) {
+			return false;
 		}
 
+		// check request signature
+		$request = new EDD_HS_Request( $this->data );
+
+		if ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get an array of emails belonging to the customer
+	 *
+	 * @return array
+	 */
+	private function get_customer_emails() {
+
+		$customer_data = $this->data['customer'];
+		$emails = array();
+
+		if( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
+			$emails = array_values( $customer_data['emails'] );
+		} elseif( isset( $customer_data['email'] ) ) {
+			$emails = array( $customer_data['email'] );
+		}
+
+		if( count( $emails ) === 0 ) {
+			$this->respond( 'No customer email given.' );
+		}
+
+		return $emails;
+	}
+
+	/**
+	 * Query all payments belonging to the customer (by email)
+	 *
+	 * @return array
+	 */
+	private function query_customer_payments() {
+
+		global $wpdb;
+
 		// query by email(s)
-		$query   = "SELECT p.ID, p.post_status, p.post_date FROM {$wpdb->posts} p, {$wpdb->postmeta} pm WHERE pm.meta_key = '_edd_payment_user_email' AND pm.meta_value {$email_query} AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
+		$sql   = "SELECT p.ID, p.post_status, p.post_date FROM {$wpdb->posts} p, {$wpdb->postmeta} pm WHERE pm.meta_key = '_edd_payment_user_email'";
+		$sql .= " AND pm.meta_value IN(%s) AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
+
+		$query = $wpdb->prepare( $sql, rtrim( implode( ',', $this->customer_emails ), ',' ) );
 		$results = $wpdb->get_results( $query );
 
-		if ( ! is_array( $results ) || count( $results ) === 0 ) {
+		if( is_array( $results ) ) {
+			return $results;
+		}
+
+		return array();
+	}
+
+	/**
+	 * Process the request
+	 *  - Find purchase data
+	 *  - Generate response
+	 *
+	 * @TODO: Refactor out loop to find additional order data.
+	 *
+	 * @link http://developer.helpscout.net/custom-apps/style-guide/ HelpScout Custom Apps Style Guide
+	 * @return string
+	 */
+	private function build_response_html() {
+
+		if ( count( $this->customer_payments ) === 0 ) {
 			// No purchase data was found
-			$this->respond( 'No purchase data found.' );
+			return 'No purchase data found';
 		}
 
 		// build array of purchases
 		$orders = array();
-		foreach ( $results as $result ) {
+		foreach ( $this->customer_payments as $payment ) {
 
 			$order                   = array();
-			$order['id']             = $result->ID;
-			$order['status']         = $result->post_status;
-			$order['date']           = $result->post_date;
-			$order['link']           = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $result->ID ) . '">#' . $result->ID . '</a>';
-			$order['amount']         = edd_get_payment_amount( $result->ID );
-			$order['payment_method'] = $this->get_payment_method( $result->ID );
+			$order['id']             = $payment->ID;
+			$order['status']         = $payment->post_status;
+			$order['date']           = $payment->post_date;
+			$order['link']           = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $payment->ID ) . '">#' . $payment->ID . '</a>';
+			$order['amount']         = edd_get_payment_amount( $payment->ID );
+			$order['payment_method'] = $this->get_payment_method( $payment->ID );
 			$order['downloads']      = array();
 
-			$downloads = edd_get_payment_meta_downloads( $result->ID );
+			$downloads = edd_get_payment_meta_downloads( $payment->ID );
 			if ( is_array( $downloads ) && count( $downloads ) > 0 ) {
 
 				foreach ( $downloads as $download ) {
@@ -148,7 +236,7 @@ class EDD_HS_Endpoint {
 		}
 
 		// build HTML output
-		$output = '';
+		$html = '';
 		foreach ( $orders as $order ) {
 
 			$class = '';
@@ -158,17 +246,17 @@ class EDD_HS_Endpoint {
 				$class = ' open';
 			}
 
-			$output .= '<div class="toggleGroup' . $class . '">';
-			$output .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
+			$html .= '<div class="toggleGroup' . $class . '">';
+			$html .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
 
 			// show status if order wasn't completed. otherwise, show resend receipt icon.
 			if ( $order['status'] !== 'publish' ) {
-				$output .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
+				$html .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
 			} else {
 
 				// was this a renewaL?
 				if( '' !== (string) get_post_meta( $order['id'], '_edd_sl_is_renewal', true ) ) {
-					$output .= '<span style="color:#008000;font-weight:bold;">renewal</span>';
+					$html .= '<span style="color:#008000;font-weight:bold;">renewal</span>';
 				}
 
 				// add icon to resend purchase receipt
@@ -179,26 +267,26 @@ class EDD_HS_Endpoint {
 				);
 				$request = new EDD_HS_Request( $args );
 				$resend_link = '<a style="float:right" href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
-				$output .=  $resend_link;
+				$html .=  $resend_link;
 			}
 
-			$output .= '<div class="toggle indent">';
-			$output .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
-			$output .= trim( edd_currency_filter( $order['amount'] ) ) . ( ( isset( $order['payment_method'] ) && '' !== $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ) . '</p>';
+			$html .= '<div class="toggle indent">';
+			$html .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
+			$html .= trim( edd_currency_filter( $order['amount'] ) ) . ( ( isset( $order['payment_method'] ) && '' !== $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ) . '</p>';
 
 			if ( ! empty( $order['downloads'] ) && count( $order['downloads'] ) > 0 ) {
 				// buid list of items with license keys
-				$output .= '<ul class="unstyled">';
+				$html .= '<ul class="unstyled">';
 				foreach ( $order['downloads'] as $download ) {
-					$output .= '<li>' . $download . '</li>';
+					$html .= '<li>' . $download . '</li>';
 				}
-				$output .= '</ul>';
+				$html .= '</ul>';
 			}
-			$output .= '</div></div>';
-			$output .= '<div class="divider"></div>';
+			$html .= '</div></div>';
+			$html .= '<div class="divider"></div>';
 		}
 
-		$this->respond( $output );
+		return $html;
 	}
 
 	/**
@@ -245,10 +333,10 @@ class EDD_HS_Endpoint {
 	/**
 	 * Set JSON headers, return the given response string
 	 *
-	 * @param $response
+	 * @param string $html
 	 */
-	private function respond( $response ) {
-		$response = array( 'html' => $response );
+	private function respond( $html ) {
+		$response = array( 'html' => $html );
 
 		// clear output, some plugins might have thrown errors by now.
 		if ( ob_get_level() > 0 ) {
