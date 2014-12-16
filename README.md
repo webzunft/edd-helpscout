@@ -20,14 +20,14 @@ If using the Software Licensing add-on, the following information is shown as we
 
 To get this up an running, you'll need to configure a few things in WordPress and HelpScout.
 
-##### WordPress
-1. Upload the contents of `edd-helpscout.zip` to your plugins directory, which usually is `/wp-content/plugins/`.
-1. Activate the `Easy Digital Downloads integration for HelpScout` plugin
-1. Set the `HELPSCOUT_SECRET_KEY` constant in your `wp-config.php` file. This should be a random string of 40 characters.
+= WordPress =
 
-##### HelpScout
+1. Upload the contents of **edd-helpscout.zip** to your plugins directory, which usually is `/wp-content/plugins/`.
+1. Activate the **HelpScout integration for Easy Digital Downloads** plugin
+1. Set the **HELPSCOUT_SECRET_KEY** constant in your `/wp-config.php` file. This should be a random string of 40 characters.
 
-1. Go to the [HelpScout custom app interface](https://secure.helpscout.net/apps/custom/).
-1. Set the App Name to `Easy Digital Downloads` and set the **Content Type** to *Dynamic Content*.
-1. Enter your WordPress Site URL as the Callback Url. The plugin will automatically hijack HelpScout requests to this URL.
-1. Enter the `HELPSCOUT_SECRET_KEY` constant value in the Secret Key field.
+
+_Example_
+`
+define( 'HELPSCOUT_SECRET_KEY', 'ueCQWKbZ48BT6UGmCFbaqXtbLaDZu1v6rnBLZjKD' );
+`
