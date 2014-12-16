@@ -48,7 +48,13 @@ class EDD_HS_Request {
 	 * @return bool
 	 */
 	public function signature_equals( $signature ) {
-		return hash_equals( $this->signature, $signature );
+
+		// use `hash_equals( str1, str2 )` if it exists
+		if( function_exists( 'hash_equals' ) ) {
+			return hash_equals( $this->signature, $signature );
+		}
+
+		return $this->signature === $signature;
 	}
 
 	/**
