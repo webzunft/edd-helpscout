@@ -59,7 +59,7 @@ define( 'HELPSCOUT_SECRET_KEY', 'ueCQWKbZ48BT6UGmCFbaqXtbLaDZu1v6rnBLZjKD' );
 
 **App Name:** Easy Digital Downloads<br />
 **Content Type:** Dynamic Content<br />
-**Callback URL:** https://your-site.com/edd-helpscout/customer-data.json _(I recommend using HTTPS)_ <br />
+**Callback URL:** https://your-site.com/edd-hs-api/customer-data.json _(I recommend using HTTPS)_ <br />
 **Secret Key:** The value of your **HELPSCOUT_SECRET_KEY** constant.
 
 == Frequently Asked Questions ==

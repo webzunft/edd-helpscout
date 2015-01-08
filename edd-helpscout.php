@@ -79,7 +79,7 @@ class EDD_HS {
 	 */
 	private function is_helpscout_request() {
 
-		$trigger = stristr( $_SERVER['REQUEST_URI'], '/edd-helpscout-api/customer-data.json' ) !== false;
+		$trigger = stristr( $_SERVER['REQUEST_URI'], '/edd-hs-api/customer-data.json' ) !== false;
 
 		if( ! $trigger && isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 
