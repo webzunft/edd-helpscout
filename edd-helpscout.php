@@ -6,7 +6,7 @@ Description: Easy Digital Downloads integration for HelpScout
 Version: 1.0.1
 Author: Danny van Kooten
 Author URI: https://dannyvankooten.com
-Text Domain: helpscout-edd
+Text Domain: edd-helpscout
 Domain Path: /languages
 License: GPL v3
 
@@ -61,13 +61,36 @@ class EDD_HS {
 		spl_autoload_register( array( $this, 'autoload' ) );
 
 		// if this is a HelpScout Request, load the Endpoint class
-		if ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+		if ( $this->is_helpscout_request() && ! is_admin() ) {
 			new EDD_HS_Endpoint();
 		}
 
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			new EDD_HS_Ajax();
+		} elseif( is_admin() ) {
+			new EDD_HS_Admin();
 		}
+	}
+
+	/**
+	 * Is this a request we should respond to?
+	 *
+	 * @return bool
+	 */
+	private function is_helpscout_request() {
+
+		$trigger = stristr( $_SERVER['REQUEST_URI'], '/edd-helpscout-api/customer-data.json' ) !== false;
+
+		if( ! $trigger && isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+
+			$greedy = (bool) get_option( 'edd_hs_greedy_listening', 1 );
+
+			if( $greedy ) {
+				$trigger = true;
+			}
+		}
+
+		return (bool) apply_filters( 'edd_hs/is_helpscout_request', $trigger );
 	}
 
 	/**
@@ -101,5 +124,17 @@ function __load_edd_helpscout() {
 	new EDD_HS;
 }
 
+/**
+ * Disable greedy listening for new plugin users
+ */
+function edd_hs_disable_greedy_listening() {
+	update_option( 'edd_hs_greedy_listening', 0 );
+}
+
+
+// Instantiate the plugin on a later hook
 add_action( 'plugins_loaded', '__load_edd_helpscout', 90 );
+
+// Register activation hook
+register_activation_hook( __FILE__, 'edd_hs_disable_greedy_listening' );
 
