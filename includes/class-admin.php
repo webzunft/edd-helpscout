@@ -54,7 +54,7 @@ class EDD_HS_Admin {
 
 		?>
 		<div class="update-nag">
-			<p><?php printf( __( 'The EDD HelpScout plugin is greedy and currently listening to all frontend requests. You should update your HelpScout App Url to %s and disable the greediness.', 'edd-helpscout' ), '<code>' . site_url( '/edd-helpscout-api/customer-data.json' ) . '</code>' ); ?></p>
+			<p><?php printf( __( 'The EDD HelpScout plugin is greedy and currently listening to all frontend requests. You should update your HelpScout App Url to %s and disable the greediness.', 'edd-helpscout' ), '<code>' . site_url( '/edd-hs-api/customer-data.json' ) . '</code>' ); ?></p>
 			<form action="<?php echo admin_url(); ?>" method="post">
 				<input type="submit" class="button" value="I updated my HelpScout App URL" />
 				<input type="hidden" name="edd_hs_disable_greediness" value="1" />

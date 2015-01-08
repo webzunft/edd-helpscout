@@ -83,7 +83,7 @@ class EDD_HS {
 
 		if( ! $trigger && isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 
-			$greedy = (bool) get_option( 'edd_hs_greedy_listening', 1 );
+			$greedy = get_option( 'edd_hs_greedy_listening', 1 );
 
 			if( $greedy ) {
 				$trigger = true;
