@@ -14,17 +14,32 @@ class EDD_HS_Admin {
 	 * Constructor
 	 */
 	public function __construct() {
+		
+		// run init on later hook
+		add_action( 'admin_init', array( $this, 'init' ) );
 
-		// maybe run upgrade routine
+	}
+
+	/**
+	 * Runs on `admin_init`
+	 */
+	public function init() {
+
+		// only run for administrators
+		if( ! current_user_can( 'manage_options' ) ) {
+			return false;
+		}
+
+		// run upgrade routine
 		$this->upgrade_routine();
 
+		// disable greedy listening if button was clicked
 		if( isset( $_POST['edd_hs_disable_greediness'] ) ) {
 			update_option( 'edd_hs_greedy_listening', 0 );
 		}
 
 		// show notice if greedy listening is enabled
 		add_action( 'admin_notices', array( $this, 'show_notice_about_greedy_listening' ) );
-
 	}
 
 	/**
@@ -38,6 +53,8 @@ class EDD_HS_Admin {
 		if( ! version_compare( $db_version, EDD_HS::VERSION, '<' ) ) {
 			return false;
 		}
+
+		// nothing here yet..
 
 		update_option( 'edd_hs_version', EDD_HS::VERSION );
 	}
@@ -56,7 +73,7 @@ class EDD_HS_Admin {
 		<div class="update-nag">
 			<p><?php printf( __( 'The EDD HelpScout plugin is greedy and currently listening to all frontend requests. You should update your HelpScout App Url to %s and disable the greediness.', 'edd-helpscout' ), '<code>' . site_url( '/edd-hs-api/customer-data.json' ) . '</code>' ); ?></p>
 			<form action="<?php echo admin_url(); ?>" method="post">
-				<input type="submit" class="button" value="I updated my HelpScout App URL" />
+				<input type="submit" class="button" value="<?php _e( 'I updated my HelpScout App URL', 'edd-helpscout' ); ?>" />
 				<input type="hidden" name="edd_hs_disable_greediness" value="1" />
 			</form>
 		</div>
