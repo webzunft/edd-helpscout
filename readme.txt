@@ -74,6 +74,12 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 
 == Changelog ==
 
+= 1.0.2 =
+
+**Improvements**
+
+- The plugin used to "listen" to all requests to the site. It will now (after confirmation) only listen to requests to `/edd-hs-api/customer-data.json`.
+
 = 1.0.1 =
 
 **Fixed**

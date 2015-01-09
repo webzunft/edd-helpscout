@@ -3,7 +3,7 @@
 Plugin Name: Easy Digital Downloads integration for HelpScout
 Plugin URI: https://dannyvankooten.com/helpscout-edd
 Description: Easy Digital Downloads integration for HelpScout
-Version: 1.0.1
+Version: 1.0.2
 Author: Danny van Kooten
 Author URI: https://dannyvankooten.com
 Text Domain: edd-helpscout
@@ -39,7 +39,7 @@ class EDD_HS {
 	/**
 	 * @const VERSION
 	 */
-	const VERSION = "1.0.1";
+	const VERSION = "1.0.2";
 
 	/**
 	 * @const FILE

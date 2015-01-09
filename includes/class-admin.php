@@ -14,7 +14,7 @@ class EDD_HS_Admin {
 	 * Constructor
 	 */
 	public function __construct() {
-		
+
 		// run init on later hook
 		add_action( 'admin_init', array( $this, 'init' ) );
 
