@@ -105,6 +105,8 @@ class EDD_HS_Endpoint {
 			$emails = array( $customer_data['email'] );
 		}
 
+		$emails = apply_filters( 'helpscout_edd_customer_emails', $emails, $this->data );
+
 		if( count( $emails ) === 0 ) {
 			$this->respond( 'No customer email given.' );
 		}
