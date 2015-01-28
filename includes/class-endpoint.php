@@ -123,12 +123,12 @@ class EDD_HS_Endpoint {
 
 		global $wpdb;
 
+		$emails = rtrim( implode( "','", $this->customer_emails ), ",'" );
 		// query by email(s)
 		$sql   = "SELECT p.ID, p.post_status, p.post_date FROM {$wpdb->posts} p, {$wpdb->postmeta} pm WHERE pm.meta_key = '_edd_payment_user_email'";
-		$sql .= " AND pm.meta_value IN(%s) AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
+		$sql .= " AND pm.meta_value IN('$emails') AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
 
-		$query = $wpdb->prepare( $sql, rtrim( implode( ',', $this->customer_emails ), ',' ) );
-		$results = $wpdb->get_results( $query );
+		$results = $wpdb->get_results( $sql );
 
 		if( is_array( $results ) ) {
 			return $results;
