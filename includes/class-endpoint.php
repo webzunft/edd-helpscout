@@ -216,7 +216,10 @@ class EDD_HS_Endpoint {
 										'site_url'   => $site,
 									);
 									$request = new EDD_HS_Request( $args );
-									$download_details .= '<li><a href="' . esc_attr( $site ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><small>(deactivate)</small></a></li>';
+									if ( strpos( $site, 'http' ) !== 0 ) {
+										$site = 'http://' . $site;
+									}
+									$download_details .= '<li><a href="' . esc_url( $site ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . esc_url( 
 								}
 
 								$download_details .= '</ul>';
