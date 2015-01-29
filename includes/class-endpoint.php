@@ -215,8 +215,12 @@ class EDD_HS_Endpoint {
 										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
 									);
-									$request = new EDD_HS_Request( $args );
-									$download_details .= '<li><a href="' . esc_attr( $site ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><small>(deactivate)</small></a></li>';
+									$request   = new EDD_HS_Request( $args );
+									$site_href = $site;
+									if ( strpos( $site, 'http' ) !== 0 ) {
+										$site_href = 'http://' . $site;
+									}
+									$download_details .= '<li><a href="' . esc_url( $site_href ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><small>(deactivate)</small></a></li>';
 								}
 
 								$download_details .= '</ul>';
