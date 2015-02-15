@@ -192,10 +192,19 @@ class EDD_HS_Endpoint {
 						if ( is_object( $license ) ) {
 
 							$license_key = get_post_meta( $license->ID, '_edd_sl_key', true );
+							$license_status = get_post_meta( $license->ID, '_edd_sl_status', true );
+							$license_expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
+							$license_status_html = '';
+
+							if( $license_expires < time() ) {
+								$license_status_html = ' <span style="color:orange;font-weight:bold;">expired</span>';
+							} elseif( $license_status !== 'valid' ) {
+								$license_status_html = ' <span style="color:orange;font-weight:bold;">'. $license_status .'</span>';
+							}
 
 							// add link to manage_sites for this license
 							$manage_license_url = admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license_key );
-							$download_details .= '<br /><a href="' . $manage_license_url . '">' . $license_key . '</a>';
+							$download_details .= '<br /><a href="' . $manage_license_url . '">' . $license_key . '</a>' . $license_status_html;
 
 							// get active sites for this license
 							$sites = $edd_sl->get_sites( $license->ID );
