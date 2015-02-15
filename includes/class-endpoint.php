@@ -198,7 +198,7 @@ class EDD_HS_Endpoint {
 
 							if( $license_expires < time() ) {
 								$license_status_html = ' <span style="color:orange;font-weight:bold;">expired</span>';
-							} elseif( $license_status !== 'valid' ) {
+							} elseif( $license_status !== 'valid' && $license_status !== 'active' ) {
 								$license_status_html = ' <span style="color:orange;font-weight:bold;">'. $license_status .'</span>';
 							}
 
