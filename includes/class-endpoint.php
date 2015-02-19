@@ -301,27 +301,6 @@ class EDD_HS_Endpoint {
 		return $html;
 	}
 
-	private function build_payment_html( $payment ) {
-
-		$html = '';
-		$total_amount = edd_get_payment_amount( $payment->ID );
-		$payment_method = $this->get_payment_method( $payment->ID );
-
-		// get payment items
-		$downloads = edd_get_payment_meta( $payment->ID );
-
-		// return empty string if no downloads found
-		if( ! is_array( $downloads ) || count( $downloads ) === 0 ) {
-			return $html;
-		}
-
-		// gather license info if order is 'completed' and edd software licensing is enabled
-
-
-
-
-	}
-
 	/**
 	 * Get the payment method used for the given $payment_id. Returns a link to the transaction in Stripe or PayPal if possible.
 	 *
