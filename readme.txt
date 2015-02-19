@@ -3,8 +3,8 @@ Contributors: DvanKooten
 Donate link: https://dannyvankooten.com/donate/
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
-Tested up to: 4.1
-Stable tag: 1.0.1
+Tested up to: 4.1.1
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,6 +73,19 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 1. Purchases and other information related to the customer is shown in the bottom right corner of your HelpScout interface.
 
 == Changelog ==
+
+= 1.0.3 =
+
+**Fixes**
+
+- Added protocol for links to active sites
+- Querying payments by multiple emails was not working
+
+**Additions**
+
+- When using EDD Software Licensing, show if a license is expired.
+- Added `helpscout_edd_customer_emails` hook to filter customer emails
+
 
 = 1.0.2 =
 
