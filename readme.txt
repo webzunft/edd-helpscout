@@ -74,7 +74,7 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 
 == Changelog ==
 
-= 1.0.3 =
+= 1.0.3 - February 19, 2015 =
 
 **Fixes**
 
