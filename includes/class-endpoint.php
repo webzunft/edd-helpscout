@@ -192,14 +192,11 @@ class EDD_HS_Endpoint {
 						if ( is_object( $license ) ) {
 
 							$license_key = get_post_meta( $license->ID, '_edd_sl_key', true );
-							$license_status = get_post_meta( $license->ID, '_edd_sl_status', true );
 							$license_expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
 							$license_status_html = '';
 
 							if( $license_expires < time() ) {
-								$license_status_html = ' <span style="color:orange;font-weight:bold;">expired</span>';
-							} elseif( $license_status !== 'valid' && $license_status !== 'active' ) {
-								$license_status_html = ' <span style="color:orange;font-weight:bold;">'. $license_status .'</span>';
+								$license_status_html = ' <span style="color:orange; font-weight:bold;">expired</span>';
 							}
 
 							// add link to manage_sites for this license
@@ -302,6 +299,27 @@ class EDD_HS_Endpoint {
 		}
 
 		return $html;
+	}
+
+	private function build_payment_html( $payment ) {
+
+		$html = '';
+		$total_amount = edd_get_payment_amount( $payment->ID );
+		$payment_method = $this->get_payment_method( $payment->ID );
+
+		// get payment items
+		$downloads = edd_get_payment_meta( $payment->ID );
+
+		// return empty string if no downloads found
+		if( ! is_array( $downloads ) || count( $downloads ) === 0 ) {
+			return $html;
+		}
+
+		// gather license info if order is 'completed' and edd software licensing is enabled
+
+
+
+
 	}
 
 	/**
