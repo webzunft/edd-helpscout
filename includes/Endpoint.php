@@ -117,14 +117,25 @@ class Endpoint {
 	 */
 	private function query_customer_payments() {
 
+		// allows you to perform your own search for customer payments, based on given data.
+		$payments = apply_filters( 'helpscout_edd_customer_payments', array(), $this->customer_emails, $this->data );
+		if( ! empty( $payments ) ) {
+			return $payments;
+		}
+
 		global $wpdb;
 
-		$emails = rtrim( implode( "','", $this->customer_emails ), ",'" );
 		// query by email(s)
-		$sql   = "SELECT p.ID, p.post_status, p.post_date FROM {$wpdb->posts} p, {$wpdb->postmeta} pm WHERE pm.meta_key = '_edd_payment_user_email'";
-		$sql .= " AND pm.meta_value IN('$emails') AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
+		$in_clause = rtrim( str_repeat( "'%s',", count( $this->customer_emails ) ), "," );
 
-		$results = $wpdb->get_results( $sql );
+		$sql  = "SELECT p.ID, p.post_status, p.post_date";
+		$sql .= "FROM {$wpdb->posts} p, {$wpdb->postmeta} pm ";
+		$sql .= "WHERE pm.meta_key = '_edd_payment_user_email' ";
+		$sql .= "AND pm.meta_value IN($in_clause) ";
+		$sql .= "AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
+
+		$query = $wpdb->prepare( $sql, $this->customer_emails );
+		$results = $wpdb->get_results( $query );
 
 		if( is_array( $results ) ) {
 			return $results;
