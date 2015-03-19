@@ -126,12 +126,17 @@ class Endpoint {
 		global $wpdb;
 
 		// query by email(s)
-		$in_clause = rtrim( str_repeat( "'%s',", count( $this->customer_emails ) ), "," );
-
-		$sql  = "SELECT p.ID, p.post_status, p.post_date";
+		$sql  = "SELECT p.ID, p.post_status, p.post_date ";
 		$sql .= "FROM {$wpdb->posts} p, {$wpdb->postmeta} pm ";
 		$sql .= "WHERE pm.meta_key = '_edd_payment_user_email' ";
-		$sql .= "AND pm.meta_value IN($in_clause) ";
+
+		if( count( $this->customer_emails ) > 1 ) {
+			$in_clause = rtrim( str_repeat( "'%s', ", count( $this->customer_emails ) ), ", " );
+			$sql .= "AND pm.meta_value IN( $in_clause ) ";
+		} else {
+			$sql .= "AND pm.meta_value = '%s' ";
+		}
+
 		$sql .= "AND p.ID = pm.post_id GROUP BY p.ID  ORDER BY p.ID DESC";
 
 		$query = $wpdb->prepare( $sql, $this->customer_emails );
