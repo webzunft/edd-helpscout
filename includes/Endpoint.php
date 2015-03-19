@@ -1,15 +1,11 @@
 <?php
 
-if ( ! defined( "EDD_HS::VERSION" ) ) {
-	header( 'Status: 403 Forbidden' );
-	header( 'HTTP/1.1 403 Forbidden' );
-	exit;
-}
+namespace EDD_HelpScout;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations
  */
-class EDD_HS_Endpoint {
+class Endpoint {
 
 	/**
 	 * @var array|mixed
@@ -80,7 +76,7 @@ class EDD_HS_Endpoint {
 		}
 
 		// check request signature
-		$request = new EDD_HS_Request( $this->data );
+		$request = new Request( $this->data );
 
 		if ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 			return true;
@@ -221,7 +217,7 @@ class EDD_HS_Endpoint {
 										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
 									);
-									$request   = new EDD_HS_Request( $args );
+									$request   = new Request( $args );
 									$site_href = $site;
 									if ( strpos( $site, 'http' ) !== 0 ) {
 										$site_href = 'http://' . $site;
@@ -277,7 +273,7 @@ class EDD_HS_Endpoint {
 					'hs_action' => 'purchase-receipt',
 					'order'     => (string) $order['id'],
 				);
-				$request = new EDD_HS_Request( $args );
+				$request = new Request( $args );
 				$resend_link = '<a style="float:right" href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
 				$html .=  $resend_link;
 			}

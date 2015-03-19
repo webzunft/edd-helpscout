@@ -1,15 +1,11 @@
 <?php
 
-if( ! defined("EDD_HS::VERSION") ) {
-	header( 'Status: 403 Forbidden' );
-	header( 'HTTP/1.1 403 Forbidden' );
-	exit;
-}
+namespace EDD_HelpScout;
 
 /**
  * This class takes care of AJAX requests from HelpScout
  */
-class EDD_HS_Ajax {
+class AJAX {
 
 	/**
 	 * Constructor
@@ -34,7 +30,7 @@ class EDD_HS_Ajax {
 			$given_signature = '';
 		}
 
-		$request = new EDD_HS_Request( $_GET );
+		$request = new Request( $_GET );
 
 		// verify signature and referrer
 		if( ! $request->signature_equals( $given_signature )  || ! $request->referred_from_helpscout() ) {

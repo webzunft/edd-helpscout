@@ -11,3 +11,6 @@ wp-content/cache/
 wp-content/backups/
 sitemap.xml.gz
 wp-config.php
+composer.lock
+vendor/composer/installers
+installed.json

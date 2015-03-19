@@ -27,6 +27,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+namespace EDD_HelpScout;
+
 // Prevent direct file access
 if ( ! defined( 'ABSPATH' ) ) {
 	header( 'Status: 403 Forbidden' );
@@ -34,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-class EDD_HS {
+class Plugin {
 
 	/**
 	 * @const VERSION
@@ -46,29 +48,40 @@ class EDD_HS {
 	 */
 	const FILE = __FILE__;
 
-
 	/**
 	 * Constructor
 	 */
 	public function __construct() {
+
+		// Load autoloader
+		require __DIR__ . '/vendor/autoload.php';
+
+		// Register activation hook
+		register_activation_hook( __FILE__, array( 'EDD_HelpScout\\Admin', 'plugin_activation' ) );
+
+		// Instantiate the plugin on a later hook
+		add_action( 'plugins_loaded', array( $this, 'init' ), 90 );
+	}
+
+	/**
+	 * Initialise the rest of the plugin
+	 */
+	public function init() {
 
 		// do nothing if EDD is not activated
 		if( ! class_exists( 'Easy_Digital_Downloads', false ) ) {
 			return;
 		}
 
-		// register autoloader
-		spl_autoload_register( array( $this, 'autoload' ) );
-
 		// if this is a HelpScout Request, load the Endpoint class
 		if ( $this->is_helpscout_request() && ! is_admin() ) {
-			new EDD_HS_Endpoint();
+			new Endpoint();
 		}
 
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			new EDD_HS_Ajax();
+			new Ajax();
 		} elseif( is_admin() ) {
-			new EDD_HS_Admin();
+			new Admin();
 		}
 	}
 
@@ -93,48 +106,9 @@ class EDD_HS {
 		return (bool) apply_filters( 'edd_hs/is_helpscout_request', $trigger );
 	}
 
-	/**
-	 * @param string $class
-	 *
-	 * @return bool
-	 */
-	public function autoload( $class ) {
-
-		// only act on classnames with this prefix
-		if( strpos( $class, 'EDD_HS_' ) !== 0 ) {
-			return false;
-		}
-
-		$filename = dirname( __FILE__ ) . '/includes/class-' . strtolower( substr( $class, 7 ) ) . '.php';
-
-		if( file_exists( $filename ) ) {
-			require_once( $filename );
-			return true;
-		}
-
-		return false;
-	}
-
 }
 
-/**
- * Initiate the EDD_HS class
- */
-function __load_edd_helpscout() {
-	new EDD_HS;
-}
-
-/**
- * Disable greedy listening for new plugin users
- */
-function edd_hs_disable_greedy_listening() {
-	update_option( 'edd_hs_greedy_listening', 0 );
-}
+new Plugin();
 
 
-// Instantiate the plugin on a later hook
-add_action( 'plugins_loaded', '__load_edd_helpscout', 90 );
-
-// Register activation hook
-register_activation_hook( __FILE__, 'edd_hs_disable_greedy_listening' );
 

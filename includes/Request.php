@@ -1,15 +1,11 @@
 <?php
 
-if( ! defined("EDD_HS::VERSION") ) {
-	header( 'Status: 403 Forbidden' );
-	header( 'HTTP/1.1 403 Forbidden' );
-	exit;
-}
+namespace EDD_HelpScout;
 
 /**
  *
  */
-class EDD_HS_Request {
+class Request {
 
 	/**
 	 * @var string

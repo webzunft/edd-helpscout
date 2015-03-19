@@ -1,7 +1,8 @@
 <?php
 
+namespace EDD_HelpScout;
 
-class EDD_HS_Admin {
+class Admin {
 
 	/**
 	 * Disable greedy listening if a new person is activating the plugin
@@ -14,10 +15,8 @@ class EDD_HS_Admin {
 	 * Constructor
 	 */
 	public function __construct() {
-
 		// run init on later hook
 		add_action( 'admin_init', array( $this, 'init' ) );
-
 	}
 
 	/**
@@ -50,13 +49,13 @@ class EDD_HS_Admin {
 		$db_version = get_option( 'edd_hs_version', 0 );
 
 		// only run if db version is lower than actual code version
-		if( ! version_compare( $db_version, EDD_HS::VERSION, '<' ) ) {
+		if( ! version_compare( $db_version, Plugin::VERSION, '<' ) ) {
 			return false;
 		}
 
 		// nothing here yet..
 
-		update_option( 'edd_hs_version', EDD_HS::VERSION );
+		update_option( 'edd_hs_version', Plugin::VERSION );
 	}
 
 	/**
