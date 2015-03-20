@@ -79,7 +79,7 @@ class Plugin {
 		}
 
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
-			new Ajax();
+			new AJAX();
 		} elseif( is_admin() ) {
 			new Admin();
 		}
