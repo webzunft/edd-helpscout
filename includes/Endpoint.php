@@ -204,11 +204,16 @@ class Endpoint {
 						if ( is_object( $license ) ) {
 
 							$license_key = get_post_meta( $license->ID, '_edd_sl_key', true );
-							$license_expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
-							$license_status_html = '';
 
-							if( $license_expires < time() ) {
-								$license_status_html = ' <span style="color:orange; font-weight:bold;">expired</span>';
+							$license_status_html = '';
+							if ( method_exists( $edd_sl, 'is_lifetime_license' ) && $edd_sl->is_lifetime_license( $license->ID ) ) {
+								$license_status_html = ' <span style="color:green; font-weight:bold">lifetime</span>';
+							} else {
+								$license_expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
+
+								if( $license_expires < time() ) {
+									$license_status_html = ' <span style="color:orange; font-weight:bold;">expired</span>';
+								}
 							}
 
 							// add link to manage_sites for this license
