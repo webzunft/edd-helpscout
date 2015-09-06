@@ -101,7 +101,17 @@ class Endpoint {
 			$emails = array( $customer_data['email'] );
 		}
 
+		/**
+		 * @deprecated 1.1
+		 * @use edd_helpscout_customer_emails
+		 */
 		$emails = apply_filters( 'helpscout_edd_customer_emails', $emails, $this->data );
+
+		/**
+		 * Filter email address of the customer
+		 * @since 1.1
+		 */
+		$emails = apply_filters( 'edd_helpscout_customer_emails', $emails, $this->data );
 
 		if( count( $emails ) === 0 ) {
 			$this->respond( 'No customer email given.' );
@@ -117,8 +127,21 @@ class Endpoint {
 	 */
 	private function query_customer_payments() {
 
-		// allows you to perform your own search for customer payments, based on given data.
-		$payments = apply_filters( 'helpscout_edd_customer_payments', array(), $this->customer_emails, $this->data );
+		$payments = array();
+
+		/**
+		 * @deprecated 1.1
+		 * @use edd_helpscout_customer_emails
+		 */
+		$payments = apply_filters( 'helpscout_edd_customer_payments', $payments, $this->customer_emails, $this->data );
+
+		/**
+		 * Allows you to perform your own search for customer payments, based on given data.
+		 *
+		 * @since 1.1
+		 */
+		$payments = apply_filters( 'edd_helpscout_customer_payments', $payments, $this->customer_emails, $this->data );
+
 		if( ! empty( $payments ) ) {
 			return $payments;
 		}
