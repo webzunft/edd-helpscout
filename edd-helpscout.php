@@ -1,9 +1,9 @@
 <?php
 /*
 Plugin Name: Easy Digital Downloads integration for HelpScout
-Plugin URI: https://dannyvankooten.com/helpscout-edd
+Plugin URI: https://dannyvankooten.com/
 Description: Easy Digital Downloads integration for HelpScout
-Version: 1.0.3
+Version: 1.1
 Author: Danny van Kooten
 Author URI: https://dannyvankooten.com
 Text Domain: edd-helpscout
@@ -11,7 +11,7 @@ Domain Path: /languages
 License: GPL v3
 
 Easy Digital Downloads integration for HelpScout
-Copyright (C) 2012-2013, Danny van Kooten, hi@dannyvankooten.com
+Copyright (C) 2013-2015, Danny van Kooten, hi@dannyvankooten.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ class Plugin {
 	/**
 	 * @const VERSION
 	 */
-	const VERSION = "1.0.3";
+	const VERSION = "1.1";
 
 	/**
 	 * @const FILE
@@ -144,6 +144,7 @@ add_action( 'plugins_loaded', function() {
 	// Load Admin stuff
 	if( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
 		$admin = new Admin();
+		$admin->add_hooks();
 	}
 }, 90 );
 

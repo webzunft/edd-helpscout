@@ -1,10 +1,10 @@
 === HelpScout integration for Easy Digital Downloads ===
-Contributors: DvanKooten
+Contributors: DvanKooten, Ibericode
 Donate link: https://dannyvankooten.com/donate/
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
-Tested up to: 4.1.1
-Stable tag: 1.0.3
+Tested up to: 4.3
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -29,6 +29,8 @@ If using the Software Licensing add-on, the following information is shown as we
 **How to install and configure**
 
 Have a look at the [installation instructions](https://wordpress.org/plugins/edd-helpscout/installation/).
+
+> Please note that this plugin requires HP 5.3 or higher.
 
 **More information**
 
@@ -73,6 +75,22 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 1. Purchases and other information related to the customer is shown in the bottom right corner of your HelpScout interface.
 
 == Changelog ==
+
+= 1.1 - September 6, 2015 =
+
+**Fixes**
+
+- The plugin is now listening at a later hook in the WP request lifecycle, which prevents issues with bbPress and EDD Wishlists.
+
+**Improvements**
+
+- Code refactoring for better separation of concerts and better overall code readability
+- Better naming consistency
+
+**Additions**
+
+- Support for lifetime licenses in Easy Digital Downloads
+- Various action hooks to output your own HTML
 
 = 1.0.3 - February 19, 2015 =
 
