@@ -331,7 +331,7 @@ class Endpoint {
 					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
 						$transaction_id = $match[1];
 						$payment_method = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
-						break;
+						break 2;
 					}
 				}
 				break;
@@ -342,7 +342,7 @@ class Endpoint {
 					if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
 						$transaction_id = $match[1];
 						$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
-						break;
+						break 2;
 					}
 				}
 				break;
