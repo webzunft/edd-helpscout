@@ -65,19 +65,19 @@ class AJAX {
 	 * Handle resending the purchase email.
 	 */
 	private function handle_purchase_receipt_resend() {
-		$purchase_id = absint( $_REQUEST['order'] );
+		$payment_id = absint( $_REQUEST['payment_id'] );
 
-		edd_email_purchase_receipt( $purchase_id, false );
+		edd_email_purchase_receipt( $payment_id, false );
 
 		// Grab all downloads of the purchase and update their file download limits, if needed
 		// This allows admins to resend purchase receipts to grant additional file downloads
-		$downloads = edd_get_payment_meta_downloads( $purchase_id );
+		$downloads = edd_get_payment_meta_downloads( $payment_id );
 
 		if ( is_array( $downloads ) ) {
 			foreach ( $downloads as $download ) {
 				$limit = edd_get_file_download_limit( $download['id'] );
 				if ( ! empty( $limit ) ) {
-					edd_set_file_download_limit_override( $download['id'], $purchase_id );
+					edd_set_file_download_limit_override( $download['id'], $payment_id );
 				}
 			}
 		}

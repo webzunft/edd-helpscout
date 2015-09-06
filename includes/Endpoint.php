@@ -168,23 +168,22 @@ class Endpoint {
 		foreach ( $this->customer_payments as $payment ) {
 
 			$order                   = array();
-			$order['id']             = $payment->ID;
-			$order['status']         = $payment->post_status;
-			$order['is_completed']   = ( $payment->post_status === 'publish' );
+			$order['payment_id']     = $payment->ID;
 			$order['date']           = $payment->post_date;
-			$order['link']           = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $payment->ID ) . '">#' . $payment->ID . '</a>';
 			$order['amount']         = edd_get_payment_amount( $payment->ID );
+			$order['status']         = $payment->post_status;
 			$order['payment_method'] = $this->get_payment_method( $payment->ID );
 			$order['downloads']      = array();
 			$order['resend_receipt_link'] = '';
 			$order['is_renewal'] = false;
+			$order['is_completed']   = ( $payment->post_status === 'publish' );
 
 			// do stuff for completed orders
 			if( $payment->post_status === 'publish' ) {
 				$args = array(
 					'action'    => 'hs_action',
 					'hs_action' => 'purchase-receipt',
-					'order'     => (string) $order['id'],
+					'payment_id'     => (string) $order['payment_id'],
 				);
 				$request = new Request( $args );
 				$order['resend_receipt_link'] = $request->get_signed_admin_url();
@@ -198,7 +197,7 @@ class Endpoint {
 				$licensing = edd_software_licensing();
 
 				// was this order a renewal?
-				$order['is_renewal'] = ( (string) get_post_meta( $order['id'], '_edd_sl_is_renewal', true ) !== '' );
+				$order['is_renewal'] = ( (string) get_post_meta( $payment->ID, '_edd_sl_is_renewal', true ) !== '' );
 
 				if( $order['is_completed'] ) {
 					foreach( $order['downloads'] as $key => $download ) {
@@ -209,7 +208,7 @@ class Endpoint {
 						}
 
 						// find license that was given out for this download purchase
-						$license = $licensing->get_license_by_purchase( $order['id'], $download['id'] );
+						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
 
 						if( is_object( $license ) ) {
 							$key =  (string) get_post_meta( $license->ID, '_edd_sl_key', true );
@@ -260,7 +259,7 @@ class Endpoint {
 		// build HTML output
 		$html = '';
 		foreach ( $orders as $order ) {
-			$html .= str_replace( '\t', '', $this->payment_row( $order ) );
+			$html .= str_replace( '\t', '', $this->order_row( $order ) );
 		}
 
 		return $html;
@@ -271,9 +270,9 @@ class Endpoint {
 	 *
 	 * @return string
 	 */
-	public function payment_row( array $order ) {
+	public function order_row( array $order ) {
 		ob_start();
-		include dirname( Plugin::FILE ) . '/views/payment-row.php';
+		include dirname( Plugin::FILE ) . '/views/order-row.php';
 		$html = ob_get_clean();
 		return $html;
 	}
