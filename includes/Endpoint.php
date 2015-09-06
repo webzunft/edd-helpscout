@@ -181,9 +181,9 @@ class Endpoint {
 			// do stuff for completed orders
 			if( $payment->post_status === 'publish' ) {
 				$args = array(
-					'action'    => 'hs_action',
-					'hs_action' => 'purchase-receipt',
-					'payment_id'     => (string) $order['payment_id'],
+					'action'        => 'edd_helpscout_action',
+					'action_id'     => 'resend-purchase-receipt',
+					'payment_id'    => (string) $order['payment_id'],
 				);
 				$request = new Request( $args );
 				$order['resend_receipt_link'] = $request->get_signed_admin_url();
@@ -234,8 +234,8 @@ class Endpoint {
 								foreach( $sites as $site ) {
 
 									$args = array(
-										'action'     => 'hs_action',
-										'hs_action'  => 'deactivate',
+										'action'     => 'edd_helpscout_action',
+										'action_id'  => 'deactivate-license-site',
 										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
 									);

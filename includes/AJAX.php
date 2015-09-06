@@ -12,8 +12,8 @@ class AJAX {
 	 */
 	public function __construct() {
 		// Double add_action because we want it to work when you're logged in too
-		add_action( 'wp_ajax_nopriv_hs_action', array( $this, 'ajax_action' ) );
-		add_action( 'wp_ajax_hs_action', array( $this, 'ajax_action' ) );
+		add_action( 'wp_ajax_nopriv_edd_helpscout_action', array( $this, 'ajax_action' ) );
+		add_action( 'wp_ajax_edd_helpscout_action', array( $this, 'ajax_action' ) );
 	}
 
 
@@ -22,26 +22,25 @@ class AJAX {
 	 */
 	public function ajax_action() {
 
-		// Verify request
-		if( isset( $_GET['s'] ) ) {
-			$given_signature = isset( $_GET['s'] ) ? $_GET['s'] : '';
-			unset( $_GET['s'] );
-		} else {
-			$given_signature = '';
-		}
-
-		$request = new Request( $_GET );
-
-		// verify signature and referrer
-		if( ! $request->signature_equals( $given_signature )  || ! $request->referred_from_helpscout() ) {
+		// make sure we got a signature and an action_id
+		if( empty( $_GET['s'] ) || empty( $_GET['action_id'] ) ) {
 			die( '-1' );
 		}
 
-		switch ( $_REQUEST['hs_action'] ) {
-			case 'deactivate':
+		$request_signature = $_GET['s'];
+		$action_id = $_GET['action_id'];
+
+		// verify signature and referrer
+		$request = new Request( $_GET );
+		if( ! $request->signature_equals( $request_signature ) || ! $request->referred_from_helpscout() ) {
+			die( '-1' );
+		}
+
+		switch ( $action_id ) {
+			case 'deactivate-license-site':
 				$this->handle_deactivation_request();
 				break;
-			case 'purchase-receipt':
+			case 'resend-purchase-receipt':
 				$this->handle_purchase_receipt_resend();
 				break;
 			default:
