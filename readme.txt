@@ -30,7 +30,7 @@ If using the Software Licensing add-on, the following information is shown as we
 
 Have a look at the [installation instructions](https://wordpress.org/plugins/edd-helpscout/installation/).
 
-> Please note that this plugin requires HP 5.3 or higher.
+> Please note that this plugin requires PHP 5.3 or higher.
 
 **More information**
 
@@ -84,7 +84,7 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 
 **Improvements**
 
-- Code refactoring for better separation of concerts and better overall code readability
+- Code refactoring for better separation of concerns and better overall code readability
 - Better naming consistency
 
 **Additions**
