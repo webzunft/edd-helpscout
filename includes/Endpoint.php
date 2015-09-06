@@ -1,6 +1,6 @@
 <?php
 
-namespace EDD_HelpScout;
+namespace EDD\HelpScout;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations

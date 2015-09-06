@@ -27,7 +27,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace EDD_HelpScout;
+namespace EDD\HelpScout;
 
 // Prevent direct file access
 if ( ! defined( 'ABSPATH' ) ) {

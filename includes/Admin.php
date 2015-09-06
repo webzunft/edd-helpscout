@@ -1,6 +1,6 @@
 <?php
 
-namespace EDD_HelpScout;
+namespace EDD\HelpScout;
 
 class Admin {
 
@@ -14,7 +14,7 @@ class Admin {
 	/**
 	 * Constructor
 	 */
-	public function __construct() {
+	public function add_hooks() {
 		// run init on later hook
 		add_action( 'admin_init', array( $this, 'init' ) );
 	}

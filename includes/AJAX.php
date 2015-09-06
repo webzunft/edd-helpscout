@@ -1,6 +1,6 @@
 <?php
 
-namespace EDD_HelpScout;
+namespace EDD\HelpScout;
 
 /**
  * This class takes care of AJAX requests from HelpScout
