@@ -214,16 +214,16 @@ class Endpoint {
 						if( is_object( $license ) ) {
 							$key =  get_post_meta( $license->ID, '_edd_sl_key', true );
 							$expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
-							$expired = $expires > time();
+							$is_expired = $expires < time();
 
 							$order['downloads'][$key]['license'] = array(
 								'key' => $key,
-								'expired' => $expired,
+								'is_expired' => $is_expired,
 								'sites' => array()
 							);
 
 							// look-up active sites if license is not expired
-							if( ! $expired ) {
+							if( ! $is_expired ) {
 								$sites = (array) $licensing->get_sites( $license->ID );
 
 								foreach( $sites as $site ) {
