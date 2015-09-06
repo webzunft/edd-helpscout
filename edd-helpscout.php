@@ -83,14 +83,26 @@ class Plugin {
 	 */
 	private function is_helpscout_request() {
 
-		$trigger = stristr( $_SERVER['REQUEST_URI'], '/edd-hs-api/customer-data.json' ) !== false;
+		/**
+		 * @since 1.1
+		 */
+		$trigger = stristr( $_SERVER['REQUEST_URI'], '/edd-helpscout/api' ) !== false;
 
-		if( ! $trigger && isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+		if( ! $trigger ) {
+			/**
+			 * @deprecated 1.1
+			 * @use `/edd-helpscout/api` instead
+			 */
+			$trigger = stristr( $_SERVER['REQUEST_URI'], '/edd-hs-api/customer-data.json' ) !== false;
 
-			$greedy = get_option( 'edd_hs_greedy_listening', 1 );
+			// if trigger is not set but signature is, it might be that user is coming from old version (with greedy listening)
+			if( ! $trigger && isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
 
-			if( $greedy ) {
-				$trigger = true;
+				$greedy = get_option( 'edd_hs_greedy_listening', 1 );
+
+				if( $greedy ) {
+					$trigger = true;
+				}
 			}
 		}
 
