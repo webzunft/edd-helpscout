@@ -94,7 +94,18 @@ class Plugin {
 			}
 		}
 
-		return (bool) apply_filters( 'edd_hs/is_helpscout_request', $trigger );
+		/**
+		 * @deprecated 1.1
+		 * @use edd_helpscout_is_helpscout_request
+		 */
+		$trigger = (bool) apply_filters( 'edd_hs/is_helpscout_request', $trigger );
+
+		/**
+		 * Filter so you can set the plugin to trigger at your own URL endpoint
+		 *
+		 * @since 1.1
+		 */
+		return (bool) apply_filters( 'edd_helpscout_is_helpscout_request', $trigger );
 	}
 
 }
