@@ -212,9 +212,15 @@ class Endpoint {
 						$license = $licensing->get_license_by_purchase( $order['id'], $download['id'] );
 
 						if( is_object( $license ) ) {
-							$key =  get_post_meta( $license->ID, '_edd_sl_key', true );
-							$expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
-							$is_expired = $expires < time();
+							$key =  (string) get_post_meta( $license->ID, '_edd_sl_key', true );
+
+							// add support for "lifetime" licenses
+							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
+								$is_expired = false;
+							} else {
+								$expires = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+								$is_expired = $expires < time();
+							}
 
 							$order['downloads'][$key]['license'] = array(
 								'key' => $key,
