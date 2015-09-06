@@ -7,7 +7,7 @@
 			<i title="<?php echo esc_attr( __( 'Resend Purchase Receipt', 'edd' ) ); ?>" class="icon-doc"></i>
 		</a>
 	<?php } else { ?>
-		<span style="color:orange;font-weight:bold;"> - <?php echo esc_html( $order['status'] ); ?></span>
+		<span style="color:orange;font-weight:bold;"> <?php echo esc_html( $order['status'] ); ?></span>
 	<?php } ?>
 
 	<?php if( $order['is_renewal'] ) : ?>
@@ -28,12 +28,11 @@
 						<?php echo edd_get_price_option_name( $download['id'], $download['options']['price_id'] ); ?>
 
 						<?php if( ! empty( $download['license'] ) ) : ?>
-							<br />
 							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $download['license']['key'] ); ?>">
 								<?php echo $download['license']['key']; ?>
 							</a>
-							<?php if( $download['license']['expired'] ) : ?>
-								<span style="color:orange; font-weight:bold;">expired</span>
+							<?php if( $download['license']['is_expired'] ) : ?>
+								<span style="color:orange; font-weight:bold;"> expired</span>
 							<?php endif; ?>
 
 							<?php if( ! empty( $download['license']['sites'] ) ) : ?>
