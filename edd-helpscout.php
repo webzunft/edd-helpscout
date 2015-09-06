@@ -52,26 +52,19 @@ class Plugin {
 	 * Constructor
 	 */
 	public function __construct() {
+	}
 
-		// Load autoloader
-		require __DIR__ . '/vendor/autoload.php';
-
-		// Register activation hook
-		register_activation_hook( __FILE__, array( 'EDD_HelpScout\\Admin', 'plugin_activation' ) );
-
-		// Instantiate the plugin on a later hook
-		add_action( 'plugins_loaded', array( $this, 'init' ), 90 );
+	/**
+	 * Add hooks
+	 */
+	public function add_hooks() {
+		add_action( 'init', array( $this, 'listen' ) );
 	}
 
 	/**
 	 * Initialise the rest of the plugin
 	 */
-	public function init() {
-
-		// do nothing if EDD is not activated
-		if( ! class_exists( 'Easy_Digital_Downloads', false ) ) {
-			return;
-		}
+	public function listen() {
 
 		// if this is a HelpScout Request, load the Endpoint class
 		if ( $this->is_helpscout_request() && ! is_admin() ) {
@@ -80,8 +73,6 @@ class Plugin {
 
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 			new AJAX();
-		} elseif( is_admin() ) {
-			new Admin();
 		}
 	}
 
@@ -108,7 +99,30 @@ class Plugin {
 
 }
 
-new Plugin();
+/**
+ * Bootstrap the plugin at `plugins_loaded` (after EDD)
+ */
+add_action( 'plugins_loaded', function() {
+	// do nothing if EDD is not activated
+	if( ! class_exists( 'Easy_Digital_Downloads' ) ) {
+		return;
+	}
+
+	// Load autoloader
+	require __DIR__ . '/vendor/autoload.php';
+
+	// Register activation hook
+	register_activation_hook( __FILE__, array( 'EDD_HelpScout\\Admin', 'plugin_activation' ) );
+
+	// Instantiate plugin
+	$plugin = new Plugin();
+	$plugin->add_hooks();
+
+	// Load Admin stuff
+	if( is_admin() && ( ! defined( 'DOING_AJAX' ) || ! DOING_AJAX ) ) {
+		$admin = new Admin();
+	}
+}, 90 );
 
 
 
