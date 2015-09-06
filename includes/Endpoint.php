@@ -152,10 +152,7 @@ class Endpoint {
 	/**
 	 * Process the request
 	 *  - Find purchase data
-	 *  - Generate response
-	 *
-	 * @TODO: Refactor out loop to find additional order data.
-	 *
+	 *  - Generate response*
 	 * @link http://developer.helpscout.net/custom-apps/style-guide/ HelpScout Custom Apps Style Guide
 	 * @return string
 	 */
@@ -163,7 +160,7 @@ class Endpoint {
 
 		if ( count( $this->customer_payments ) === 0 ) {
 			// No purchase data was found
-			return 'No purchase data found';
+			return 'No payments found';
 		}
 
 		// build array of purchases
@@ -173,60 +170,64 @@ class Endpoint {
 			$order                   = array();
 			$order['id']             = $payment->ID;
 			$order['status']         = $payment->post_status;
+			$order['is_completed']   = ( $payment->post_status === 'publish' );
 			$order['date']           = $payment->post_date;
 			$order['link']           = '<a target="_blank" href="' . admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id=' . $payment->ID ) . '">#' . $payment->ID . '</a>';
 			$order['amount']         = edd_get_payment_amount( $payment->ID );
 			$order['payment_method'] = $this->get_payment_method( $payment->ID );
 			$order['downloads']      = array();
+			$order['resend_receipt_link'] = '';
+			$order['is_renewal'] = false;
 
-			$downloads = edd_get_payment_meta_downloads( $payment->ID );
-			if ( is_array( $downloads ) && count( $downloads ) > 0 ) {
+			// do stuff for completed orders
+			if( $payment->post_status === 'publish' ) {
+				$args = array(
+					'action'    => 'hs_action',
+					'hs_action' => 'purchase-receipt',
+					'order'     => (string) $order['id'],
+				);
+				$request = new Request( $args );
+				$order['resend_receipt_link'] = $request->get_signed_admin_url();
+			}
 
-				foreach ( $downloads as $download ) {
+			// find purchased Downloads.
+			$order['downloads'] = (array) edd_get_payment_meta_downloads( $payment->ID );
 
-					$id = $download['id'];
+			// for each download, find license + sites
+			if( function_exists( 'edd_software_licensing' ) ) {
+				$licensing = edd_software_licensing();
 
-					if ( ! $id || empty( $id ) ) {
-						continue;
-					}
+				// was this order a renewal?
+				$order['is_renewal'] = ( (string) get_post_meta( $order['id'], '_edd_sl_is_renewal', true ) !== '' );
 
-					// generate download string
-					$download_details = '<strong>' . get_the_title( $id ) . "</strong><br />";
-					$download_details .= edd_get_price_option_name( $id, $download['options']['price_id'] );
+				if( $order['is_completed'] ) {
+					foreach( $order['downloads'] as $key => $download ) {
 
-					// query license keys if order is completed and has licensing enabled
-					if ( $order['status'] === 'publish' &&  get_post_meta( $download['id'], '_edd_sl_enabled', true ) && function_exists( 'edd_software_licensing' ) ) {
-						$edd_sl = edd_software_licensing();
+						// only proceed if this download has EDD Software Licensing enabled
+						if( '' === (string) get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
+							continue;
+						}
 
-						// get license key
-						$license = $edd_sl->get_license_by_purchase( $order['id'], $id );
+						// find license that was given out for this download purchase
+						$license = $licensing->get_license_by_purchase( $order['id'], $download['id'] );
 
-						if ( is_object( $license ) ) {
+						if( is_object( $license ) ) {
+							$key =  get_post_meta( $license->ID, '_edd_sl_key', true );
+							$expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
+							$expired = $expires > time();
 
-							$license_key = get_post_meta( $license->ID, '_edd_sl_key', true );
-							$license_expires = get_post_meta( $license->ID, '_edd_sl_expiration', true );
-							$license_status_html = '';
+							$order['downloads'][$key]['license'] = array(
+								'key' => $key,
+								'expired' => $expired,
+								'sites' => array()
+							);
 
-							if( $license_expires < time() ) {
-								$license_status_html = ' <span style="color:orange; font-weight:bold;">expired</span>';
-							}
+							// look-up active sites if license is not expired
+							if( ! $expired ) {
+								$sites = (array) $licensing->get_sites( $license->ID );
 
-							// add link to manage_sites for this license
-							$manage_license_url = admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license_key );
-							$download_details .= '<br /><a href="' . $manage_license_url . '">' . $license_key . '</a>' . $license_status_html;
+								foreach( $sites as $site ) {
 
-							// get active sites for this license
-							$sites = $edd_sl->get_sites( $license->ID );
-
-							if ( is_array( $sites ) && count( $sites ) > 0 ) {
-
-								// add active sites to the download HTML
-								$download_details .= '<div class="toggleGroup">';
-								$download_details .= '<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites</a>';
-								$download_details .= '<div class="toggle indent">';
-								$download_details .= '<ul class="unstyled">';
-
-								foreach ( $sites as $site ) {
 									$args = array(
 										'action'     => 'hs_action',
 										'hs_action'  => 'deactivate',
@@ -234,26 +235,17 @@ class Endpoint {
 										'site_url'   => $site,
 									);
 									$request   = new Request( $args );
-									$site_href = $site;
-									if ( strpos( $site, 'http' ) !== 0 ) {
-										$site_href = 'http://' . $site;
-									}
-									$download_details .= '<li><a href="' . esc_url( $site_href ) . '" target="_blank">' . esc_html( $site ) . '</a> <a href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><small>(deactivate)</small></a></li>';
+									$order['downloads'][$key]['license']['sites'][] = array(
+										'url' => 'http://' . ltrim( $site, 'http://' ),
+										'deactivate_link' => $request->get_signed_admin_url()
+									);
+
+
 								}
-
-								$download_details .= '</ul>';
-								$download_details .= '</div></div>';
-
-
-							}
-
-						}
-
-
-					}
-					$order['downloads'][] = $download_details;
-				}
-
+							} //endif not expired
+						} // endif license found
+					} // end foreach downloads
+				} // endif order completed
 			}
 
 			$orders[] = $order;
@@ -262,54 +254,21 @@ class Endpoint {
 		// build HTML output
 		$html = '';
 		foreach ( $orders as $order ) {
-
-			$class = '';
-
-			// open completed purchases by default
-			if ( $order['status'] === 'publish' ) {
-				$class = ' open';
-			}
-
-			$html .= '<div class="toggleGroup' . $class . '">';
-			$html .= '<strong><i class="icon-cart"></i> ' . $order['link'] . '</strong> <a class="toggleBtn"><i class="icon-arrow"></i></a>';
-
-			// show status if order wasn't completed. otherwise, show resend receipt icon.
-			if ( $order['status'] !== 'publish' ) {
-				$html .= '<span style="color:orange;font-weight:bold;">' . $order['status'] . '</span>';
-			} else {
-
-				// was this a renewaL?
-				if( '' !== (string) get_post_meta( $order['id'], '_edd_sl_is_renewal', true ) ) {
-					$html .= '<span style="color:#008000;font-weight:bold;">renewal</span>';
-				}
-
-				// add icon to resend purchase receipt
-				$args = array(
-					'action'    => 'hs_action',
-					'hs_action' => 'purchase-receipt',
-					'order'     => (string) $order['id'],
-				);
-				$request = new Request( $args );
-				$resend_link = '<a style="float:right" href="' . esc_url( $request->get_signed_admin_url() ) . '" target="_blank"><i title="' . __( 'Resend Purchase Receipt', 'edd' ) . '" class="icon-doc"></i></a>';
-				$html .=  $resend_link;
-			}
-
-			$html .= '<div class="toggle indent">';
-			$html .= '<p><span class="muted">' . $order['date'] . '</span><br/>';
-			$html .= trim( edd_currency_filter( $order['amount'] ) ) . ( ( isset( $order['payment_method'] ) && '' !== $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ) . '</p>';
-
-			if ( ! empty( $order['downloads'] ) && count( $order['downloads'] ) > 0 ) {
-				// buid list of items with license keys
-				$html .= '<ul class="unstyled">';
-				foreach ( $order['downloads'] as $download ) {
-					$html .= '<li>' . $download . '</li>';
-				}
-				$html .= '</ul>';
-			}
-			$html .= '</div></div>';
-			$html .= '<div class="divider"></div>';
+			$html .= str_replace( '\t', '', $this->payment_row( $order ) );
 		}
 
+		return $html;
+	}
+
+	/**
+	 * @param $order
+	 *
+	 * @return string
+	 */
+	public function payment_row( array $order ) {
+		ob_start();
+		include dirname( Plugin::FILE ) . '/views/payment-row.php';
+		$html = ob_get_clean();
 		return $html;
 	}
 
