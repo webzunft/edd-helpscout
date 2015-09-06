@@ -57,7 +57,7 @@
 							<?php endif; ?>
 
 							<?php if( ! empty( $download['license']['sites'] ) ) : ?>
-								<div class="toggleGroup">
+								<div class="toggleGroup nested">
 									<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites</a>
 									<div class="toggle indent">
 										<ul class="unstyled">
