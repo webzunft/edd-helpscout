@@ -28,6 +28,8 @@ class AJAX {
 		}
 
 		$request_signature = $_GET['s'];
+		// unset `s` because we need to compare request signature
+		unset( $_GET['s'] );
 		$action_id = $_GET['action_id'];
 
 		// verify signature and referrer
