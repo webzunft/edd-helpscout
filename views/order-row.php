@@ -64,7 +64,7 @@
 											<?php foreach( $download['license']['sites'] as $site ) : ?>
 												<li>
 													<a href="<?php echo esc_url( $site['url'] ); ?>" target="_blank"><?php echo esc_html( ltrim( $site['url'], 'http://' ) ); ?></a>
-													<a href="<?php echo esc_url( $site['deactivate_link'] ); ?>" target="_blank"><small>(deactivate)</small></a>
+													<a href="<?php echo esc_url( $site['deactivate_link'] ); ?>" target="_blank"> <small style="color: red;">(deactivate)</small></a>
 												</li>
 											<?php endforeach; // end foreach sites ?>
 										</ul>
