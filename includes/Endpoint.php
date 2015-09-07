@@ -1,6 +1,7 @@
 <?php
 
 namespace EDD\HelpScout;
+use EDD_Software_Licensing;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations
@@ -217,6 +218,10 @@ class Endpoint {
 
 			// for each download, find license + sites
 			if( function_exists( 'edd_software_licensing' ) ) {
+
+				/**
+				 * @var EDD_Software_Licensing
+				 */
 				$licensing = edd_software_licensing();
 
 				// was this order a renewal?
