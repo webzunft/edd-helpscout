@@ -250,6 +250,7 @@ class Endpoint {
 							}
 
 							$order['downloads'][$key]['license'] = array(
+								'limit' => 0,
 								'key' => $key,
 								'is_expired' => $is_expired,
 								'sites' => array()
@@ -257,6 +258,9 @@ class Endpoint {
 
 							// look-up active sites if license is not expired
 							if( ! $is_expired ) {
+
+								// get license limit
+								$order['downloads'][$key]['license']['limit'] = $licensing->get_license_limit( $download['id'], $license->ID );
 								$sites = (array) $licensing->get_sites( $license->ID );
 
 								foreach( $sites as $site ) {

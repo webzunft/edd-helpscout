@@ -45,23 +45,23 @@
 
 						<?php do_action( 'edd_helpscout_before_order_download_details', $order, $download ); ?>
 
-						<?php if( ! empty( $download['license'] ) ) : ?>
+						<?php if( ! empty( $download['license'] ) ) : $license = $download['license']; ?>
 
-							<?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $download['license'] ); ?>
+							<?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $license ); ?>
 
-							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $download['license']['key'] ); ?>">
-								<?php echo $download['license']['key']; ?>
+							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license['key'] ); ?>">
+								<?php echo $license['key']; ?>
 							</a>
-							<?php if( $download['license']['is_expired'] ) : ?>
+							<?php if( $license['is_expired'] ) : ?>
 								<span style="color:orange; font-weight:bold;"> expired</span>
 							<?php endif; ?>
 
-							<?php if( ! empty( $download['license']['sites'] ) ) : ?>
+							<?php if( ! empty( $license['sites'] ) ) : ?>
 								<div class="toggleGroup nested">
-									<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites</a>
+									<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites <?php printf( '(%d/%d)', count( $license['sites'] ), $license['limit'] ); ?></a>
 									<div class="toggle indent">
 										<ul class="unstyled">
-											<?php foreach( $download['license']['sites'] as $site ) : ?>
+											<?php foreach( $license['sites'] as $site ) : ?>
 												<li>
 													<a href="<?php echo esc_url( $site['url'] ); ?>" target="_blank"><?php echo esc_html( ltrim( $site['url'], 'http://' ) ); ?></a>
 													<a href="<?php echo esc_url( $site['deactivate_link'] ); ?>" target="_blank"> <small style="color: red;">(deactivate)</small></a>
@@ -72,7 +72,7 @@
 								</div>
 							<?php endif; // end if sites not empty ?>
 
-							<?php do_action( 'edd_helpscout_after_order_download_license', $order, $download, $download['license'] ); ?>
+							<?php do_action( 'edd_helpscout_after_order_download_license', $order, $download, $license ); ?>
 
 						<?php endif; //end if has license ?>
 
