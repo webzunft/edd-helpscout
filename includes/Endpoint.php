@@ -183,8 +183,10 @@ class Endpoint {
 	private function build_response_html() {
 
 		if ( count( $this->customer_payments ) === 0 ) {
+
+
 			// No purchase data was found
-			return 'No payments found';
+			return sprintf( '<p>No payments founds for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
 		}
 
 		// build array of purchases
