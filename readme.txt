@@ -3,8 +3,8 @@ Contributors: DvanKooten, Ibericode
 Donate link: https://dannyvankooten.com/donate/
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
-Tested up to: 4.3
-Stable tag: 1.1
+Tested up to: 4.4.1
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,12 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 1. Purchases and other information related to the customer is shown in the bottom right corner of your HelpScout interface.
 
 == Changelog ==
+
+= 1.1.1 - January 28, 2016 =
+
+**Fixes**
+
+- Certain characters at start of URL were being stripped off in HelpScout.
 
 = 1.1 - September 6, 2015 =
 
