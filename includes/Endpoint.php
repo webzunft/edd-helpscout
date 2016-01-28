@@ -275,9 +275,13 @@ class Endpoint {
 										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
 									);
+
+									// make sure site url is prefixed with "http://"
+									$site_url = strpos( $site, '://' ) !== false ? $site : 'http://' . $site;
+
 									$request   = new Request( $args );
 									$order['downloads'][$key]['license']['sites'][] = array(
-										'url' => 'http://' . ltrim( $site, 'http://' ),
+										'url' => $site_url,
 										'deactivate_link' => $request->get_signed_admin_url()
 									);
 
