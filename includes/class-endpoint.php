@@ -104,12 +104,6 @@ class Endpoint {
 		}
 
 		/**
-		 * @deprecated 1.1
-		 * @use edd_helpscout_customer_emails
-		 */
-		$emails = apply_filters( 'helpscout_edd_customer_emails', $emails, $this->data );
-
-		/**
 		 * Filter email address of the customer
 		 * @since 1.1
 		 */
