@@ -1,6 +1,8 @@
 EDD integration for HelpScout
 =============
 
+> As of version 2.0, the Callback URL in HelpScout should be `https://your-site.com/edd-helpscout-api/customer_info`.
+
 Easy Digital Downloads integration for HelpScout is a WordPress plugin that will show customer information right from your HelpScout dashboard.
 
 Activating the plugin and configuring the integration will add the following information to your HelpScout dashboard:
@@ -30,7 +32,7 @@ To get this up an running, you'll need to configure a few things in WordPress an
 _Example_
 
 ```php
-define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
+define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-fourty-characters!' );
 ```
 
 #### HelpScout
@@ -38,8 +40,9 @@ define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 1. Go to the [HelpScout custom app interface](https://secure.helpscout.net/apps/custom/).
 1. Enter the following settings.
 
-| App Name     	| Easy Digital Downloads                                	|
+| Setting     	| Value						                               	|
 |--------------	|-------------------------------------------------------	|
+| App Name     	| Easy Digital Downloads                                	|
 | Content Type 	| Dynamic Content                                       	|
 | Callback URL 	| https://your-site.com/edd-helpscout-api/customer_info 	|
 | Secret Key   	| The value of your **HELPSCOUT_SECRET_KEY** constant.  	|
