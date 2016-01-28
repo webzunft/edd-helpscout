@@ -35,6 +35,7 @@ defined( 'ABSPATH' ) or exit;
 define( 'EDD_HELPSCOUT_VERSION', '2.0-beta' );
 define( 'EDD_HELPSCOUT_FILE', __FILE__ );
 
+
 /**
  * @ignore
  */

@@ -15,6 +15,8 @@ function authorize_request() {
 /**
  * Verify that we're coming from secure.helpscout.net.
  *
+ * This is easily spoofed, so keep that in mind when using this as your only auth check.
+ *
  * @return bool
  */
 function verify_referer() {
@@ -23,6 +25,8 @@ function verify_referer() {
 
 /**
  * Verify the request signature that was received.
+ *
+ * This is harder to spoof as it uses your secret key.
  *
  * @return bool
  */
@@ -44,7 +48,7 @@ function verify_request_signature() {
  * Listen for API actions
  */
 function listen_for_actions() {
-	$listener = new Listener( '/edd-helpscout-api' );
+	$listener = new Listener( EDD_HELPSCOUT_API_PATH );
 	$action = $listener->listen( $_SERVER['REQUEST_URI'] );
 
 	if( ! empty( $action ) ) {

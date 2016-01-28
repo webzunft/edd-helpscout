@@ -4,6 +4,9 @@ namespace EDD\HelpScout;
 
 defined( 'ABSPATH' ) or exit;
 
+// define some default constants
+require __DIR__ . '/includes/default-constants.php';
+
 // Load autoloader
 require __DIR__ . '/vendor/autoload.php';
 

@@ -20,13 +20,12 @@ class Request {
 	/**
 	 * @var string
 	 */
-	private $secret_key = '';
+	private static $secret_key = HELPSCOUT_SECRET_KEY;
 
 	/**
 	 * @param array $data
 	 */
 	public function __construct( $data ) {
-		$this->secret_key = defined( 'HELPSCOUT_SECRET_KEY' ) ? HELPSCOUT_SECRET_KEY : '';
 		$this->data = $data;
 		$this->signature = $this->create_expected_signature();
 	}
@@ -35,7 +34,7 @@ class Request {
 	 * @return string
 	 */
 	private function create_expected_signature() {
-		return base64_encode( hash_hmac( 'sha1', json_encode( $this->data ), $this->secret_key, true ) );
+		return base64_encode( hash_hmac( 'sha1', json_encode( $this->data ), self::$secret_key, true ) );
 	}
 
 	/**
@@ -66,7 +65,7 @@ class Request {
 		// add signature to url args
 		$args['s'] = $this->signature;
 
-		return add_query_arg( urlencode_deep( $args ), home_url( '/edd-helpscout-api/' . $action ) );
+		return add_query_arg( urlencode_deep( $args ), home_url( rtrim( EDD_HELPSCOUT_API_PATH, '/' ) . '/' . $action ) );
 	}
 
 
