@@ -63,8 +63,7 @@ return array(
     'Composer\\Installers\\WordPressInstaller' => $vendorDir . '/composer/installers/src/Composer/Installers/WordPressInstaller.php',
     'Composer\\Installers\\ZendInstaller' => $vendorDir . '/composer/installers/src/Composer/Installers/ZendInstaller.php',
     'Composer\\Installers\\ZikulaInstaller' => $vendorDir . '/composer/installers/src/Composer/Installers/ZikulaInstaller.php',
-    'EDD\\HelpScout\\AJAX' => $baseDir . '/includes/AJAX.php',
-    'EDD\\HelpScout\\Admin' => $baseDir . '/includes/Admin.php',
-    'EDD\\HelpScout\\Endpoint' => $baseDir . '/includes/Endpoint.php',
-    'EDD\\HelpScout\\Request' => $baseDir . '/includes/Request.php',
+    'EDD\\HelpScout\\Endpoint' => $baseDir . '/includes/class-endpoint.php',
+    'EDD\\HelpScout\\Listener' => $baseDir . '/includes/class-listener.php',
+    'EDD\\HelpScout\\Request' => $baseDir . '/includes/class-request.php',
 );

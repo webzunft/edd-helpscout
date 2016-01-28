@@ -20,13 +20,12 @@ class Request {
 	/**
 	 * @var string
 	 */
-	private $secret_key = '';
+	private static $secret_key = HELPSCOUT_SECRET_KEY;
 
 	/**
 	 * @param array $data
 	 */
 	public function __construct( $data ) {
-		$this->secret_key = defined( 'HELPSCOUT_SECRET_KEY' ) ? HELPSCOUT_SECRET_KEY : '';
 		$this->data = $data;
 		$this->signature = $this->create_expected_signature();
 	}
@@ -35,7 +34,7 @@ class Request {
 	 * @return string
 	 */
 	private function create_expected_signature() {
-		return base64_encode( hash_hmac( 'sha1', json_encode( $this->data ), $this->secret_key, true ) );
+		return base64_encode( hash_hmac( 'sha1', json_encode( $this->data ), self::$secret_key, true ) );
 	}
 
 	/**
@@ -53,24 +52,20 @@ class Request {
 		return $this->signature === $signature;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function referred_from_helpscout() {
-		return ( isset( $_SERVER['HTTP_REFERER'] ) && strpos( $_SERVER['HTTP_REFERER'], 'https://secure.helpscout.net/' ) === 0 );
-	}
 
 	/**
+	 * @param string $action
+	 *
 	 * @return string
 	 */
-	public function get_signed_admin_url() {
+	public function get_signed_url( $action = '' ) {
 
 		$args = $this->data;
 
 		// add signature to url args
 		$args['s'] = $this->signature;
 
-		return add_query_arg( urlencode_deep( $args ), admin_url( 'admin-ajax.php' ) );
+		return add_query_arg( urlencode_deep( $args ), home_url( rtrim( EDD_HELPSCOUT_API_PATH, '/' ) . '/' . $action ) );
 	}
 
 
