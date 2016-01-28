@@ -29,16 +29,17 @@ To get this up an running, you'll need to configure a few things in WordPress an
 
 _Example_
 
-`
+```php
 define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
-`
+```
 
 #### HelpScout
 
 1. Go to the [HelpScout custom app interface](https://secure.helpscout.net/apps/custom/).
 1. Enter the following settings.
 
-**App Name:** Easy Digital Downloads<br />
-**Content Type:** Dynamic Content<br />
-**Callback URL:** https://your-site.com/edd-helpscout/api _(I recommend using HTTPS)_ <br />
-**Secret Key:** The value of your **HELPSCOUT_SECRET_KEY** constant.
+| App Name     	| Easy Digital Downloads                                	|
+|--------------	|-------------------------------------------------------	|
+| Content Type 	| Dynamic Content                                       	|
+| Callback URL 	| https://your-site.com/edd-helpscout-api/customer_info 	|
+| Secret Key   	| The value of your **HELPSCOUT_SECRET_KEY** constant.  	|

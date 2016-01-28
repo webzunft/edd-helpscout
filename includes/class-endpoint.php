@@ -1,6 +1,7 @@
 <?php
 
 namespace EDD\HelpScout;
+
 use EDD_Software_Licensing;
 
 /**
@@ -131,12 +132,6 @@ class Endpoint {
 		$payments = array();
 
 		/**
-		 * @deprecated 1.1
-		 * @use edd_helpscout_customer_emails
-		 */
-		$payments = apply_filters( 'helpscout_edd_customer_payments', $payments, $this->customer_emails, $this->data );
-
-		/**
 		 * Allows you to perform your own search for customer payments, based on given data.
 		 *
 		 * @since 1.1
@@ -209,12 +204,10 @@ class Endpoint {
 			// do stuff for completed orders
 			if( $payment->post_status === 'publish' ) {
 				$args = array(
-					'action'        => 'edd_helpscout_action',
-					'action_id'     => 'resend-purchase-receipt',
 					'payment_id'    => (string) $order['payment_id'],
 				);
 				$request = new Request( $args );
-				$order['resend_receipt_link'] = $request->get_signed_admin_url();
+				$order['resend_receipt_link'] = $request->get_signed_url( 'resend_purchase_receipt' );
 			}
 
 			// find purchased Downloads.
@@ -268,10 +261,7 @@ class Endpoint {
 								$sites = (array) $licensing->get_sites( $license->ID );
 
 								foreach( $sites as $site ) {
-
 									$args = array(
-										'action'     => 'edd_helpscout_action',
-										'action_id'  => 'deactivate-license-site',
 										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
 									);
@@ -282,7 +272,7 @@ class Endpoint {
 									$request   = new Request( $args );
 									$order['downloads'][$key]['license']['sites'][] = array(
 										'url' => $site_url,
-										'deactivate_link' => $request->get_signed_admin_url()
+										'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
 									);
 
 
@@ -312,7 +302,7 @@ class Endpoint {
 	 */
 	public function order_row( array $order ) {
 		ob_start();
-		include dirname( Plugin::FILE ) . '/views/order-row.php';
+		include dirname( EDD_HELPSCOUT_FILE ) . '/views/order-row.php';
 		$html = ob_get_clean();
 		return $html;
 	}
@@ -361,9 +351,10 @@ class Endpoint {
 	/**
 	 * Set JSON headers, return the given response string
 	 *
-	 * @param string $html
+	 * @param string $html HTML content of the response
+	 * @param int $code The HTTP status code to respond with
 	 */
-	private function respond( $html ) {
+	private function respond( $html, $code = 200 ) {
 		$response = array( 'html' => $html );
 
 		// clear output, some plugins might have thrown errors by now.
@@ -371,6 +362,7 @@ class Endpoint {
 			ob_end_clean();
 		}
 
+		status_header( $code );
 		header( "Content-Type: application/json" );
 		echo json_encode( $response );
 		die();

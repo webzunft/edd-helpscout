@@ -17,6 +17,7 @@
     "composer/installers" : "~1.0"
   },
   "autoload": {
-    "classmap": [ "includes/" ]
+    "classmap": [ "includes/" ],
+    "files": [ "includes/functions.php" ]
   }
 }

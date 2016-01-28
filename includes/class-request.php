@@ -53,24 +53,20 @@ class Request {
 		return $this->signature === $signature;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function referred_from_helpscout() {
-		return ( isset( $_SERVER['HTTP_REFERER'] ) && strpos( $_SERVER['HTTP_REFERER'], 'https://secure.helpscout.net/' ) === 0 );
-	}
 
 	/**
+	 * @param string $action
+	 *
 	 * @return string
 	 */
-	public function get_signed_admin_url() {
+	public function get_signed_url( $action = '' ) {
 
 		$args = $this->data;
 
 		// add signature to url args
 		$args['s'] = $this->signature;
 
-		return add_query_arg( urlencode_deep( $args ), admin_url( 'admin-ajax.php' ) );
+		return add_query_arg( urlencode_deep( $args ), home_url( '/edd-helpscout-api/' . $action ) );
 	}
 
 
