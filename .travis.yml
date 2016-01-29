@@ -5,6 +5,8 @@ php:
   - hhvm
   - 7.0
 install:
-- composer install --no-interaction --prefer-dist
+  - composer install --no-interaction --prefer-dist
 script:
-- phpunit
+  - phpunit
+before_script:
+  - phpenv config-rm xdebug.ini
