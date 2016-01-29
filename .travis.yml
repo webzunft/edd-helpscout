@@ -7,6 +7,6 @@ php:
 install:
   - composer install --no-interaction --prefer-dist
 script:
-  - phpunit
+  - composer test
 before_script:
   - phpenv config-rm xdebug.ini
