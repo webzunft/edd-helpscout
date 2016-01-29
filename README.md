@@ -1,7 +1,11 @@
 EDD integration for HelpScout
 =============
 
+[![Build Status](https://api.travis-ci.org/dannyvankooten/edd-helpscout.png?branch=master)](https://travis-ci.org/dannyvankooten/edd-helpscout)
+
+
 > **Changed Callback URL**
+>
 > As of version 2.0, the Callback URL in HelpScout should be `https://your-site.com/edd-helpscout-api/customer_info`.
 
 
@@ -20,7 +24,7 @@ If using the Software Licensing add-on, the following information is shown as we
 - Active sites, with a link to deactivate the license for the given site.
 
 
-### Installation
+## Installation
 
 To get this up an running, you'll need to configure a few things in WordPress and HelpScout.
 
@@ -50,7 +54,7 @@ define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-fourty-characters!' );
 | Secret Key   	| The value of your **HELPSCOUT_SECRET_KEY** constant.  	|
 
 
-### Running Tests
+## Running Tests
 
 First, make sure all developer dependencies are installed.
 
@@ -64,6 +68,6 @@ Then, run the following command.
 composer test
 ```
 
-### License
+## License
 
 GPL v2
