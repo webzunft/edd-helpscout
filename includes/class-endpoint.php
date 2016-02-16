@@ -25,6 +25,11 @@ class Endpoint {
 	private $customer_payments = array();
 
 	/**
+         * @var string 
+         */
+        private $customer_license_key;
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -37,6 +42,9 @@ class Endpoint {
 			$this->respond( 'Invalid signature' );
 			exit;
 		}
+
+                // get customer license key
+                $this->customer_license_key = $this->get_customer_license_key();
 
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
@@ -88,6 +96,44 @@ class Endpoint {
 	}
 
 	/**
+         * Get the license key of the customer from subject line of the ticket
+         * Key must be last element of the subject line separated by at least one blank space
+         * 
+         * @return string
+         */
+        private function get_customer_license_key() {
+            $ticket_data = $this->data['ticket'];
+            $subject = $ticket_data['subject'];
+            $trim_spaces = preg_replace('/\s+/', ' ',$subject);
+            
+            $parts = explode(' ', $trim_spaces);
+            $key = array_pop($parts);
+
+            return $key;
+        }
+        
+        /**
+         * get customer mail address by license key
+         * 
+         * @return mixed string|false
+         */
+        private function get_customer_mail_by_key(){
+            if (!class_exists('EDD_Software_Licensing'))
+                return false;
+            
+                $license     = $this->customer_license_key;
+                $license_id  = EDD_Software_Licensing::get_license_by_key( $license );
+		$payment_id  = get_post_meta( $license_id, '_edd_sl_payment_id', true );
+		$user_info   = edd_get_payment_meta_user_info( $payment_id );
+                
+                if (isset($user_info['email']))
+                    return $user_info['email'];
+                
+                return false;
+     
+        }
+
+    /**
 	 * Get an array of emails belonging to the customer
 	 *
 	 * @return array
@@ -97,10 +143,15 @@ class Endpoint {
 		$customer_data = $this->data['customer'];
 		$emails = array();
 
+                // try to get email address by license key 
+                if ( is_string($this->get_customer_mail_by_key() ) )  
+                    $emails[] = $this->get_customer_mail_by_key();
+                
+
 		if( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
-			$emails = array_values( $customer_data['emails'] );
+			$emails[] = array_values( $customer_data['emails'] );
 		} elseif( isset( $customer_data['email'] ) ) {
-			$emails = array( $customer_data['email'] );
+			$emails[] = $customer_data['email'];
 		}
 
 		/**
