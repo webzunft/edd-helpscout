@@ -25,11 +25,6 @@ class Endpoint {
 	private $customer_payments = array();
 
 	/**
-         * @var string 
-         */
-        private $customer_license_key;
-
-	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -42,9 +37,6 @@ class Endpoint {
 			$this->respond( 'Invalid signature' );
 			exit;
 		}
-
-                // get customer license key
-                $this->customer_license_key = $this->get_customer_license_key();
 
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
@@ -95,47 +87,39 @@ class Endpoint {
 		return false;
 	}
 
+
 	/**
-         * Get the license key of the customer from subject line of the ticket
-         * Key must be last element of the subject line separated by at least one blank space
-         * 
-         * @return string
-         */
-        private function get_customer_license_key() {
-            $ticket_data = $this->data['ticket'];
-            $subject = $ticket_data['subject'];
-            $trim_spaces = preg_replace('/\s+/', ' ',$subject);
-            
-            $parts = explode(' ', $trim_spaces);
-            $key = array_pop($parts);
+	 * get customer mail address by license key
+	 *
+	 * @return array
+	 */
+	private function get_customer_emails_by_license_key() {
 
-            return $key;
-        }
-        
-        /**
-         * get customer mail address by license key
-         * 
-         * @return mixed string|false
-         */
-        private function get_customer_mail_by_key() {
-            
-            if (!class_exists('EDD_Software_Licensing')) {
-                return false;
-            }
+		if ( ! class_exists( 'EDD_Software_Licensing' ) ) {
+			return array();
+		}
 
-            $license = $this->customer_license_key;
-            $license_id = EDD_Software_Licensing::get_license_by_key($license);
-            $payment_id = get_post_meta($license_id, '_edd_sl_payment_id', true);
-            $user_info = edd_get_payment_meta_user_info($payment_id);
+		$subject_line = $this->data['ticket']['subject'];
+		$last_word    = substr( $subject_line, strrpos( $subject_line, ' ' ) + 1 );
 
-            if (isset($user_info['email'])) {
-                return $user_info['email'];
-            }
+		// only search for license key if last word actually looks like a license key
+		// this check is dirty, as people could be using the filter in EDD for generating their own type of licenes key...
+		if ( strlen( $last_word ) === 32 ) {
+			$license_key = $last_word;
+			$edd_sl      = edd_software_licensing();
+			$license_id  = $edd_sl->get_license_by_key( $license_key );
+			$payment_id  = get_post_meta( $license_id, '_edd_sl_payment_id', true );
+			$user_info   = edd_get_payment_meta_user_info( $payment_id );
 
-            return false;
-    }
+			if ( ! empty( $user_info['email'] ) ) {
+				return array( $user_info['email'] );
+			}
+		}
 
-    /**
+		return array();
+	}
+
+	/**
 	 * Get an array of emails belonging to the customer
 	 *
 	 * @return array
@@ -143,16 +127,13 @@ class Endpoint {
 	private function get_customer_emails() {
 
 		$customer_data = $this->data['customer'];
-		$emails = array();
+		$emails        = array();
 
-                // try to get email address by license key 
-                if ( is_string($this->get_customer_mail_by_key() ) ) {  
-                    $emails[] = $this->get_customer_mail_by_key();
-                }
-                
-		if( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
+		$emails = array_merge( $emails, $this->get_customer_emails_by_license_key() );
+
+		if ( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
 			$emails[] = array_values( $customer_data['emails'] );
-		} elseif( isset( $customer_data['email'] ) ) {
+		} elseif ( isset( $customer_data['email'] ) ) {
 			$emails[] = $customer_data['email'];
 		}
 
