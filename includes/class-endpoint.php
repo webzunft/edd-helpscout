@@ -7,7 +7,7 @@ use EDD_Software_Licensing;
 /**
  * This class takes care of requests coming from HelpScout App Integrations
  */
-class Endpoint {
+class Endpoint { 
 
 	/**
 	 * @var array|mixed
