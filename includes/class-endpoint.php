@@ -117,21 +117,23 @@ class Endpoint {
          * 
          * @return mixed string|false
          */
-        private function get_customer_mail_by_key(){
-            if (!class_exists('EDD_Software_Licensing'))
-                return false;
+        private function get_customer_mail_by_key() {
             
-                $license     = $this->customer_license_key;
-                $license_id  = EDD_Software_Licensing::get_license_by_key( $license );
-		$payment_id  = get_post_meta( $license_id, '_edd_sl_payment_id', true );
-		$user_info   = edd_get_payment_meta_user_info( $payment_id );
-                
-                if (isset($user_info['email']))
-                    return $user_info['email'];
-                
+            if (!class_exists('EDD_Software_Licensing')) {
                 return false;
-     
-        }
+            }
+
+            $license = $this->customer_license_key;
+            $license_id = EDD_Software_Licensing::get_license_by_key($license);
+            $payment_id = get_post_meta($license_id, '_edd_sl_payment_id', true);
+            $user_info = edd_get_payment_meta_user_info($payment_id);
+
+            if (isset($user_info['email'])) {
+                return $user_info['email'];
+            }
+
+            return false;
+    }
 
     /**
 	 * Get an array of emails belonging to the customer
@@ -144,10 +146,10 @@ class Endpoint {
 		$emails = array();
 
                 // try to get email address by license key 
-                if ( is_string($this->get_customer_mail_by_key() ) )  
+                if ( is_string($this->get_customer_mail_by_key() ) ) {  
                     $emails[] = $this->get_customer_mail_by_key();
+                }
                 
-
 		if( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
 			$emails[] = array_values( $customer_data['emails'] );
 		} elseif( isset( $customer_data['email'] ) ) {
