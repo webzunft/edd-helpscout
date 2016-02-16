@@ -33,7 +33,7 @@ class Endpoint {
 		$this->data = $this->parse_data();
 
 		// validate request
-		if( ! $this->validate() ) {
+		if ( ! $this->validate() ) {
 			$this->respond( 'Invalid signature' );
 			exit;
 		}
@@ -57,7 +57,7 @@ class Endpoint {
 	private function parse_data() {
 
 		$data_string = file_get_contents( 'php://input' );
-		$data = json_decode( $data_string, true );
+		$data        = json_decode( $data_string, true );
 
 		return $data;
 	}
@@ -143,7 +143,7 @@ class Endpoint {
 		 */
 		$emails = apply_filters( 'edd_helpscout_customer_emails', $emails, $this->data );
 
-		if( count( $emails ) === 0 ) {
+		if ( count( $emails ) === 0 ) {
 			$this->respond( 'No customer email given.' );
 		}
 
@@ -166,20 +166,20 @@ class Endpoint {
 		 */
 		$payments = apply_filters( 'edd_helpscout_customer_payments', $payments, $this->customer_emails, $this->data );
 
-		if( ! empty( $payments ) ) {
+		if ( ! empty( $payments ) ) {
 			return $payments;
 		}
 
 		global $wpdb;
 
 		// query by email(s)
-		$sql  = "SELECT p.ID, p.post_status, p.post_date";
+		$sql = "SELECT p.ID, p.post_status, p.post_date";
 		$sql .= " FROM {$wpdb->posts} p, {$wpdb->postmeta} pm";
 		$sql .= " WHERE p.post_type = 'edd_payment'";
 		$sql .= " AND p.ID = pm.post_id";
 		$sql .= " AND pm.meta_key = '_edd_payment_user_email'";
 
-		if( count( $this->customer_emails ) > 1 ) {
+		if ( count( $this->customer_emails ) > 1 ) {
 			$in_clause = rtrim( str_repeat( "'%s', ", count( $this->customer_emails ) ), ", " );
 			$sql .= " AND pm.meta_value IN($in_clause)";
 		} else {
@@ -188,10 +188,10 @@ class Endpoint {
 
 		$sql .= " GROUP BY p.ID  ORDER BY p.ID DESC";
 
-		$query = $wpdb->prepare( $sql, $this->customer_emails );
+		$query   = $wpdb->prepare( $sql, $this->customer_emails );
 		$results = $wpdb->get_results( $query );
 
-		if( is_array( $results ) ) {
+		if ( is_array( $results ) ) {
 			return $results;
 		}
 
@@ -218,23 +218,23 @@ class Endpoint {
 		$orders = array();
 		foreach ( $this->customer_payments as $payment ) {
 
-			$order                   = array();
-			$order['payment_id']     = $payment->ID;
-			$order['date']           = $payment->post_date;
-			$order['amount']         = edd_get_payment_amount( $payment->ID );
-			$order['status']         = $payment->post_status;
-			$order['payment_method'] = $this->get_payment_method( $payment->ID );
-			$order['downloads']      = array();
+			$order                        = array();
+			$order['payment_id']          = $payment->ID;
+			$order['date']                = $payment->post_date;
+			$order['amount']              = edd_get_payment_amount( $payment->ID );
+			$order['status']              = $payment->post_status;
+			$order['payment_method']      = $this->get_payment_method( $payment->ID );
+			$order['downloads']           = array();
 			$order['resend_receipt_link'] = '';
-			$order['is_renewal'] = false;
-			$order['is_completed']   = ( $payment->post_status === 'publish' );
+			$order['is_renewal']          = false;
+			$order['is_completed']        = ( $payment->post_status === 'publish' );
 
 			// do stuff for completed orders
-			if( $payment->post_status === 'publish' ) {
-				$args = array(
-					'payment_id'    => (string) $order['payment_id'],
+			if ( $payment->post_status === 'publish' ) {
+				$args                         = array(
+					'payment_id' => (string) $order['payment_id'],
 				);
-				$request = new Request( $args );
+				$request                      = new Request( $args );
 				$order['resend_receipt_link'] = $request->get_signed_url( 'resend_purchase_receipt' );
 			}
 
@@ -242,7 +242,7 @@ class Endpoint {
 			$order['downloads'] = (array) edd_get_payment_meta_downloads( $payment->ID );
 
 			// for each download, find license + sites
-			if( function_exists( 'edd_software_licensing' ) ) {
+			if ( function_exists( 'edd_software_licensing' ) ) {
 
 				/**
 				 * @var EDD_Software_Licensing
@@ -252,43 +252,43 @@ class Endpoint {
 				// was this order a renewal?
 				$order['is_renewal'] = ( (string) get_post_meta( $payment->ID, '_edd_sl_is_renewal', true ) !== '' );
 
-				if( $order['is_completed'] ) {
-					foreach( $order['downloads'] as $key => $download ) {
+				if ( $order['is_completed'] ) {
+					foreach ( $order['downloads'] as $key => $download ) {
 
 						// only proceed if this download has EDD Software Licensing enabled
-						if( '' === (string) get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
+						if ( '' === (string) get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
 							continue;
 						}
 
 						// find license that was given out for this download purchase
 						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
 
-						if( is_object( $license ) ) {
-							$key =  (string) get_post_meta( $license->ID, '_edd_sl_key', true );
+						if ( is_object( $license ) ) {
+							$key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
 
 							// add support for "lifetime" licenses
 							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
 								$is_expired = false;
 							} else {
-								$expires = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+								$expires    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
 								$is_expired = $expires < time();
 							}
 
-							$order['downloads'][$key]['license'] = array(
-								'limit' => 0,
-								'key' => $key,
+							$order['downloads'][ $key ]['license'] = array(
+								'limit'      => 0,
+								'key'        => $key,
 								'is_expired' => $is_expired,
-								'sites' => array()
+								'sites'      => array()
 							);
 
 							// look-up active sites if license is not expired
-							if( ! $is_expired ) {
+							if ( ! $is_expired ) {
 
 								// get license limit
-								$order['downloads'][$key]['license']['limit'] = $licensing->get_license_limit( $download['id'], $license->ID );
-								$sites = (array) $licensing->get_sites( $license->ID );
+								$order['downloads'][ $key ]['license']['limit'] = $licensing->get_license_limit( $download['id'], $license->ID );
+								$sites                                          = (array) $licensing->get_sites( $license->ID );
 
-								foreach( $sites as $site ) {
+								foreach ( $sites as $site ) {
 									$args = array(
 										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
@@ -297,9 +297,9 @@ class Endpoint {
 									// make sure site url is prefixed with "http://"
 									$site_url = strpos( $site, '://' ) !== false ? $site : 'http://' . $site;
 
-									$request   = new Request( $args );
-									$order['downloads'][$key]['license']['sites'][] = array(
-										'url' => $site_url,
+									$request                                          = new Request( $args );
+									$order['downloads'][ $key ]['license']['sites'][] = array(
+										'url'             => $site_url,
 										'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
 									);
 
@@ -332,6 +332,7 @@ class Endpoint {
 		ob_start();
 		include dirname( EDD_HELPSCOUT_FILE ) . '/views/order-row.php';
 		$html = ob_get_clean();
+
 		return $html;
 	}
 
@@ -380,7 +381,7 @@ class Endpoint {
 	 * Set JSON headers, return the given response string
 	 *
 	 * @param string $html HTML content of the response
-	 * @param int $code The HTTP status code to respond with
+	 * @param int    $code The HTTP status code to respond with
 	 */
 	private function respond( $html, $code = 200 ) {
 		$response = array( 'html' => $html );
