@@ -353,7 +353,7 @@ class Endpoint {
 				foreach ( $notes as $note ) {
 					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
 						$transaction_id = $match[1];
-						$payment_method = '<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
+						$payment_method = '<a href="https://www.paypal.com/us/vst/id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
 						break 2;
 					}
 				}
