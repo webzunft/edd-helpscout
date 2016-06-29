@@ -211,7 +211,7 @@ class Endpoint {
 
 
 			// No purchase data was found
-			return sprintf( '<p>No payments founds for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
+			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
 		}
 
 		// build array of purchases
