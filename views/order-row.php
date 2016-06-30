@@ -55,6 +55,9 @@
 							<?php if( $license['is_expired'] ) : ?>
 								<span style="color:orange; font-weight:bold;"> expired</span>
 							<?php endif; ?>
+							<?php if( $license['is_revoked'] ) : ?>
+								<span style="color:red; font-weight:bold;"> revoked</span>
+							<?php endif; ?>
 
 							<?php if( ! empty( $license['sites'] ) ) : ?>
 								<div class="toggleGroup nested">

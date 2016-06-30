@@ -278,6 +278,7 @@ class Endpoint {
 								'limit'      => 0,
 								'key'        => $key,
 								'is_expired' => $is_expired,
+								'is_revoked' => $license->post_status !== 'publish',
 								'sites'      => array()
 							);
 
