@@ -31,6 +31,9 @@ class RequestTest extends PHPUnit_Framework_TestCase {
 		self::assertTrue( $request->signature_equals( $signature ) );
 		self::assertFalse( $request->signature_equals( '' ) );
 
+		$signature = base64_encode( hash_hmac( 'sha1', json_encode( $data ), 'SomeIncorrectKey', true ) );
+		self::assertFalse( $request->signature_equals( $signature ) );
+
 		$signature = base64_encode( hash_hmac( 'sha1', json_encode( [ 'other-key' => 'value' ] ), HELPSCOUT_SECRET_KEY, true ) );
 		self::assertFalse( $request->signature_equals( $signature ) );
 	}
