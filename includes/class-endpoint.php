@@ -265,13 +265,14 @@ class Endpoint {
 
 						if ( is_object( $license ) ) {
 							$key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
+                            $expires_at = 0;
 
 							// add support for "lifetime" licenses
 							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
 								$is_expired = false;
 							} else {
-								$expires    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
-								$is_expired = $expires < time();
+                                $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+								$is_expired = $expires_at < time();
 							}
 
 							$order['downloads'][ $key ]['license'] = array(
@@ -279,7 +280,8 @@ class Endpoint {
 								'key'        => $key,
 								'is_expired' => $is_expired,
 								'is_revoked' => $license->post_status !== 'publish',
-								'sites'      => array()
+								'sites'      => array(),
+                                'expires_at' => $expires_at
 							);
 
 							// look-up active sites if license is not expired

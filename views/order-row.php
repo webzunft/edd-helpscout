@@ -52,14 +52,19 @@
 							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license['key'] ); ?>">
 								<?php echo $license['key']; ?>
 							</a>
-							<?php if( $license['is_expired'] ) : ?>
-								<span style="color:orange; font-weight:bold;"> expired</span>
-							<?php endif; ?>
-							<?php if( $license['is_revoked'] ) : ?>
-								<span style="color:red; font-weight:bold;"> revoked</span>
-							<?php endif; ?>
 
-							<?php if( ! empty( $license['sites'] ) ) : ?>
+							<?php
+							if( ! empty( $license['expires_at'] ) ) {
+								echo sprintf( '<span class="muted">Expire%s at %s</span><br />', $license['is_expired'] ? 'd' : 's', date( 'Y-m-d', $license['expires_at'] ) );
+							}
+
+							if( $license['is_expired'] ) {
+								echo '<span style = "color:orange; font-weight:bold;"> expired</span>';
+							} elseif( $license['is_revoked'] ) {
+								echo '<span style="color:red; font-weight:bold;"> revoked</span>';
+							}
+
+							if( ! empty( $license['sites'] ) ) { ?>
 								<div class="toggleGroup nested">
 									<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites <?php printf( '(%d/%d)', count( $license['sites'] ), $license['limit'] ); ?></a>
 									<div class="toggle indent">
@@ -73,7 +78,8 @@
 										</ul>
 									</div>
 								</div>
-							<?php endif; // end if sites not empty ?>
+							<?php
+							} // end if sites not empty ?>
 
 							<?php do_action( 'edd_helpscout_after_order_download_license', $order, $download, $license ); ?>
 
