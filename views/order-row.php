@@ -49,18 +49,18 @@
 
 							<?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $license ); ?>
 
-							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license['key'] ); ?>">
+							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license['key'] ); ?>" style="display: block;">
 								<?php echo $license['key']; ?>
 							</a>
 
 							<?php
 							if( ! empty( $license['expires_at'] ) ) {
-								echo sprintf( '<span class="muted">Expire%s at %s</span><br />', $license['is_expired'] ? 'd' : 's', date( 'Y-m-d', $license['expires_at'] ) );
+								$suffix = $license['is_expired'] ? 'd' : 's';
+								$color = $license['is_expired'] ? 'orange' : '-';
+								echo sprintf( '<span class="muted" style="color: %s;">Expire%s at %s</span><br />', $color, $suffix, date( 'Y-m-d', $license['expires_at'] ) );
 							}
 
-							if( $license['is_expired'] ) {
-								echo '<span style = "color:orange; font-weight:bold;"> expired</span>';
-							} elseif( $license['is_revoked'] ) {
+							if( $license['is_revoked'] ) {
 								echo '<span style="color:red; font-weight:bold;"> revoked</span>';
 							}
 
