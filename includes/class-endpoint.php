@@ -132,7 +132,7 @@ class Endpoint {
 		$emails = array_merge( $emails, $this->get_customer_emails_by_license_key() );
 
 		if ( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
-			$emails[] = array_values( $customer_data['emails'] );
+			$emails = array_merge( $emails, $customer_data['emails'] );
 		} elseif ( isset( $customer_data['email'] ) ) {
 			$emails[] = $customer_data['email'];
 		}
@@ -208,7 +208,6 @@ class Endpoint {
 	private function build_response_html() {
 
 		if ( count( $this->customer_payments ) === 0 ) {
-
 
 			// No purchase data was found
 			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
