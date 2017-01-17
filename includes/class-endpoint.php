@@ -221,6 +221,7 @@ class Endpoint {
 			$order['payment_id']          = $payment->ID;
 			$order['date']                = $payment->post_date;
 			$order['amount']              = edd_get_payment_amount( $payment->ID );
+			$order['currency']            = edd_get_payment_currency_code( $payment->ID );
 			$order['status']              = $payment->post_status;
 			$order['payment_method']      = $this->get_payment_method( $payment->ID );
 			$order['downloads']           = array();
