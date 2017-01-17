@@ -31,7 +31,7 @@
 
 		<p>
 			<span class="muted"><?php echo $order['date']; ?></span><br/>
-			<?php echo trim( edd_currency_filter( $order['amount'] ) ) . ( ( isset( $order['payment_method'] ) && '' !== $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ); ?>
+			<?php echo trim( edd_currency_filter( $order['amount'], $order['currency'] ) ) . ( ( isset( $order['payment_method'] ) && '' !== $order['payment_method'] ) ?  ' - ' . $order['payment_method'] : '' ); ?>
 		</p>
 
 		<?php if ( ! empty( $order['downloads'] ) ) : ?>
