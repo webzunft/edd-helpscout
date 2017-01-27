@@ -352,6 +352,7 @@ class Endpoint {
 
 		switch ( $payment_method ) {
 			case 'paypal':
+			case 'paypalexpress':
 				$notes = edd_get_payment_notes( $payment_id );
 				foreach ( $notes as $note ) {
 					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
