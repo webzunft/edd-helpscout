@@ -39,7 +39,7 @@ define( 'EDD_HELPSCOUT_FILE', __FILE__ );
 /**
  * @ignore
  */
-function __load_edd_helpscout() {
+function _load_edd_helpscout() {
 
 	// do nothing if EDD is not activated
 	if( ! class_exists( 'Easy_Digital_Downloads' ) ) {
@@ -58,4 +58,4 @@ function __load_edd_helpscout() {
 /**
  * Bootstrap the plugin at `plugins_loaded` (after EDD)
  */
-add_action( 'plugins_loaded', '__load_edd_helpscout' , 90 );
+add_action( 'plugins_loaded', '_load_edd_helpscout' , 90 );
