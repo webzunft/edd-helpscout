@@ -31,7 +31,7 @@ class Endpoint {
 
 		// get request data
 		$this->data = $this->parse_data();
-
+                
 		// validate request
 		if ( ! $this->validate() ) {
 			$this->respond( 'Invalid signature' );
@@ -56,8 +56,36 @@ class Endpoint {
 	 */
 	private function parse_data() {
 
-		$data_string = file_get_contents( 'php://input' );
-		$data        = json_decode( $data_string, true );
+                /**
+                 * use dummy data, e.g. for local environments
+                 */
+                if( defined( 'HELPSCOUT_DUMMY_DATA' ) ){
+                        $email = defined( 'HELPSCOUT_DUMMY_DATA_EMAIL' ) ? HELPSCOUT_DUMMY_DATA_EMAIL : 'user@example.com';
+                    
+                        $data = array(
+                            'ticket' => array
+                                    (
+                                    'id'        => 123456789,
+                                    'number'    => 12345,
+                                    'subject'   => 'I need help using your plugin'
+                                    ),
+                            'customer' => array
+                                    (
+                                    'id' => 987654321,
+                                    'fname' => 'Firstname',
+                                    'lname' => 'Lastname',
+                                    'email' => $email,
+                                    'emails' => array
+                                        (
+                                            $email
+                                        )
+
+                                    ),
+                        );
+                } else {
+                        $data_string = file_get_contents( 'php://input' );
+                        $data        = json_decode( $data_string, true );
+                }
 
 		return $data;
 	}
@@ -76,11 +104,12 @@ class Endpoint {
 		if ( ! isset( $this->data['customer']['email'] ) && ! isset( $this->data['customer']['emails'] ) ) {
 			return false;
 		}
-
+            
 		// check request signature
 		$request = new Request( $this->data );
 
-		if ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) {
+		if ( defined( 'HELPSCOUT_DUMMY_DATA' ) 
+                        || ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) ) {
 			return true;
 		}
 
@@ -264,14 +293,25 @@ class Endpoint {
 						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
 
 						if ( is_object( $license ) ) {
-							$key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
-                            $expires_at = 0;
+                                                        // make sure we are using the right version of EDD Software Licensing
+                                                        if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
+                                                                $key = $licensing->get_license_key( $license->ID );
+                                                        } else {
+                                                                $key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
+                                                        }
+                                                    
+                                                        $expires_at = 0;
 
 							// add support for "lifetime" licenses
 							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
 								$is_expired = false;
 							} else {
-                                $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+                                                                // make sure we are using the right version of EDD Software Licensing
+                                                                if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
+                                                                        $expires_at = $licensing->get_license_expiration( $license->ID );
+                                                                } else {
+                                                                        $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+                                                                }
 								$is_expired = $expires_at < time();
 							}
 
@@ -281,7 +321,7 @@ class Endpoint {
 								'is_expired' => $is_expired,
 								'is_revoked' => $license->post_status !== 'publish',
 								'sites'      => array(),
-                                'expires_at' => $expires_at
+                                                                'expires_at' => $expires_at
 							);
 
 							// look-up active sites if license is not expired
