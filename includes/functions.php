@@ -16,11 +16,13 @@ function authorize_request() {
  * Verify that we're coming from secure.helpscout.net.
  *
  * This is easily spoofed, so keep that in mind when using this as your only auth check.
+ * 
+ * Help Scout no longer seems to use HTTP_REFERER, so we had to soften this check
  *
  * @return bool
  */
 function verify_referer() {
-	return isset( $_SERVER['HTTP_REFERER'] ) && strpos( $_SERVER['HTTP_REFERER'], 'https://secure.helpscout.net/' ) === 0;
+	return ! isset( $_SERVER['HTTP_REFERER'] ) || strpos( $_SERVER['HTTP_REFERER'], 'https://secure.helpscout.net/' ) === 0;
 }
 
 /**
@@ -31,7 +33,7 @@ function verify_referer() {
  * @return bool
  */
 function verify_request_signature() {
-
+    
 	if( empty( $_GET['s'] ) ) {
 		return false;
 	}
