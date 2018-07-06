@@ -293,14 +293,25 @@ class Endpoint {
 						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
 
 						if ( is_object( $license ) ) {
-							$key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
-                            $expires_at = 0;
+                                                        // make sure we are using the right version of EDD Software Licensing
+                                                        if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
+                                                                $key = $licensing->get_license_key( $license->ID );
+                                                        } else {
+                                                                $key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
+                                                        }
+                                                    
+                                                        $expires_at = 0;
 
 							// add support for "lifetime" licenses
 							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
 								$is_expired = false;
 							} else {
-                                $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+                                                                // make sure we are using the right version of EDD Software Licensing
+                                                                if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
+                                                                        $expires_at = $licensing->get_license_expiration( $license->ID );
+                                                                } else {
+                                                                        $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+                                                                }
 								$is_expired = $expires_at < time();
 							}
 
@@ -310,7 +321,7 @@ class Endpoint {
 								'is_expired' => $is_expired,
 								'is_revoked' => $license->post_status !== 'publish',
 								'sites'      => array(),
-                                'expires_at' => $expires_at
+                                                                'expires_at' => $expires_at
 							);
 
 							// look-up active sites if license is not expired
