@@ -146,7 +146,8 @@ class Endpoint {
 	}        
 
 	/**
-	 * get customer mail address by license key
+	 * get customer mail address by license key, if added as the last word in the subject line
+         * this feature is not yet documented. Not sure if it is even practically useful, i.e. how to tell our clients about that?
 	 *
 	 * @return array
 	 */
