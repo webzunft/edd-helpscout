@@ -16,6 +16,7 @@ HelpScout integration for Easy Digital Downloads is a WordPress plugin that will
 
 Activating the plugin and configuring the integration will add the following information to your HelpScout dashboard:
 
+- The of the customer and link to the profile page in EDD
 - All payments by the customer (email address must match)
 - A link to resent purchase receipts
 - All purchased "downloads"
@@ -75,6 +76,12 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 1. Purchases and other information related to the customer is shown in the bottom right corner of your HelpScout interface.
 
 == Changelog ==
+
+= 2.0 =
+
+**Additions**
+
+- added name of the customer and link to the profile page in EDD since Help Scout doesn‘t show it for everyone
 
 = 1.1.1 - January 28, 2016 =
 

@@ -2,6 +2,7 @@
 
 namespace EDD\HelpScout;
 
+use EDD_Customer;
 use EDD_Software_Licensing;
 
 /**
@@ -13,6 +14,11 @@ class Endpoint {
 	 * @var array|mixed
 	 */
 	private $data;
+
+	/**
+	 * @var bool|obj
+	 */
+	private $edd_customer = false;
 
 	/**
 	 * @var array
@@ -37,6 +43,9 @@ class Endpoint {
 			$this->respond( 'Invalid signature' );
 			exit;
 		}
+
+		// get EDD customer details
+		$this->edd_customer = $this->get_edd_customer();
 
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
@@ -115,7 +124,26 @@ class Endpoint {
 
 		return false;
 	}
+        
+	/**
+	 * Get customer details from EDD
+	 *
+	 * @return array
+	 */
+	private function get_edd_customer() {
 
+                // this is the customer data received from Help Scout
+		$this->data['customer'];
+                
+                if ( ! isset( $this->data['customer']['email'] ) || ! class_exists( 'EDD_Customer', false ) ) {
+			return false;
+		}
+		
+                /**
+                 * returns Customer object or false
+                 */
+                return new EDD_Customer( $this->data['customer']['email'] );                
+	}        
 
 	/**
 	 * get customer mail address by license key
@@ -359,6 +387,12 @@ class Endpoint {
 
 		// build HTML output
 		$html = '';
+                
+                // add name of the customer at the top, since we only have one
+                if( $this->edd_customer ){
+                        $html .= '<strong><a target="_blank" href="' . esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $this->edd_customer->id ) ) . '">' . $this->edd_customer->name . '</a></strong>';
+                }
+                
 		foreach ( $orders as $order ) {
 			$html .= str_replace( '\t', '', $this->order_row( $order ) );
 		}

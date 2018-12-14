@@ -6,5 +6,6 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    '35e34b4c8467ac82ec059da80a5774e9' => $baseDir . '/includes/functions.php',
+    $vendorDir . '/symfony/polyfill-ctype/bootstrap.php',
+    $baseDir . '/includes/functions.php',
 );
