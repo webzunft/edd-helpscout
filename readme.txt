@@ -16,7 +16,7 @@ HelpScout integration for Easy Digital Downloads is a WordPress plugin that will
 
 Activating the plugin and configuring the integration will add the following information to your HelpScout dashboard:
 
-- The of the customer and link to the profile page in EDD
+- The name of the customer and link to the profile page in EDD
 - All payments by the customer (email address must match)
 - A link to resent purchase receipts
 - All purchased "downloads"
