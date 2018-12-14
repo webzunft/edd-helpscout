@@ -3,7 +3,7 @@ Contributors: DvanKooten, Ibericode
 Donate link: https://dannyvankooten.com/donate/
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
-Tested up to: 4.4.1
+Tested up to: 4.9.8
 Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -65,6 +65,12 @@ define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 **Callback URL:** https://your-site.com/edd-helpscout/api _(I recommend using HTTPS)_ <br />
 **Secret Key:** The value of your **HELPSCOUT_SECRET_KEY** constant.
 
+= Testing the plugin locally =
+
+You can set the plugin in some test mode.
+Set `HELPSCOUT_DUMMY_DATA` to `true` and `HELPSCOUT_DUMMY_DATA_EMAIL` to an email address in `wp-config.php` to let the plugin use dummy data.
+You can then call https://your-site.com/edd-helpscout-api/customer_info directly and get a reply based on the value of `HELPSCOUT_DUMMY_DATA_EMAIL`.
+
 == Frequently Asked Questions ==
 
 = HelpScout just shows "Invalid Signature" =
@@ -79,9 +85,20 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 
 = 2.0 =
 
+The original developer Danny van Kooten stopped working on EDD HelpScout since he no longer uses it.
+The development of the plugin was taken over by Thomas Maier from https://wpadvancedads.com, who continues using the plugin.
+Danny left in the middle of developing a better version 2.0. I decided to build in top of that because the changes show a lot potential and fixed some issues.
+Please test carefully and let me know in case something is missing or not working as expected.
+
 **Additions**
 
+- callback URL changed from https://your-site.com/edd-helpscout/api to https://your-site.com/edd-helpscout-api/customer_info, though both are working for now
 - added name of the customer and link to the profile page in EDD since Help Scout doesn‘t show it for everyone
+- set `HELPSCOUT_DUMMY_DATA` and `HELPSCOUT_DUMMY_DATA_EMAIL` constants in `wp-config.php` to let the plugin use dummy data
+
+**Fixes**
+
+- Compatibility with latest EDD plugin versions.
 
 = 1.1.1 - January 28, 2016 =
 
@@ -116,7 +133,6 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 
 - When using EDD Software Licensing, show if a license is expired.
 - Added `helpscout_edd_customer_emails` hook to filter customer emails
-
 
 = 1.0.2 =
 

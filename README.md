@@ -54,6 +54,11 @@ define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-fourty-characters!' );
 | Callback URL 	| https://your-site.com/edd-helpscout-api/customer_info 	|
 | Secret Key   	| The value of your **HELPSCOUT_SECRET_KEY** constant.  	|
 
+#### Testing the plugin locally.
+
+You can set the plugin in some test mode.
+Set `HELPSCOUT_DUMMY_DATA` to `true` and `HELPSCOUT_DUMMY_DATA_EMAIL` to an email address in `wp-config.php` to let the plugin use dummy data.
+You can then call https://your-site.com/edd-helpscout-api/customer_info directly and get a reply based on the value of `HELPSCOUT_DUMMY_DATA_EMAIL`.
 
 ## Running Tests
 
