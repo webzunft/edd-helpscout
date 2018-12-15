@@ -96,6 +96,10 @@ Please test carefully and let me know in case something is missing or not workin
 - added name of the customer and link to the profile page in EDD since Help Scout doesn‘t show it for everyone
 - set `HELPSCOUT_DUMMY_DATA` and `HELPSCOUT_DUMMY_DATA_EMAIL` constants in `wp-config.php` to let the plugin use dummy data
 
+**Improvements**
+
+- fetch all payments when user has multiple emails in Help Scout or in his EDD profile
+
 **Fixes**
 
 - Compatibility with latest EDD plugin versions.

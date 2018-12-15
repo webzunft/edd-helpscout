@@ -46,13 +46,13 @@ class Endpoint {
 
 		// get EDD customer details
 		$this->edd_customer = $this->get_edd_customer();
-
+                
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
-
+                
 		// get customer payment(s)
 		$this->customer_payments = $this->query_customer_payments();
-
+                
 		// build the final response HTML for HelpScout
 		$html = $this->build_response_html();
 
@@ -153,7 +153,7 @@ class Endpoint {
 	 */
 	private function get_customer_emails_by_license_key() {
 
-		if ( ! class_exists( 'EDD_Software_Licensing' ) ) {
+		if ( ! class_exists( 'EDD_Software_Licensing' ) || !isset( $this->data['ticket']['subject'] ) ) {
 			return array();
 		}
 
@@ -188,12 +188,28 @@ class Endpoint {
 		$emails        = array();
 
 		$emails = array_merge( $emails, $this->get_customer_emails_by_license_key() );
-
+                
+                /**
+                 * merge multiple emails from the Help Scout customer details
+                 * m
+                 */
 		if ( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
 			$emails = array_merge( $emails, $customer_data['emails'] );
 		} elseif ( isset( $customer_data['email'] ) ) {
 			$emails[] = $customer_data['email'];
 		}
+                
+                /**
+                 * merge multiple emails from the EDD customer profile
+                 */
+                if ( isset( $this->edd_customer->emails ) && is_array( $this->edd_customer->emails ) && count( $this->edd_customer->emails ) > 1 ) {
+			$emails = array_merge( $emails, $this->edd_customer->emails );
+		}
+                
+                /**
+                 * remove possible duplicates
+                 */
+                $emails = array_unique( $emails );
 
 		/**
 		 * Filter email address of the customer
@@ -204,7 +220,7 @@ class Endpoint {
 		if ( count( $emails ) === 0 ) {
 			$this->respond( 'No customer email given.' );
 		}
-
+                
 		return $emails;
 	}
 
@@ -227,7 +243,7 @@ class Endpoint {
 		if ( ! empty( $payments ) ) {
 			return $payments;
 		}
-
+                
 		global $wpdb;
 
 		// query by email(s)
@@ -245,7 +261,7 @@ class Endpoint {
 		}
 
 		$sql .= " GROUP BY p.ID  ORDER BY p.ID DESC";
-
+                
 		$query   = $wpdb->prepare( $sql, $this->customer_emails );
 		$results = $wpdb->get_results( $query );
 
