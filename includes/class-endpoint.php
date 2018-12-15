@@ -246,7 +246,12 @@ class Endpoint {
                 
 		global $wpdb;
 
-		// query by email(s)
+		/**
+                 * query by email(s)
+                 * should be replaced with another method at some point
+                 * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
+                 * we also find payments no longer attached to a customer
+                 */
 		$sql = "SELECT p.ID, p.post_status, p.post_date";
 		$sql .= " FROM {$wpdb->posts} p, {$wpdb->postmeta} pm";
 		$sql .= " WHERE p.post_type = 'edd_payment'";
