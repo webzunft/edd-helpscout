@@ -191,7 +191,6 @@ class Endpoint {
                 
                 /**
                  * merge multiple emails from the Help Scout customer details
-                 * m
                  */
 		if ( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
 			$emails = array_merge( $emails, $customer_data['emails'] );
