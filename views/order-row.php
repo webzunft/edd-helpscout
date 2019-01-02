@@ -42,7 +42,9 @@
 					<li>
 						<?php if (isset($download['id'])): // this is the actual download ?>
 							<strong><?php echo get_the_title( $download['id'] ); ?></strong><br />
-							<?php echo edd_get_price_option_name( $download['id'], $download['options']['price_id'] ); ?>
+							<?php if( isset( $download['options']['price_id'] ) ) {
+                                                                echo edd_get_price_option_name( $download['id'], $download['options']['price_id'] ); 
+                                                        } ?>
 						<?php endif ?>
 
 						<?php do_action( 'edd_helpscout_before_order_download_details', $order, $download ); ?>
