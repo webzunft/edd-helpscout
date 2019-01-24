@@ -14,3 +14,4 @@ wp-config.php
 composer.lock
 vendor/composer/installers
 installed.json
+.tags
