@@ -1,17 +1,18 @@
 <?php
 /*
 Plugin Name: Easy Digital Downloads integration for HelpScout
-Plugin URI: https://dannyvankooten.com/
+Plugin URI: https://webgilde.com
 Description: Easy Digital Downloads integration for HelpScout
-Version: 2.0-beta
-Author: Danny van Kooten
-Author URI: https://dannyvankooten.com
+Version: 2.0
+Author: Thomas Maier
+Author URI: https://webgilde.com
 Text Domain: edd-helpscout
 Domain Path: /languages
 License: GPL v3
 
 Easy Digital Downloads integration for HelpScout
-Copyright (C) 2013-2016, Danny van Kooten, hi@dannyvankooten.com
+Copyright (C) 2013-2018, Danny van Kooten, hi@dannyvankooten.com
+Copyright (C) 2018–, Thomas Maier, thomas.maier@webgilde.com
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -32,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 defined( 'ABSPATH' ) or exit;
 
 // define some useful constants
-define( 'EDD_HELPSCOUT_VERSION', '2.0-beta' );
+define( 'EDD_HELPSCOUT_VERSION', '2.0' );
 define( 'EDD_HELPSCOUT_FILE', __FILE__ );
 
 

@@ -1,10 +1,9 @@
 === HelpScout integration for Easy Digital Downloads ===
-Contributors: DvanKooten, Ibericode
-Donate link: https://dannyvankooten.com/donate/
+Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
-Tested up to: 4.9.8
-Stable tag: 1.1.1
+Tested up to: 5.0
+Stable tag: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -35,9 +34,8 @@ Have a look at the [installation instructions](https://wordpress.org/plugins/edd
 
 **More information**
 
-- Developers; follow or contribute to the [plugin on GitHub](https://github.com/dannyvankooten/edd-helpscout)
-- Other [WordPress plugins](https://dannyvankooten.com/wordpress-plugins/#utm_source=wp-plugin-repo&utm_medium=link&utm_campaign=more-info-link) by [Danny van Kooten](https://dannyvankooten.com#utm_source=wp-plugin-repo&utm_medium=link&utm_campaign=more-info-link)
-- [@DannyvanKooten](https://twitter.com/dannyvankooten) on Twitter
+- Developers; follow or contribute to the [plugin on GitHub](https://github.com/webzunft/edd-helpscout)
+- Other [WordPress plugins](https://profiles.wordpress.org/webzunft/#content-plugins) by Thomas Maier
 
 == Installation ==
 
