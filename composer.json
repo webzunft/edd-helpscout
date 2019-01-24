@@ -6,9 +6,9 @@
   "license": "GPL-2.0+",
   "authors": [
     {
-      "name": "Danny van Kooten",
-      "email": "hi@dannyvankooten.com",
-      "homepage": "https://dannyvankooten.com"
+      "name": "Thomas Maier",
+      "email": "thomas.maier@webgilde.com",
+      "homepage": "https://webgilde.com"
     }
   ],
   "type": "wordpress-plugin",
