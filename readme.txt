@@ -60,7 +60,7 @@ define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 
 **App Name:** Easy Digital Downloads<br />
 **Content Type:** Dynamic Content<br />
-**Callback URL:** https://your-site.com/edd-helpscout/api _(I recommend using HTTPS)_ <br />
+**Callback URL:** https://your-site.com/edd-helpscout-api/customer_info _(I recommend using HTTPS)_ <br />
 **Secret Key:** The value of your **HELPSCOUT_SECRET_KEY** constant.
 
 = Testing the plugin locally =
