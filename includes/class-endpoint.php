@@ -320,87 +320,78 @@ class Endpoint {
 			$order['downloads'] = (array) edd_get_payment_meta_downloads( $payment->ID );
 
 			// for each download, find license + sites
-			if ( function_exists( 'edd_software_licensing' ) ) {
+			if ( function_exists( 'edd_software_licensing' ) && version_compare( EDD_SL_VERSION, '3.6', '>' ) ) {
 
-				/**
-				 * @var EDD_Software_Licensing
-				 */
-				$licensing = edd_software_licensing();
+				$payment_licenses = edd_software_licensing()->get_licenses_of_purchase( $order['payment_id'] );
 
-				// was this order a renewal?
-				$order['is_renewal'] = ( (string) get_post_meta( $payment->ID, '_edd_sl_is_renewal', true ) !== '' );
+				if ( ! empty( $payment_licenses ) ) {
+					foreach ( $order['downloads'] as $download_key => $download ) {
 
-				if ( $order['is_completed'] ) {
-					foreach ( $order['downloads'] as $key => $download ) {
-
-						// only proceed if this download has EDD Software Licensing enabled
-						if ( '' === (string) get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
-							continue;
-						}
-
-						// find license that was given out for this download purchase
-						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
-
-						if ( is_object( $license ) ) {
-                                                        // make sure we are using the right version of EDD Software Licensing
-                                                        if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-                                                                $key = $licensing->get_license_key( $license->ID );
-                                                        } else {
-                                                                $key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
-                                                        }
-                                                    
-                                                        $expires_at = 0;
-
-							// add support for "lifetime" licenses
-							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
-								$is_expired = false;
-							} else {
-                                                                // make sure we are using the right version of EDD Software Licensing
-                                                                if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-                                                                        $expires_at = $licensing->get_license_expiration( $license->ID );
-                                                                } else {
-                                                                        $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
-                                                                }
-								$is_expired = $expires_at < time();
+						$licenses = array(
+							'parent' => array(),
+							'child'  => array(),
+						);
+						// get parent first
+						foreach( $payment_licenses as $key => $license ) {
+							if ( $license->download_id != $download['id'] ) {
+								continue;
 							}
 
-							$order['downloads'][ $key ]['license'] = array(
-								'limit'      => 0,
-								'key'        => $key,
-								'is_expired' => $is_expired,
-								'is_revoked' => $license->post_status !== 'publish',
-								'sites'      => array(),
-                                                                'expires_at' => $expires_at
-							);
+							// if for some reason we have multiple parent licenses for this download, defer them to children
+							if ( empty($licenses['parent']) ) {
+								$licenses['parent'][$key] = $license;
+							} else {
+								$licenses['child'][$key] = $license;
+							}
+						}
 
-							// look-up active sites if license is not expired
-							if ( ! $is_expired ) {
+						// get children for this license
+						foreach ( $licenses['parent'] as $parent_key => $parent_license ) {
+							foreach( $payment_licenses as $key => $license ) {
+								if( $license->parent && $license->parent == $parent_license->ID ) {
+									$licenses['child'][$key] = $license;
+								}
+							}
+						}
 
-								// get license limit
-								$order['downloads'][ $key ]['license']['limit'] = $licensing->get_license_limit( $download['id'], $license->ID );
-								$sites                                          = (array) $licensing->get_sites( $license->ID );
 
-								foreach ( $sites as $site ) {
+						foreach ($licenses as $license_type => $licenses ) {
+							foreach ($licenses as $key => $license) {
+								$license_data = array(
+									'limit'      => $license->activation_limit,
+									'key'        => $license->key,
+									'view_url'   => admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ),
+									'is_expired' => $license->is_expired(),
+									'is_revoked' => $license->post_status === 'revoked',
+									'sites'      => array(),
+									'expires_at' => $license->expiration,
+								);
+
+								foreach ( $license->sites as $site ) {
 									$args = array(
 										'license_id' => (string) $license->ID,
 										'site_url'   => $site,
 									);
 
 									// make sure site url is prefixed with "http://"
-									$site_url = strpos( $site, '://' ) !== false ? $site : 'http://' . $site;
+									$site_url = strpos( $site, '://' ) !== false ? $site : 'https://' . $site;
 
 									$request                                          = new Request( $args );
-									$order['downloads'][ $key ]['license']['sites'][] = array(
+									$license_data['sites'][] = array(
 										'url'             => $site_url,
 										'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
 									);
-
-
 								}
-							} //endif not expired
-						} // endif license found
-					} // end foreach downloads
-				} // endif order completed
+
+								if ($license_type == 'parent') {
+									$order['downloads'][ $download_key ]['license'] = $license_data;
+								} else {
+									$order['downloads'][ $download_key ]['child_licenses'][] = $license_data;									
+								}
+							}
+						}
+					}
+				}
 			}
 
 			$orders[] = $order;

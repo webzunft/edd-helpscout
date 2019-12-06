@@ -43,49 +43,57 @@
 						<?php if (isset($download['id'])): // this is the actual download ?>
 							<strong><?php echo get_the_title( $download['id'] ); ?></strong><br />
 							<?php if( isset( $download['options']['price_id'] ) ) {
-                                                                echo edd_get_price_option_name( $download['id'], $download['options']['price_id'] ); 
-                                                        } ?>
+									echo edd_get_price_option_name( $download['id'], $download['options']['price_id'] ); 
+							} ?>
 						<?php endif ?>
 
 						<?php do_action( 'edd_helpscout_before_order_download_details', $order, $download ); ?>
 
-						<?php if( ! empty( $download['license'] ) ) : $license = $download['license']; ?>
-
-							<?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $license ); ?>
-
-							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license['key'] ); ?>" style="display: block;">
-								<?php echo $license['key']; ?>
-							</a>
-
+						<?php if( ! empty( $download['license'] ) ) : ?>
 							<?php
-							if( ! empty( $license['expires_at'] ) ) {
-								$suffix = $license['is_expired'] ? 'd' : 's';
-								$color = $license['is_expired'] ? 'orange' : '-';
-								echo sprintf( '<span class="muted" style="color: %s;">Expire%s at %s</span><br />', $color, $suffix, date( 'Y-m-d', $license['expires_at'] ) );
+							$licenses[] = $download['license'];
+							if ( !empty( $download['child_licenses'] ) ) {
+								$licenses = array_merge( $licenses, $download['child_licenses'] );
 							}
+							?>
+							<?php foreach ($licenses as $license): ?>
+								<?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $license ); ?>
 
-							if( $license['is_revoked'] ) {
-								echo '<span style="color:red; font-weight:bold;"> revoked</span>';
-							}
+								<a href="<?php echo esc_url( $license['view_url'] ); ?>" style="display: block;">
+									<?php echo $license['key']; ?>
+								</a>
 
-							if( ! empty( $license['sites'] ) ) { ?>
-								<div class="toggleGroup nested">
-									<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites <?php printf( '(%d/%d)', count( $license['sites'] ), $license['limit'] ); ?></a>
-									<div class="toggle indent">
-										<ul class="unstyled">
-											<?php foreach( $license['sites'] as $site ) : ?>
-												<li>
-													<a href="<?php echo esc_url( $site['url'] ); ?>" target="_blank"><?php echo esc_html( preg_replace( '/^https?:\/\//', '', $site['url'] ) ); ?></a>
-													<a href="<?php echo esc_url( $site['deactivate_link'] ); ?>" target="_blank"> <small style="color: red;">(deactivate)</small></a>
-												</li>
-											<?php endforeach; // end foreach sites ?>
-										</ul>
+								<?php
+								if( ! empty( $license['expires_at'] ) ) {
+									$suffix = $license['is_expired'] ? 'd' : 's';
+									$color = $license['is_expired'] ? 'orange' : '-';
+									echo sprintf( '<span class="muted" style="color: %s;">Expire%s at %s</span><br />', $color, $suffix, date( 'Y-m-d', $license['expires_at'] ) );
+								}
+
+								if( $license['is_revoked'] ) {
+									echo '<span style="color:red; font-weight:bold;"> revoked</span>';
+								}
+
+								if( ! empty( $license['sites'] ) ) { ?>
+									<div class="toggleGroup nested">
+										<a href="" class="toggleBtn"><i class="icon-arrow"></i> Active sites <?php printf( '(%d/%d)', count( $license['sites'] ), $license['limit'] ); ?></a>
+										<div class="toggle indent">
+											<ul class="unstyled">
+												<?php foreach( $license['sites'] as $site ) : ?>
+													<li>
+														<a href="<?php echo esc_url( $site['url'] ); ?>" target="_blank"><?php echo esc_html( preg_replace( '/^https?:\/\//', '', $site['url'] ) ); ?></a>
+														<a href="<?php echo esc_url( $site['deactivate_link'] ); ?>" target="_blank"> <small style="color: red;">(deactivate)</small></a>
+													</li>
+												<?php endforeach; // end foreach sites ?>
+											</ul>
+										</div>
 									</div>
-								</div>
-							<?php
-							} // end if sites not empty ?>
+								<?php
+								} // end if sites not empty ?>
 
-							<?php do_action( 'edd_helpscout_after_order_download_license', $order, $download, $license ); ?>
+								<?php do_action( 'edd_helpscout_after_order_download_license', $order, $download, $license ); ?>
+								
+							<?php endforeach ?>
 
 						<?php endif; //end if has license ?>
 
