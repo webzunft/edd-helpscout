@@ -51,7 +51,7 @@
 
 						<?php if( ! empty( $download['license'] ) ) : ?>
 							<?php
-							$licenses[] = $download['license'];
+							$licenses = array( $download['license'] );
 							if ( !empty( $download['child_licenses'] ) ) {
 								$licenses = array_merge( $licenses, $download['child_licenses'] );
 							}
