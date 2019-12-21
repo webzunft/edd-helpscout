@@ -81,6 +81,10 @@ Make sure the "Secret Key" setting for your HelpScout application matches the va
 
 == Changelog ==
 
+= untagged =
+
+- extended hooks for order rows with a parameter that contains the data from Help Scout
+
 = 2.0 =
 
 The original developer Danny van Kooten stopped working on EDD HelpScout since he no longer uses it.
