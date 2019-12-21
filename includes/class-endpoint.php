@@ -427,6 +427,7 @@ class Endpoint {
 	 * @return string
 	 */
 	public function order_row( array $order ) {
+		$helpscout_data = $this->data;
 		ob_start();
 		include dirname( EDD_HELPSCOUT_FILE ) . '/views/order-row.php';
 		$html = ob_get_clean();

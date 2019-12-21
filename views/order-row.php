@@ -1,7 +1,7 @@
 <?php defined( 'ABSPATH' ) or exit; ?>
 <div class="toggleGroup <?php if( $order['is_completed'] ) echo 'open'; ?>">
 
-	<?php do_action( 'edd_helpscout_before_order', $order ); ?>
+	<?php do_action( 'edd_helpscout_before_order', $order, $helpscout_data ); ?>
 
 	<strong>
 		<i class="icon-cart"></i>
@@ -9,7 +9,7 @@
 	</strong>
 	<a class="toggleBtn"><i class="icon-arrow"></i></a>
 
-	<?php do_action( 'edd_helpscout_before_order_status', $order ); ?>
+	<?php do_action( 'edd_helpscout_before_order_status', $order, $helpscout_data ); ?>
 
 	<?php if( $order['is_completed'] ) { ?>
 		<a style="float:right" href="<?php echo  esc_url( $order['resend_receipt_link'] ); ?>" target="_blank">
@@ -23,11 +23,11 @@
 		<span style="color:#008000;font-weight:bold;"> (renewal)</span>
 	<?php endif; ?>
 
-	<?php do_action( 'edd_helpscout_after_order_status', $order ); ?>
+	<?php do_action( 'edd_helpscout_after_order_status', $order, $helpscout_data ); ?>
 
 	<div class="toggle indent">
 
-		<?php do_action( 'edd_helpscout_before_order_details', $order ); ?>
+		<?php do_action( 'edd_helpscout_before_order_details', $order, $helpscout_data ); ?>
 
 		<p>
 			<span class="muted"><?php echo $order['date']; ?></span><br/>
@@ -98,11 +98,11 @@
 
 		<?php endif; // endif downloads ?>
 
-		<?php do_action( 'edd_helpscout_after_order_details', $order ); ?>
+		<?php do_action( 'edd_helpscout_after_order_details', $order, $helpscout_data ); ?>
 
 	</div>
 
-	<?php do_action( 'edd_helpscout_after_order', $order ); ?>
+	<?php do_action( 'edd_helpscout_after_order', $order, $helpscout_data ); ?>
 
 </div>
 
