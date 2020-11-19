@@ -43,7 +43,7 @@
 						<?php if (isset($download['id'])): // this is the actual download ?>
 							<strong><?php echo get_the_title( $download['id'] ); ?></strong><br />
 							<?php if( isset( $download['options']['price_id'] ) ) {
-                                                                echo edd_get_price_option_name( $download['id'], $download['options']['price_id'] ); 
+                                                                echo edd_get_price_option_name( $download['id'], $download['options']['price_id'] );
                                                         } ?>
 						<?php endif ?>
 
@@ -58,11 +58,13 @@
 							</a>
 
 							<?php
-							if( ! empty( $license['expires_at'] ) ) {
-								$suffix = $license['is_expired'] ? 'd' : 's';
-								$color = $license['is_expired'] ? 'orange' : '-';
-								echo sprintf( '<span class="muted" style="color: %s;">Expire%s at %s</span><br />', $color, $suffix, date( 'Y-m-d', $license['expires_at'] ) );
-							}
+							if( isset( $license['expires_at'] ) && $license['expires_at'] === 0 ) {
+                                echo '<span class="muted" style="color: #008000;font-weight:bold;">Lifetime</span><br />';
+							} elseif( ! empty( $license['expires_at'] ) ) {
+                                $suffix = $license['is_expired'] ? 'd' : 's';
+                                $color = $license['is_expired'] ? 'orange' : '-';
+                                echo sprintf( '<span class="muted" style="color: %s;">Expire%s at %s</span><br />', $color, $suffix, date( 'Y-m-d', $license['expires_at'] ) );
+                            }
 
 							if( $license['is_revoked'] ) {
 								echo '<span style="color:red; font-weight:bold;"> revoked</span>';
