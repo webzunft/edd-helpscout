@@ -51,7 +51,18 @@
 
 						<?php if( ! empty( $download['license'] ) ) : $license = $download['license']; ?>
 
-							<?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $license ); ?>
+                            <?php
+                            if( isset( $download['subscription']['status'] ) ) {
+                                $sub_status = $download['subscription']['status'];
+                                $sub_color = ( $sub_status == 'active' ) ? '#008000' : 'orange';
+                            } else {
+                                $sub_status = 'none';
+                                $sub_color = '-';
+                            }
+                            echo sprintf( '<span class="muted" style="color: %s;font-weight:bold;">Subscription: %s</span><br />', $sub_color, ucfirst( $sub_status ) );
+                            ?>
+
+                            <?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $license ); ?>
 
 							<a href="<?php echo admin_url( 'edit.php?post_type=download&page=edd-licenses&s=' . $license['key'] ); ?>" style="display: block;">
 								<?php echo $license['key']; ?>

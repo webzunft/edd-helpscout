@@ -4,6 +4,7 @@ namespace EDD\HelpScout;
 
 use EDD_Customer;
 use EDD_Software_Licensing;
+use EDD_Subscriptions_DB;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations
@@ -37,7 +38,7 @@ class Endpoint {
 
 		// get request data
 		$this->data = $this->parse_data();
-                
+
 		// validate request
 		if ( ! $this->validate() ) {
 			$this->respond( 'Invalid signature' );
@@ -46,13 +47,13 @@ class Endpoint {
 
 		// get EDD customer details
 		$this->edd_customer = $this->get_edd_customer();
-                
+
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
-                
+
 		// get customer payment(s)
 		$this->customer_payments = $this->query_customer_payments();
-                
+
 		// build the final response HTML for HelpScout
 		$html = $this->build_response_html();
 
@@ -70,7 +71,7 @@ class Endpoint {
                  */
                 if( defined( 'HELPSCOUT_DUMMY_DATA' ) ){
                         $email = defined( 'HELPSCOUT_DUMMY_DATA_EMAIL' ) ? HELPSCOUT_DUMMY_DATA_EMAIL : 'user@example.com';
-                    
+
                         $data = array(
                             'ticket' => array
                                     (
@@ -113,18 +114,18 @@ class Endpoint {
 		if ( ! isset( $this->data['customer']['email'] ) && ! isset( $this->data['customer']['emails'] ) ) {
 			return false;
 		}
-            
+
 		// check request signature
 		$request = new Request( $this->data );
 
-		if ( defined( 'HELPSCOUT_DUMMY_DATA' ) 
+		if ( defined( 'HELPSCOUT_DUMMY_DATA' )
                         || ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) ) {
 			return true;
 		}
 
 		return false;
 	}
-        
+
 	/**
 	 * Get customer details from EDD
 	 *
@@ -134,16 +135,16 @@ class Endpoint {
 
                 // this is the customer data received from Help Scout
 		$this->data['customer'];
-                
+
                 if ( ! isset( $this->data['customer']['email'] ) || ! class_exists( 'EDD_Customer', false ) ) {
 			return false;
 		}
-		
+
                 /**
                  * returns Customer object or false
                  */
-                return new EDD_Customer( $this->data['customer']['email'] );                
-	}        
+                return new EDD_Customer( $this->data['customer']['email'] );
+	}
 
 	/**
 	 * get customer mail address by license key, if added as the last word in the subject line
@@ -188,7 +189,7 @@ class Endpoint {
 		$emails        = array();
 
 		$emails = array_merge( $emails, $this->get_customer_emails_by_license_key() );
-                
+
                 /**
                  * merge multiple emails from the Help Scout customer details
                  */
@@ -197,14 +198,14 @@ class Endpoint {
 		} elseif ( isset( $customer_data['email'] ) ) {
 			$emails[] = $customer_data['email'];
 		}
-                
+
                 /**
                  * merge multiple emails from the EDD customer profile
                  */
                 if ( isset( $this->edd_customer->emails ) && is_array( $this->edd_customer->emails ) && count( $this->edd_customer->emails ) > 1 ) {
 			$emails = array_merge( $emails, $this->edd_customer->emails );
 		}
-                
+
                 /**
                  * remove possible duplicates
                  */
@@ -219,7 +220,7 @@ class Endpoint {
 		if ( count( $emails ) === 0 ) {
 			$this->respond( 'No customer email given.' );
 		}
-                
+
 		return $emails;
 	}
 
@@ -242,7 +243,7 @@ class Endpoint {
 		if ( ! empty( $payments ) ) {
 			return $payments;
 		}
-                
+
 		global $wpdb;
 
 		/**
@@ -265,7 +266,7 @@ class Endpoint {
 		}
 
 		$sql .= " GROUP BY p.ID  ORDER BY p.ID DESC";
-                
+
 		$query   = $wpdb->prepare( $sql, $this->customer_emails );
 		$results = $wpdb->get_results( $query );
 
@@ -348,7 +349,7 @@ class Endpoint {
                                                         } else {
                                                                 $key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
                                                         }
-                                                    
+
                                                         $expires_at = 0;
 
 							// add support for "lifetime" licenses
@@ -359,7 +360,7 @@ class Endpoint {
                                                                 if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
                                                                         $expires_at = $licensing->get_license_expiration( $license->ID );
                                                                 } else {
-                                                                        $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+                                                                        $expires_at = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
                                                                 }
 								$is_expired = $expires_at < time();
 							}
@@ -370,7 +371,7 @@ class Endpoint {
 								'is_expired' => $is_expired,
 								'is_revoked' => $license->post_status !== 'publish',
 								'sites'      => array(),
-                                                                'expires_at' => $expires_at
+                                'expires_at' => $expires_at
 							);
 
 							// look-up active sites if license is not expired
@@ -398,7 +399,27 @@ class Endpoint {
 
 								}
 							} //endif not expired
-						} // endif license found
+
+                            // subscriptions related to this license
+                            if ( class_exists( 'EDD_Subscriptions_DB' ) ) {
+                                $db = new EDD_Subscriptions_DB;
+                                $subs = $db->get_subscriptions( array(
+                                    'product_id' => $download['id'],
+                                    'parent_payment_id' => $payment->ID
+                                ));
+
+                                $sub = array_pop( $subs );
+
+                                if( ! empty( $sub ) ) {
+                                    if( isset( $sub->status ) ) {
+                                        $order['downloads'][ $key ]['subscription'] = array(
+                                            'status' => $sub->status
+                                        );
+                                    }
+                                }
+                            }
+
+                        } // endif license found
 					} // end foreach downloads
 				} // endif order completed
 			}
@@ -408,12 +429,12 @@ class Endpoint {
 
 		// build HTML output
 		$html = '';
-                
+
                 // add name of the customer at the top, since we only have one
                 if( $this->edd_customer ){
                         $html .= '<strong><a target="_blank" href="' . esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $this->edd_customer->id ) ) . '">' . $this->edd_customer->name . '</a></strong>';
                 }
-                
+
 		foreach ( $orders as $order ) {
 			$html .= str_replace( '\t', '', $this->order_row( $order ) );
 		}
