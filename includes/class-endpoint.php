@@ -54,8 +54,14 @@ class Endpoint {
 		// get customer payment(s)
 		$this->customer_payments = $this->query_customer_payments();
 
-		// build the final response HTML for HelpScout
-		$html = $this->build_response_html();
+        // build the final response HTML for HelpScout
+        if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && ( 0 != HELPSCOUT_CACHE_DURATION ) ) {
+            $html = get_transient( 'edd_helpscout_cache_' . md5( $this->data['customer']['email'] ) );
+        }
+
+        if ( empty( $html ) ) {
+            $html = $this->build_response_html();
+        }
 
 		// respond with the built HTML string
 		$this->respond( $html );
@@ -148,7 +154,7 @@ class Endpoint {
 
 	/**
 	 * get customer mail address by license key, if added as the last word in the subject line
-         * this feature is not yet documented. Not sure if it is even practically useful, i.e. how to tell our clients about that?
+     * this feature is not yet documented. Not sure if it is even practically useful, i.e. how to tell our clients about that?
 	 *
 	 * @return array
 	 */
@@ -247,11 +253,11 @@ class Endpoint {
 		global $wpdb;
 
 		/**
-                 * query by email(s)
-                 * should be replaced with another method at some point
-                 * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
-                 * we also find payments no longer attached to a customer
-                 */
+         * query by email(s)
+         * should be replaced with another method at some point
+         * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
+         * we also find payments no longer attached to a customer
+         */
 		$sql = "SELECT p.ID, p.post_status, p.post_date";
 		$sql .= " FROM {$wpdb->posts} p, {$wpdb->postmeta} pm";
 		$sql .= " WHERE p.post_type = 'edd_payment'";
@@ -438,6 +444,11 @@ class Endpoint {
 		foreach ( $orders as $order ) {
 			$html .= str_replace( '\t', '', $this->order_row( $order ) );
 		}
+
+        // Cache data
+        if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && 0 != HELPSCOUT_CACHE_DURATION ) {
+            set_transient( 'edd_helpscout_cache_' . md5( $this->data['customer']['email'] ), $html, HELPSCOUT_CACHE_DURATION );
+        }
 
 		return $html;
 	}
