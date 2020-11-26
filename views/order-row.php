@@ -51,15 +51,20 @@
 
 						<?php if( ! empty( $download['license'] ) ) : $license = $download['license']; ?>
 
-                            <?php
-                            if( isset( $download['subscription']['status'] ) ) {
+                            <?php if( isset( $download['subscription']['status'] ) ) {
+
                                 $sub_status = $download['subscription']['status'];
-                                $sub_color = ( $sub_status == 'active' ) ? '#008000' : 'orange';
-                            } else {
-                                $sub_status = 'none';
-                                $sub_color = '-';
+
+                                if ( 'active' == $sub_status ) {
+                                    $sub_color = 'green';
+                                } elseif ( 'cancelled' == $sub_status ) {
+                                    $sub_color = 'red';
+                                } else {
+                                    $sub_color = 'orange';
+                                }
+
+                                echo sprintf( '<span class="muted" style="font-weight:bold;">Subscription: <span style="color: %s; font-weight: 400;">%s</span></span><br />', $sub_color, ucfirst( $sub_status ) );
                             }
-                            echo sprintf( '<span class="muted" style="color: %s;font-weight:bold;">Subscription: %s</span><br />', $sub_color, ucfirst( $sub_status ) );
                             ?>
 
                             <?php do_action( 'edd_helpscout_before_order_download_license', $order, $download, $license ); ?>
@@ -70,7 +75,7 @@
 
 							<?php
 							if( isset( $license['expires_at'] ) && $license['expires_at'] === 0 ) {
-                                echo '<span class="muted" style="color: #008000;font-weight:bold;">Lifetime</span><br />';
+                                echo '<span class="muted" style="color: green;font-weight:bold;">Lifetime</span><br />';
 							} elseif( ! empty( $license['expires_at'] ) ) {
                                 $suffix = $license['is_expired'] ? 'd' : 's';
                                 $color = $license['is_expired'] ? 'orange' : '-';

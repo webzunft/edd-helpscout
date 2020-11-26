@@ -455,6 +455,8 @@ class Endpoint {
 			$html .= str_replace( '\t', '', $this->order_row( $order ) );
 		}
 
+		//error_log( $html );
+
 		return $html;
 	}
 
