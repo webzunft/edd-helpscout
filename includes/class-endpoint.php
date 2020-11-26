@@ -5,6 +5,7 @@ namespace EDD\HelpScout;
 use EDD_Customer;
 use EDD_Software_Licensing;
 use EDD_Subscriptions_DB;
+use function EddPaddle\edd_paddle_debug_log;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations
@@ -45,22 +46,31 @@ class Endpoint {
 			exit;
 		}
 
-		// get EDD customer details
-		$this->edd_customer = $this->get_edd_customer();
-
-		// get customer email(s)
-		$this->customer_emails = $this->get_customer_emails();
-
-		// get customer payment(s)
-		$this->customer_payments = $this->query_customer_payments();
-
-        // build the final response HTML for HelpScout
-        if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && ( 0 != HELPSCOUT_CACHE_DURATION ) ) {
+		// Maybe lookup cache.
+        if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && HELPSCOUT_CACHE_DURATION > 0 ) {
             $html = get_transient( 'edd_helpscout_cache_' . md5( $this->data['customer']['email'] ) );
         }
 
         if ( empty( $html ) ) {
+
+            //error_log( __CLASS__ . ' >> ' . __FUNCTION__ . ' >> NO cache' );
+
+            // get EDD customer detailsx
+            $this->edd_customer = $this->get_edd_customer();
+
+            // get customer email(s)
+            $this->customer_emails = $this->get_customer_emails();
+
+            // get customer payment(s)
+            $this->customer_payments = $this->query_customer_payments();
+
+            // build the final response HTML for HelpScout
             $html = $this->build_response_html();
+
+            // Maybe build cache.
+            if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && HELPSCOUT_CACHE_DURATION > 0 ) {
+                set_transient( 'edd_helpscout_cache_' . md5( $this->data['customer']['email'] ), $html, HELPSCOUT_CACHE_DURATION * MINUTE_IN_SECONDS );
+            }
         }
 
 		// respond with the built HTML string
@@ -444,11 +454,6 @@ class Endpoint {
 		foreach ( $orders as $order ) {
 			$html .= str_replace( '\t', '', $this->order_row( $order ) );
 		}
-
-        // Cache data
-        if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && 0 != HELPSCOUT_CACHE_DURATION ) {
-            set_transient( 'edd_helpscout_cache_' . md5( $this->data['customer']['email'] ), $html, HELPSCOUT_CACHE_DURATION );
-        }
 
 		return $html;
 	}
