@@ -5,7 +5,6 @@ namespace EDD\HelpScout;
 use EDD_Customer;
 use EDD_Software_Licensing;
 use EDD_Subscriptions_DB;
-use function EddPaddle\edd_paddle_debug_log;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations
