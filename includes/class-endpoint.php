@@ -45,7 +45,7 @@ class Endpoint {
 		}
 
 		// get EDD customer details
-		$this->edd_customer = $this->get_edd_customer();
+		$this->edd_customers = $this->get_edd_customers();
 				
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
@@ -117,25 +117,26 @@ class Endpoint {
 
 		return false;
 	}
-		
+
 	/**
-	 * Get customer details from EDD
+	 * Get customers from EDD by email addresses
 	 *
 	 * @return array
 	 */
-	private function get_edd_customer() {
+	private function get_edd_customers() {
+		$customers = array();
 
-		// this is the customer data received from Help Scout
-		$this->data['customer'];
-				
-		if ( ! isset( $this->data['customer']['email'] ) || ! class_exists( 'EDD_Customer', false ) ) {
-			return false;
+		$helpscout_emails = $this->data['customer']['emails'];
+		foreach ($helpscout_emails as $email) {
+			$customer = new EDD_Customer( $email );
+			if ( $customer->id == 0 || !empty($customers[$customer->id]) ) {
+				continue;
+			} else {
+				$customers[$customer->id] = $customer;
+			}
 		}
-		
-		/**
-		 * returns Customer object or false
-		 */
-		return new EDD_Customer( $this->data['customer']['email'] );
+
+		return $customers;
 	}
 
 	/**
@@ -144,24 +145,15 @@ class Endpoint {
 	 * @return array
 	 */
 	private function get_customer_emails() {
+		$emails = $this->data['customer']['emails'];
 
-		$customer_data = $this->data['customer'];
-		$emails        = array();
-
-		/**
-		 * merge multiple emails from the Help Scout customer details
-		 */
-		if ( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
-			$emails = array_merge( $emails, $customer_data['emails'] );
-		} elseif ( isset( $customer_data['email'] ) ) {
-			$emails[] = $customer_data['email'];
-		}
-
-		/**
-		 * merge multiple emails from the EDD customer profile
-		 */
-		if ( isset( $this->edd_customer->emails ) && is_array( $this->edd_customer->emails ) && count( $this->edd_customer->emails ) > 1 ) {
-			$emails = array_merge( $emails, $this->edd_customer->emails );
+		foreach ($this->edd_customers as $customer_id => $customer) {
+			/**
+			 * merge multiple emails from the EDD customer profile
+			 */
+			if ( isset( $customer->emails ) && is_array( $customer->emails ) && count( $customer->emails ) > 1 ) {
+				$emails = array_merge( $emails, $customer->emails );
+			}
 		}
 
 		/**
