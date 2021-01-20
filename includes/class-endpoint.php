@@ -210,7 +210,7 @@ class Endpoint {
 		 * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
 		 * we also find payments no longer attached to a customer
 		 */
-		$sql = "SELECT p.ID, p.post_status, p.post_date";
+		$sql = "SELECT p.ID";
 		$sql .= " FROM {$wpdb->posts} p, {$wpdb->postmeta} pm";
 		$sql .= " WHERE p.post_type = 'edd_payment'";
 		$sql .= " AND p.ID = pm.post_id";
@@ -226,7 +226,7 @@ class Endpoint {
 		$sql .= " GROUP BY p.ID  ORDER BY p.ID DESC";
 				
 		$query   = $wpdb->prepare( $sql, $this->customer_emails );
-		$results = $wpdb->get_results( $query );
+		$results = $wpdb->get_col( $query );
 
 		if ( is_array( $results ) ) {
 			return $results;
