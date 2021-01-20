@@ -37,7 +37,7 @@ class Endpoint {
 
 		// get request data
 		$this->data = $this->parse_data();
-                
+				
 		// validate request
 		if ( ! $this->validate() ) {
 			$this->respond( 'Invalid signature' );
@@ -46,13 +46,13 @@ class Endpoint {
 
 		// get EDD customer details
 		$this->edd_customer = $this->get_edd_customer();
-                
+				
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
-                
+				
 		// get customer payment(s)
 		$this->customer_payments = $this->query_customer_payments();
-                
+				
 		// build the final response HTML for HelpScout
 		$html = $this->build_response_html();
 
@@ -65,36 +65,30 @@ class Endpoint {
 	 */
 	private function parse_data() {
 
-                /**
-                 * use dummy data, e.g. for local environments
-                 */
-                if( defined( 'HELPSCOUT_DUMMY_DATA' ) ){
-                        $email = defined( 'HELPSCOUT_DUMMY_DATA_EMAIL' ) ? HELPSCOUT_DUMMY_DATA_EMAIL : 'user@example.com';
-                    
-                        $data = array(
-                            'ticket' => array
-                                    (
-                                    'id'        => 123456789,
-                                    'number'    => 12345,
-                                    'subject'   => 'I need help using your plugin'
-                                    ),
-                            'customer' => array
-                                    (
-                                    'id' => 987654321,
-                                    'fname' => 'Firstname',
-                                    'lname' => 'Lastname',
-                                    'email' => $email,
-                                    'emails' => array
-                                        (
-                                            $email
-                                        )
-
-                                    ),
-                        );
-                } else {
-                        $data_string = file_get_contents( 'php://input' );
-                        $data        = json_decode( $data_string, true );
-                }
+		/**
+		 * use dummy data, e.g. for local environments
+		 */
+		if( defined( 'HELPSCOUT_DUMMY_DATA' ) ){
+			$email = defined( 'HELPSCOUT_DUMMY_DATA_EMAIL' ) ? HELPSCOUT_DUMMY_DATA_EMAIL : 'user@example.com';
+		
+			$data = array(
+				'ticket' => array(
+					'id'        => 123456789,
+					'number'    => 12345,
+					'subject'   => 'I need help using your plugin'
+				),
+				'customer' => array(
+					'id' => 987654321,
+					'fname' => 'Firstname',
+					'lname' => 'Lastname',
+					'email' => $email,
+					'emails' => array( $email ),
+				),
+			);
+		} else {
+			$data_string = file_get_contents( 'php://input' );
+			$data        = json_decode( $data_string, true );
+		}
 
 		return $data;
 	}
@@ -113,18 +107,17 @@ class Endpoint {
 		if ( ! isset( $this->data['customer']['email'] ) && ! isset( $this->data['customer']['emails'] ) ) {
 			return false;
 		}
-            
+			
 		// check request signature
 		$request = new Request( $this->data );
 
-		if ( defined( 'HELPSCOUT_DUMMY_DATA' ) 
-                        || ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) ) {
+		if ( defined( 'HELPSCOUT_DUMMY_DATA' ) || ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) ) {
 			return true;
 		}
 
 		return false;
 	}
-        
+		
 	/**
 	 * Get customer details from EDD
 	 *
@@ -132,22 +125,22 @@ class Endpoint {
 	 */
 	private function get_edd_customer() {
 
-                // this is the customer data received from Help Scout
+		// this is the customer data received from Help Scout
 		$this->data['customer'];
-                
-                if ( ! isset( $this->data['customer']['email'] ) || ! class_exists( 'EDD_Customer', false ) ) {
+				
+		if ( ! isset( $this->data['customer']['email'] ) || ! class_exists( 'EDD_Customer', false ) ) {
 			return false;
 		}
 		
-                /**
-                 * returns Customer object or false
-                 */
-                return new EDD_Customer( $this->data['customer']['email'] );                
-	}        
+		/**
+		 * returns Customer object or false
+		 */
+		return new EDD_Customer( $this->data['customer']['email'] );
+	}
 
 	/**
 	 * get customer mail address by license key, if added as the last word in the subject line
-         * this feature is not yet documented. Not sure if it is even practically useful, i.e. how to tell our clients about that?
+	 * this feature is not yet documented. Not sure if it is even practically useful, i.e. how to tell our clients about that?
 	 *
 	 * @return array
 	 */
@@ -188,27 +181,27 @@ class Endpoint {
 		$emails        = array();
 
 		$emails = array_merge( $emails, $this->get_customer_emails_by_license_key() );
-                
-                /**
-                 * merge multiple emails from the Help Scout customer details
-                 */
+
+		/**
+		 * merge multiple emails from the Help Scout customer details
+		 */
 		if ( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
 			$emails = array_merge( $emails, $customer_data['emails'] );
 		} elseif ( isset( $customer_data['email'] ) ) {
 			$emails[] = $customer_data['email'];
 		}
-                
-                /**
-                 * merge multiple emails from the EDD customer profile
-                 */
-                if ( isset( $this->edd_customer->emails ) && is_array( $this->edd_customer->emails ) && count( $this->edd_customer->emails ) > 1 ) {
+
+		/**
+		 * merge multiple emails from the EDD customer profile
+		 */
+		if ( isset( $this->edd_customer->emails ) && is_array( $this->edd_customer->emails ) && count( $this->edd_customer->emails ) > 1 ) {
 			$emails = array_merge( $emails, $this->edd_customer->emails );
 		}
-                
-                /**
-                 * remove possible duplicates
-                 */
-                $emails = array_unique( $emails );
+
+		/**
+		 * remove possible duplicates
+		 */
+		$emails = array_unique( $emails );
 
 		/**
 		 * Filter email address of the customer
@@ -219,7 +212,7 @@ class Endpoint {
 		if ( count( $emails ) === 0 ) {
 			$this->respond( 'No customer email given.' );
 		}
-                
+
 		return $emails;
 	}
 
@@ -242,15 +235,15 @@ class Endpoint {
 		if ( ! empty( $payments ) ) {
 			return $payments;
 		}
-                
+				
 		global $wpdb;
 
 		/**
-                 * query by email(s)
-                 * should be replaced with another method at some point
-                 * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
-                 * we also find payments no longer attached to a customer
-                 */
+		 * query by email(s)
+		 * should be replaced with another method at some point
+		 * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
+		 * we also find payments no longer attached to a customer
+		 */
 		$sql = "SELECT p.ID, p.post_status, p.post_date";
 		$sql .= " FROM {$wpdb->posts} p, {$wpdb->postmeta} pm";
 		$sql .= " WHERE p.post_type = 'edd_payment'";
@@ -265,7 +258,7 @@ class Endpoint {
 		}
 
 		$sql .= " GROUP BY p.ID  ORDER BY p.ID DESC";
-                
+				
 		$query   = $wpdb->prepare( $sql, $this->customer_emails );
 		$results = $wpdb->get_results( $query );
 
@@ -342,25 +335,25 @@ class Endpoint {
 						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
 
 						if ( is_object( $license ) ) {
-                                                        // make sure we are using the right version of EDD Software Licensing
-                                                        if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-                                                                $key = $licensing->get_license_key( $license->ID );
-                                                        } else {
-                                                                $key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
-                                                        }
-                                                    
-                                                        $expires_at = 0;
+							// make sure we are using the right version of EDD Software Licensing
+							if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
+								$key = $licensing->get_license_key( $license->ID );
+							} else {
+								$key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
+							}
+						
+							$expires_at = 0;
 
 							// add support for "lifetime" licenses
 							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
 								$is_expired = false;
 							} else {
-                                                                // make sure we are using the right version of EDD Software Licensing
-                                                                if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-                                                                        $expires_at = $licensing->get_license_expiration( $license->ID );
-                                                                } else {
-                                                                        $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
-                                                                }
+								// make sure we are using the right version of EDD Software Licensing
+								if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
+									$expires_at = $licensing->get_license_expiration( $license->ID );
+								} else {
+									$expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
+								}
 								$is_expired = $expires_at < time();
 							}
 
@@ -370,7 +363,7 @@ class Endpoint {
 								'is_expired' => $is_expired,
 								'is_revoked' => $license->post_status !== 'publish',
 								'sites'      => array(),
-                                                                'expires_at' => $expires_at
+								'expires_at' => $expires_at
 							);
 
 							// look-up active sites if license is not expired
@@ -408,12 +401,12 @@ class Endpoint {
 
 		// build HTML output
 		$html = '';
-                
-                // add name of the customer at the top, since we only have one
-                if( $this->edd_customer ){
-                        $html .= '<strong><a target="_blank" href="' . esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $this->edd_customer->id ) ) . '">' . $this->edd_customer->name . '</a></strong>';
-                }
-                
+
+		// add name of the customer at the top, since we only have one
+		if( $this->edd_customer ){
+			$html .= '<strong><a target="_blank" href="' . esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $this->edd_customer->id ) ) . '">' . $this->edd_customer->name . '</a></strong>';
+		}
+
 		foreach ( $orders as $order ) {
 			$html .= str_replace( '\t', '', $this->order_row( $order ) );
 		}
