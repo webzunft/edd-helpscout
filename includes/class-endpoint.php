@@ -452,10 +452,7 @@ class Endpoint {
 			ob_end_clean();
 		}
 
-		status_header( $code );
-		header( "Content-Type: application/json" );
-		echo json_encode( $response );
-		die();
+		wp_send_json( $response, $code );
 	}
 
 }
