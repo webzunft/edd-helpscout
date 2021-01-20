@@ -139,38 +139,6 @@ class Endpoint {
 	}
 
 	/**
-	 * get customer mail address by license key, if added as the last word in the subject line
-	 * this feature is not yet documented. Not sure if it is even practically useful, i.e. how to tell our clients about that?
-	 *
-	 * @return array
-	 */
-	private function get_customer_emails_by_license_key() {
-
-		if ( ! class_exists( 'EDD_Software_Licensing' ) || !isset( $this->data['ticket']['subject'] ) ) {
-			return array();
-		}
-
-		$subject_line = $this->data['ticket']['subject'];
-		$last_word    = substr( $subject_line, strrpos( $subject_line, ' ' ) + 1 );
-
-		// only search for license key if last word actually looks like a license key
-		// this check is dirty, as people could be using the filter in EDD for generating their own type of licenes key...
-		if ( strlen( $last_word ) === 32 ) {
-			$license_key = $last_word;
-			$edd_sl      = edd_software_licensing();
-			$license_id  = $edd_sl->get_license_by_key( $license_key );
-			$payment_id  = get_post_meta( $license_id, '_edd_sl_payment_id', true );
-			$user_info   = edd_get_payment_meta_user_info( $payment_id );
-
-			if ( ! empty( $user_info['email'] ) ) {
-				return array( $user_info['email'] );
-			}
-		}
-
-		return array();
-	}
-
-	/**
 	 * Get an array of emails belonging to the customer
 	 *
 	 * @return array
@@ -179,8 +147,6 @@ class Endpoint {
 
 		$customer_data = $this->data['customer'];
 		$emails        = array();
-
-		$emails = array_merge( $emails, $this->get_customer_emails_by_license_key() );
 
 		/**
 		 * merge multiple emails from the Help Scout customer details
