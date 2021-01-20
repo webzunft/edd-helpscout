@@ -294,7 +294,7 @@ class Endpoint {
 			$order['amount']              = edd_get_payment_amount( $payment->ID );
 			$order['currency']            = edd_get_payment_currency_code( $payment->ID );
 			$order['status']              = $payment->post_status;
-			$order['payment_method']      = $this->get_payment_method( $payment->ID );
+			$order['payment_method']      = $this->get_payment_method( $payment );
 			$order['downloads']           = array();
 			$order['resend_receipt_link'] = '';
 			$order['is_renewal']          = false;
@@ -435,35 +435,37 @@ class Endpoint {
 	 *
 	 * @return string
 	 */
-	private function get_payment_method( $payment_id ) {
+	private function get_payment_method( $payment ) {
+		$payment        = new \EDD_Payment( $payment->ID );
+		$gateway        = $payment->gateway;
+		$transaction_id = $payment->transaction_id;
 
-		$payment_method = edd_get_payment_gateway( $payment_id );
+		$payment_method = edd_get_gateway_admin_label( $gateway );
 
-		switch ( $payment_method ) {
+		switch ( $gateway ) {
 			case 'paypal':
 			case 'paypalexpress':
-				$notes = edd_get_payment_notes( $payment_id );
-				foreach ( $notes as $note ) {
-					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$payment_method = '<a href="https://www.paypal.com/us/vst/id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
-						break 2;
-					}
+				if ( !empty($transaction_id) ) {
+					$url = 'https://www.paypal.com/us/vst/id='.esc_attr( $transaction_id );
+					$payment_method = sprintf('<a href="%s" target="_blank">%s</a>', $url, $payment_method );
 				}
 				break;
 
 			case 'stripe':
-				$notes = edd_get_payment_notes( $payment_id );
-				foreach ( $notes as $note ) {
-					if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
-						break 2;
-					}
+				if ( !empty($transaction_id) ) {
+					$url = 'https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id );
+					$payment_method = sprintf('<a href="%s" target="_blank">%s</a>', $url, $payment_method );
 				}
 				break;
 			case 'manual_purchases':
 				$payment_method = 'Manual';
+				break;
+			default:
+				if ( $transaction_link = apply_filters( 'edd_payment_details_transaction_id-'.$gateway, $transaction_id, $payment->ID ) ) {
+					// Always use payment method as link text
+					$payment_method = preg_replace('/<a(.+?)>.+?<\/a>/i',"<a$1>".$payment_method."</a>",$transaction_link);
+				}
+				
 				break;
 		}
 
