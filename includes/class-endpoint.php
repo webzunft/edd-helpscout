@@ -4,6 +4,9 @@ namespace EDD\HelpScout;
 
 use EDD_Customer;
 use EDD_Software_Licensing;
+use EDD_Download;
+use EDD_Payment;
+use EDD_Recurring_Subscriber;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations
@@ -227,6 +230,103 @@ class Endpoint {
 		return array();
 	}
 
+	private function get_customer_orders() {
+		$orders = array();
+		foreach ($this->query_customer_payments() as $payment_id) {
+			$payment = new EDD_Payment( $payment_id );
+			$order_items = array();
+			foreach ($payment->downloads as $key => $item) {
+				$download = new EDD_Download( $item['id'] );
+				$price_id = edd_get_cart_item_price_id( $item );
+
+				$order_items[$key] = array(
+					'title'    => $download->get_name(),
+					'subtitle' => ( ! empty( $price_id ) && 0 !== $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
+					'files'    => edd_get_download_files( $download->ID, $price_id ),
+				);
+			}
+			$orders[$payment_id] = array(
+				'id'             => $payment_id,
+				'total'          => edd_payment_amount( $payment_id ),
+				'items'          => $order_items,
+				'payment_method' => $this->get_payment_method( $payment ),
+				'date'           => !empty( $payment->completed_date ) ? $payment->completed_date : $payment->date,
+				'status'         => $payment->status,
+				'status_label'   => $payment->status_nicename,
+			);
+		}
+		return $orders;
+	}
+
+	private function get_customer_licenses() {
+		$licenses = array();
+		if ( !function_exists( 'edd_software_licensing' ) || empty( $this->edd_customers ) ) {
+			return $licenses;
+		}
+
+		foreach ( $this->edd_customers as $customer_id => $customer ) {
+			$customer_licenses = edd_software_licensing()->licenses_db->get_licenses( array(
+				'number'      => -1,
+				'customer_id' => $customer->id,
+				'orderby'     => 'id',
+				'order'       => 'ASC',
+			) );
+			if ( !empty( $customer_licenses ) ) {
+				foreach ( $customer_licenses as $license ) {
+					$license_data = array(
+						'key'              => $license->key,
+						'link'             => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
+						'title'            => $license->get_download()->get_name(),
+						'status'           => $license->status,
+						'expires'          => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
+						'is_lifetime'      => $license->is_lifetime,
+						'limit'            => $license->activation_limit,
+						'activation_count' => $license->activation_count,
+						'sites'            => $license->sites,
+					);
+
+					// move child licenses to parent
+					if ( ! empty( $license->parent ) ) {
+						$children = ! empty( $licenses[$license->parent]['children'] ) ? $licenses[$license->parent]['children'] : array();
+						$children = $children + array( $license->ID => $license_data );
+						$licenses[$license->parent]['children'] = $children;
+					} else { // parent or regular
+						if (isset($licenses[$license->ID])) {
+							$licenses[$license->ID] = array_merge( $licenses[$license->ID], $license_data );
+						} else {
+							$licenses[$license->ID] = $license_data;
+						}
+					}
+				}
+			}
+		}
+
+		return $licenses;
+	}
+
+	private function get_customer_subscriptions() {
+		$subscriptions = array();
+		if ( !function_exists( 'EDD_Recurring' ) || empty( $this->edd_customers ) ) {
+			return $subscriptions;
+		}
+
+		foreach ( $this->edd_customers as $customer_id => $customer ) {
+			$subscriber    = new EDD_Recurring_Subscriber( $customer->id );
+			if( $customer_subscriptions = $subscriber->get_subscriptions() ) {
+				foreach ( $customer_subscriptions as $subscription ) {
+					$subscriptions[$subscription->id] = array(
+						'title'        => get_the_title( $subscription->product_id ),
+						'link'         => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
+						'status'       => $subscription->get_status(),
+						'status_label' => $subscription->get_status_label(),
+					);
+				}
+			}
+		}
+
+		return $subscriptions;
+	}
+
 	/**
 	 * Process the request
 	 *  - Find purchase data
@@ -236,137 +336,23 @@ class Endpoint {
 	 */
 	private function build_response_html() {
 
-		if ( count( $this->customer_payments ) === 0 ) {
+		// general customer data
+		$html = $this->render_template_html( 'customers.php', array( 'customers' => $this->edd_customers ) );
 
-			// No purchase data was found
-			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
+		// customer orders
+		$orders = $this->get_customer_orders();
+		$html .= $this->render_template_html( 'orders.php', compact( 'orders' ) );
+
+		// customer licenses (EDD Software Licensing)
+		if ( function_exists( 'edd_software_licensing' ) ) {
+			$licenses = $this->get_customer_licenses();
+			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses' ) );
 		}
 
-		// build array of purchases
-		$orders = array();
-		foreach ( $this->customer_payments as $payment ) {
-
-			$order                        = array();
-			$order['payment_id']          = $payment->ID;
-			$order['date']                = $payment->post_date;
-			$order['amount']              = edd_get_payment_amount( $payment->ID );
-			$order['currency']            = edd_get_payment_currency_code( $payment->ID );
-			$order['status']              = $payment->post_status;
-			$order['payment_method']      = $this->get_payment_method( $payment );
-			$order['downloads']           = array();
-			$order['resend_receipt_link'] = '';
-			$order['is_renewal']          = false;
-			$order['is_completed']        = ( $payment->post_status === 'publish' );
-
-			// do stuff for completed orders
-			if ( $payment->post_status === 'publish' ) {
-				$args                         = array(
-					'payment_id' => (string) $order['payment_id'],
-				);
-				$request                      = new Request( $args );
-				$order['resend_receipt_link'] = $request->get_signed_url( 'resend_purchase_receipt' );
-			}
-
-			// find purchased Downloads.
-			$order['downloads'] = (array) edd_get_payment_meta_downloads( $payment->ID );
-
-			// for each download, find license + sites
-			if ( function_exists( 'edd_software_licensing' ) ) {
-
-				/**
-				 * @var EDD_Software_Licensing
-				 */
-				$licensing = edd_software_licensing();
-
-				// was this order a renewal?
-				$order['is_renewal'] = ( (string) get_post_meta( $payment->ID, '_edd_sl_is_renewal', true ) !== '' );
-
-				if ( $order['is_completed'] ) {
-					foreach ( $order['downloads'] as $key => $download ) {
-
-						// only proceed if this download has EDD Software Licensing enabled
-						if ( '' === (string) get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
-							continue;
-						}
-
-						// find license that was given out for this download purchase
-						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
-
-						if ( is_object( $license ) ) {
-							// make sure we are using the right version of EDD Software Licensing
-							if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-								$key = $licensing->get_license_key( $license->ID );
-							} else {
-								$key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
-							}
-						
-							$expires_at = 0;
-
-							// add support for "lifetime" licenses
-							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
-								$is_expired = false;
-							} else {
-								// make sure we are using the right version of EDD Software Licensing
-								if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-									$expires_at = $licensing->get_license_expiration( $license->ID );
-								} else {
-									$expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
-								}
-								$is_expired = $expires_at < time();
-							}
-
-							$order['downloads'][ $key ]['license'] = array(
-								'limit'      => 0,
-								'key'        => $key,
-								'is_expired' => $is_expired,
-								'is_revoked' => $license->post_status !== 'publish',
-								'sites'      => array(),
-								'expires_at' => $expires_at
-							);
-
-							// look-up active sites if license is not expired
-							if ( ! $is_expired ) {
-
-								// get license limit
-								$order['downloads'][ $key ]['license']['limit'] = $licensing->get_license_limit( $download['id'], $license->ID );
-								$sites                                          = (array) $licensing->get_sites( $license->ID );
-
-								foreach ( $sites as $site ) {
-									$args = array(
-										'license_id' => (string) $license->ID,
-										'site_url'   => $site,
-									);
-
-									// make sure site url is prefixed with "http://"
-									$site_url = strpos( $site, '://' ) !== false ? $site : 'http://' . $site;
-
-									$request                                          = new Request( $args );
-									$order['downloads'][ $key ]['license']['sites'][] = array(
-										'url'             => $site_url,
-										'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
-									);
-
-
-								}
-							} //endif not expired
-						} // endif license found
-					} // end foreach downloads
-				} // endif order completed
-			}
-
-			$orders[] = $order;
-		}
-
-		// build HTML output
-		$html = '';
-
-		// add name of the customer at the top, since we only have one
-		if( $this->edd_customer ){
-			$html .= '<strong><a target="_blank" href="' . esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $this->edd_customer->id ) ) . '">' . $this->edd_customer->name . '</a></strong>';
-		}
-
-		foreach ( $orders as $order ) {
-			$html .= str_replace( '\t', '', $this->order_row( $order ) );
+		// customer subscriptions (EDD Recurring)
+		if ( function_exists('EDD_Recurring') ) {
+			$subscriptions = $this->get_customer_subscriptions();
+			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
 		}
 
 		return $html;
@@ -377,13 +363,24 @@ class Endpoint {
 	 *
 	 * @return string
 	 */
-	public function order_row( array $order ) {
+	public function render_template_html( $file, $args = array() ) {
 		$helpscout_data = $this->data;
+		if ( ! empty( $args ) && is_array( $args ) ) {
+			extract( $args );
+		}
+		$path = $this->get_template_path( $file );
 		ob_start();
-		include dirname( EDD_HELPSCOUT_FILE ) . '/views/order-row.php';
-		$html = ob_get_clean();
+		if (file_exists($path)) {
+			include($path);
+		}
+		return ob_get_clean();
 
 		return $html;
+	}
+
+	public function get_template_path( $file ) {
+		$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
+		return "{$template_base_path}/{$file}";
 	}
 
 	/**
@@ -394,7 +391,6 @@ class Endpoint {
 	 * @return string
 	 */
 	private function get_payment_method( $payment ) {
-		$payment        = new \EDD_Payment( $payment->ID );
 		$gateway        = $payment->gateway;
 		$transaction_id = $payment->transaction_id;
 
