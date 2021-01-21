@@ -230,6 +230,20 @@ class Endpoint {
 		return array();
 	}
 
+	private function get_customer_data() {
+		$customers = array();
+		foreach ( $this->edd_customers as $customer_id => $edd_customer ) {
+			$customers[$customer_id] = array(
+				'name'      => $edd_customer->name,
+				'id'        => $customer_id,
+				'link'      => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $customer_id ) ),
+				'user_id'   => $edd_customer->user_id,
+				'user_link' => esc_attr( admin_url( 'user-edit.php?user_id='. $edd_customer->user_id ) ),
+			);
+		}
+		return $customers;
+	}
+
 	private function get_customer_orders() {
 		$orders = array();
 		foreach ($this->query_customer_payments() as $payment_id) {
@@ -352,7 +366,8 @@ class Endpoint {
 	private function build_response_html() {
 
 		// general customer data
-		$html = $this->render_template_html( 'customers.php', array( 'customers' => $this->edd_customers ) );
+		$customers = $this->get_customer_data();
+		$html = $this->render_template_html( 'customers.php', compact( 'customers' ) );
 
 		// customer licenses (EDD Software Licensing)
 		if ( function_exists( 'edd_software_licensing' ) ) {
