@@ -283,7 +283,21 @@ class Endpoint {
 						'limit'            => $license->activation_limit,
 						'activation_count' => $license->activation_count,
 						'sites'            => $license->sites,
+						'upgrades'         => array(),
 					);
+
+					if ( $license->status != 'expired' && empty( $license->parent ) ) {
+						if( $upgrades = edd_sl_get_license_upgrades( $license->ID ) ) {
+							foreach( $upgrades as $upgrade_id => $upgrade ) {
+								$license_data['upgrades'][$upgrade_id] = array(
+									'title'        =>  get_the_title( $upgrade['download_id'] ),
+									'price_option' => isset( $upgrade['price_id'] ) && edd_has_variable_prices( $upgrade['download_id'] ) ? edd_get_price_option_name( $upgrade['download_id'], $upgrade['price_id'] ) : '',
+									'price'        => edd_currency_filter( edd_sanitize_amount( edd_sl_get_license_upgrade_cost( $license->ID, $upgrade_id ) ) ),
+									'url'          => edd_sl_get_license_upgrade_url( $license->ID, $upgrade_id ),
+								);
+							}
+						}
+					}
 
 					// move child licenses to parent
 					if ( ! empty( $license->parent ) ) {
