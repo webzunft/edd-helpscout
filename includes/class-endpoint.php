@@ -354,15 +354,15 @@ class Endpoint {
 		// general customer data
 		$html = $this->render_template_html( 'customers.php', array( 'customers' => $this->edd_customers ) );
 
-		// customer orders
-		$orders = $this->get_customer_orders();
-		$html .= $this->render_template_html( 'orders.php', compact( 'orders' ) );
-
 		// customer licenses (EDD Software Licensing)
 		if ( function_exists( 'edd_software_licensing' ) ) {
 			$licenses = $this->get_customer_licenses();
 			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses' ) );
 		}
+
+		// customer orders
+		$orders = $this->get_customer_orders();
+		$html .= $this->render_template_html( 'orders.php', compact( 'orders' ) );
 
 		// customer subscriptions (EDD Recurring)
 		if ( function_exists('EDD_Recurring') ) {
