@@ -337,6 +337,8 @@ class Endpoint {
 			}
 		}
 
+		krsort( $licenses ); // sort new to old
+
 		return $licenses;
 	}
 
@@ -376,6 +378,8 @@ class Endpoint {
 				}
 			}
 		}
+
+		krsort( $subscriptions ); // sort new to old
 
 		return $subscriptions;
 	}
