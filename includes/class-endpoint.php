@@ -254,9 +254,9 @@ class Endpoint {
 				$price_id = edd_get_cart_item_price_id( $item );
 
 				$order_items[$key] = array(
-					'title'    => $download->get_name(),
-					'subtitle' => ( ! empty( $price_id ) && 0 !== $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
-					'files'    => edd_get_download_files( $download->ID, $price_id ),
+					'title'        => $download->get_name(),
+					'price_option' => ( ! empty( $price_id ) && 0 !== $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
+					'files'        => edd_get_download_files( $download->ID, $price_id ),
 				);
 			}
 			$orders[$payment_id] = array(
@@ -292,6 +292,7 @@ class Endpoint {
 						'key'              => $license->key,
 						'link'             => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
 						'title'            => $license->get_download()->get_name(),
+						'price_option'     => '',
 						'status'           => $license->status,
 						'expires'          => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
 						'is_lifetime'      => $license->is_lifetime,
@@ -300,6 +301,11 @@ class Endpoint {
 						'sites'            => $license->sites,
 						'upgrades'         => array(),
 					);
+
+					if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
+						$prices   = $license->get_download()->get_prices();
+						$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+					}
 
 					if ( $license->status != 'expired' && empty( $license->parent ) ) {
 						if( $upgrades = edd_sl_get_license_upgrades( $license->ID ) ) {
