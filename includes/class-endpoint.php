@@ -300,6 +300,7 @@ class Endpoint {
 						'activation_count' => $license->activation_count,
 						'sites'            => $license->sites,
 						'upgrades'         => array(),
+						'renewal_link'     => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
 					);
 
 					if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
