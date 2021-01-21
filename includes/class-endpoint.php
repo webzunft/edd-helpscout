@@ -259,6 +259,30 @@ class Endpoint {
 					'files'        => edd_get_download_files( $download->ID, $price_id ),
 				);
 			}
+
+			switch ($payment->status) {
+				case 'edd_subscription':
+				case 'publish':
+					$status_color = 'green';
+					break;
+				case 'refunded':
+				case 'revoked':
+					$status_color = 'red';
+					break;
+				case 'cancelled':
+				case 'failed':
+				case 'preapproval':
+				case 'preapproval_pending':
+					$status_color = 'orange';
+					break;
+				case 'abandoned':
+				case 'pending':
+				case 'processing':
+				default:
+					$status_color = ''; // grey
+					break;
+			}
+
 			$orders[$payment_id] = array(
 				'id'             => $payment_id,
 				'total'          => edd_payment_amount( $payment_id ),
@@ -267,6 +291,7 @@ class Endpoint {
 				'date'           => !empty( $payment->completed_date ) ? $payment->completed_date : $payment->date,
 				'status'         => $payment->status,
 				'status_label'   => $payment->status_nicename,
+				'status_color'   => $status_color,
 				'link'           => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id='. $order['payment_id'] ) ),
 			);
 		}
@@ -288,12 +313,29 @@ class Endpoint {
 			) );
 			if ( !empty( $customer_licenses ) ) {
 				foreach ( $customer_licenses as $license ) {
+					switch ($payment->status) {
+						case 'active':
+							$status_color = 'green';
+							break;
+						case 'disabled':
+							$status_color = 'red';
+							break;
+						case 'expired':
+							$status_color = 'orange';
+							break;
+						case 'inactive':
+						default:
+							$status_color = ''; // grey
+							break;
+					}
+
 					$license_data = array(
 						'key'              => $license->key,
 						'link'             => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
 						'title'            => $license->get_download()->get_name(),
 						'price_option'     => '',
 						'status'           => $license->status,
+						'status_color'     => $status_color,
 						'expires'          => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
 						'is_lifetime'      => $license->is_lifetime,
 						'limit'            => $license->activation_limit,

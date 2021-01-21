@@ -8,7 +8,12 @@
 			<?php foreach ($orders as $order_id => $order): ?>
 				<li class="c-sb-list-item">
 					<span class="c-sb-list-item__text t-tx-charcoal-500">
-					<a href="<?= $order['link'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?> - <?= $order['payment_method'] ?> - <?= $order['date'] ?>
+					<a href="<?= $order['link'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?> <span class="badge <?= $order['status_color'] ?>"><?= $order['status_label'] ?></span>
+					</span>
+				</li>
+				<li class="c-sb-list-item">
+					<span class="c-sb-list-item__text t-tx-charcoal-500">
+						<?= $order['payment_method'] ?> - <?= $order['date'] ?>
 					</span>
 				</li>
 				<?php foreach ($order['items'] as $item): ?>
@@ -17,8 +22,8 @@
 						<?php if (!empty($item['price_option'])): ?> - <?= $item['price_option'] ?><?php endif ?>
 					</li>
 				<?php endforeach ?>
-  				<li role="separator" class="c-sb-list-divider"></li>
-  			<?php endforeach ?>
+				<li role="separator" class="c-sb-list-divider"></li>
+			<?php endforeach ?>
 		</ul>
 	</div>
 </div>
