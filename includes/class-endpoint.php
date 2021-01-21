@@ -253,6 +253,7 @@ class Endpoint {
 				'date'           => !empty( $payment->completed_date ) ? $payment->completed_date : $payment->date,
 				'status'         => $payment->status,
 				'status_label'   => $payment->status_nicename,
+				'link'           => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id='. $order['payment_id'] ) ),
 			);
 		}
 		return $orders;
