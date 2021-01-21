@@ -343,11 +343,28 @@ class Endpoint {
 			$subscriber    = new EDD_Recurring_Subscriber( $customer->id );
 			if( $customer_subscriptions = $subscriber->get_subscriptions() ) {
 				foreach ( $customer_subscriptions as $subscription ) {
+					switch ($subscription->get_status()) {
+						case 'active':
+						case 'trialling':
+							$status_color = 'green';
+							break;
+						case 'cancelled':
+							$status_color = 'red';
+							break;
+						case 'expired':
+							$status_color = 'orange';
+							break;
+						default:
+							$status_color = '';
+							break;
+					}
+
 					$subscriptions[$subscription->id] = array(
 						'title'        => get_the_title( $subscription->product_id ),
 						'link'         => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
 						'status'       => $subscription->get_status(),
 						'status_label' => $subscription->get_status_label(),
+						'status_color' => $status_color,
 					);
 				}
 			}
