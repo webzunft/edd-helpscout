@@ -434,7 +434,10 @@ class Endpoint {
 	 * @return string
 	 */
 	private function build_response_html() {
-
+		$orders = $this->get_customer_orders();
+		if ( empty( $orders ) ) {
+			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
+		}
 		// general customer data
 		$customers = $this->get_customer_data();
 		$html = $this->render_template_html( 'customers.php', compact( 'customers' ) );
@@ -446,7 +449,6 @@ class Endpoint {
 		}
 
 		// customer orders
-		$orders = $this->get_customer_orders();
 		$html .= $this->render_template_html( 'orders.php', compact( 'orders' ) );
 
 		// customer subscriptions (EDD Recurring)
