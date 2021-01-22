@@ -292,7 +292,7 @@ class Endpoint {
 				'status'         => $payment->status,
 				'status_label'   => $payment->status_nicename,
 				'status_color'   => $status_color,
-				'link'           => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id='. $order['payment_id'] ) ),
+				'link'           => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id='. $payment_id ) ),
 			);
 		}
 		return $orders;
