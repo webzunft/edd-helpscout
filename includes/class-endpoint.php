@@ -313,7 +313,7 @@ class Endpoint {
 			) );
 			if ( !empty( $customer_licenses ) ) {
 				foreach ( $customer_licenses as $license ) {
-					switch ($payment->status) {
+					switch ($license->status) {
 						case 'active':
 							$status_color = 'green';
 							break;
