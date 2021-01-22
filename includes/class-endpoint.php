@@ -339,12 +339,14 @@ class Endpoint {
 						'status'           => $license->status,
 						'status_color'     => $status_color,
 						'expires'          => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
+						'is_expired'       => $license->is_expired(),
 						'is_lifetime'      => $license->is_lifetime,
 						'limit'            => $license->activation_limit,
 						'activation_count' => $license->activation_count,
 						'sites'            => $license->sites,
 						'upgrades'         => array(),
 						'renewal_link'     => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
+						'show_activations' => true,
 					);
 
 					if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
@@ -379,6 +381,11 @@ class Endpoint {
 					}
 				}
 			}
+		}
+
+		// determine whether to show activations
+		foreach ($licenses as $license_id => $license_data) {
+			$licenses[$license_id]['show_activations'] = apply_filters( 'edd_helpscout_show_activations', empty( $license_data['children'] ), $license_data );
 		}
 
 		krsort( $licenses ); // sort new to old
