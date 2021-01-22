@@ -262,6 +262,8 @@ class Endpoint {
 
 			switch ($payment->status) {
 				case 'edd_subscription':
+					$status_color = 'purple';
+					break;
 				case 'publish':
 					$status_color = 'green';
 					break;
