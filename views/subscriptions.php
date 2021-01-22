@@ -8,7 +8,7 @@
 			<?php foreach ($subscriptions as $subscription_id => $subscription): ?>
 				<li class="c-sb-list-item--bullet">
 					<span class="badge <?= $subscription['status_color'] ?>">
-						<a href="<?= $subscription['link'] ?>" class="t-tx-white" title="<?= $subscription['status_label'] ?>">#<?= $subscription_id ?></a>
+						<a href="<?= $subscription['url'] ?>" class="t-tx-white" title="<?= $subscription['status_label'] ?>">#<?= $subscription_id ?></a>
 					</span> - <?= $subscription['title'] ?>
 				</li>
   			<?php endforeach ?>

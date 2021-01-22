@@ -236,9 +236,9 @@ class Endpoint {
 			$customers[$customer_id] = array(
 				'name'      => $edd_customer->name,
 				'id'        => $customer_id,
-				'link'      => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $customer_id ) ),
+				'url'       => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $customer_id ) ),
 				'user_id'   => $edd_customer->user_id,
-				'user_link' => esc_attr( admin_url( 'user-edit.php?user_id='. $edd_customer->user_id ) ),
+				'user_url'  => esc_attr( admin_url( 'user-edit.php?user_id='. $edd_customer->user_id ) ),
 			);
 		}
 		return $customers;
@@ -294,7 +294,7 @@ class Endpoint {
 				'status'         => $payment->status,
 				'status_label'   => $payment->status_nicename,
 				'status_color'   => $status_color,
-				'link'           => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id='. $payment_id ) ),
+				'url'            => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id='. $payment_id ) ),
 			);
 		}
 		return $orders;
@@ -333,7 +333,7 @@ class Endpoint {
 
 					$license_data = array(
 						'key'              => $license->key,
-						'link'             => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
+						'url'              => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
 						'title'            => $license->get_download()->get_name(),
 						'price_option'     => '',
 						'status'           => $license->status,
@@ -345,7 +345,7 @@ class Endpoint {
 						'activation_count' => $license->activation_count,
 						'sites'            => $license->sites,
 						'upgrades'         => array(),
-						'renewal_link'     => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
+						'renewal_url'      => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
 						'show_activations' => true,
 					);
 
@@ -421,7 +421,7 @@ class Endpoint {
 
 					$subscriptions[$subscription->id] = array(
 						'title'        => get_the_title( $subscription->product_id ),
-						'link'         => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
+						'url'          => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
 						'status'       => $subscription->get_status(),
 						'status_label' => $subscription->get_status_label(),
 						'status_color' => $status_color,

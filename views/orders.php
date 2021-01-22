@@ -8,7 +8,7 @@
 			<?php foreach ($orders as $order_id => $order): ?>
 				<li class="c-sb-list-item">
 					<span class="c-sb-list-item__text t-tx-charcoal-500">
-					<a href="<?= $order['link'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?> <span class="badge <?= $order['status_color'] ?>"><?= $order['status_label'] ?></span>
+					<a href="<?= $order['url'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?> <span class="badge <?= $order['status_color'] ?>"><?= $order['status_label'] ?></span>
 					</span>
 				</li>
 				<li class="c-sb-list-item">

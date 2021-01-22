@@ -17,7 +17,7 @@
 				<li class="c-sb-list-item" style="font-size: 80% !important;">
 					<?php if (!empty($license['price_option'])): ?><?= $license['price_option'] ?> - <?php endif ?>
 					<?= $license['key'] ?>
-					<a href="<?= $license['link']?>" target="_blank"><span class="icon-gear"></span></a>
+					<a href="<?= $license['url']?>" target="_blank"><span class="icon-gear"></span></a>
 				</li>
 			</ul>
 			<div style="margin-left: 18px">
@@ -33,7 +33,7 @@
 					<li class="c-sb-list-item" style="font-size: 80% !important;">
 						<?php if (!empty($child_license['price_option'])): ?><?= $child_license['price_option'] ?> - <?php endif ?>
 						<?= $child_license['key'] ?>
-						<a href="<?= $child_license['link']?>" target="_blank"><span class="icon-gear"></span></a>
+						<a href="<?= $child_license['url']?>" target="_blank"><span class="icon-gear"></span></a>
 					</li>
 				</ul>
 				<?php if ( $child_license['show_activations'] ): ?>
@@ -44,7 +44,7 @@
 						<div class="c-sb-section__body">
 							<ul class="c-sb-list c-sb-list--compact">
 								<?php foreach ($child_license['sites'] as $site): ?>
-									<li class="c-sb-list-item">
+									<li class="c-sb-list-item--bullet">
 										<a class="c-sb-list-item__link t-tx-blue-500" href="https://<?= $site ?>"><?= $site ?></a>
 									</li>
 								<?php endforeach ?>
@@ -64,7 +64,7 @@
 							<?php foreach ($license['upgrades'] as $upgrade_id => $upgrade): ?>
 								<li class="c-sb-timeline-item">
 									<span class="c-sb-timeline-item__text">
-										<a class="c-sb-timeline-item__link t-tx-blue-500" href="<?= $upgrade['link'] ?>">
+										<a class="c-sb-timeline-item__link t-tx-blue-500" href="<?= $upgrade['url'] ?>">
 											<?= $upgrade['title'] ?> - <?= $upgrade['price_option'] ?>
 										</a>
 										<span class="c-sb-list-item__text__secondary t-tx-charcoal-400">
@@ -85,7 +85,7 @@
 					<div class="c-sb-section__body">
 						<ul class="c-sb-list c-sb-list--compact">
 							<?php foreach ($license['sites'] as $site): ?>
-								<li class="c-sb-list-item">
+								<li class="c-sb-list-item--bullet">
 									<a class="c-sb-list-item__link t-tx-blue-500" href="https://<?= $site ?>"><?= $site ?></a>
 								</li>
 							<?php endforeach ?>
@@ -95,7 +95,7 @@
 			<?php endif ?>
 			<?php if ( $license['is_expired'] ): ?>
 				<div class="c-sb-section">
-					<a href="<?= $license['renewal_link'] ?>"><?= __('Renew') ?></a>
+					<a href="<?= $license['renewal_url'] ?>"><?= __('Renew') ?></a>
 				</div>
 			<?php endif ?>
 			<div class="divider"></div>
