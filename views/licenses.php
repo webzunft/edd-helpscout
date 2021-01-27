@@ -13,7 +13,7 @@
 				<?php endif ?>
 
 				<li class="c-sb-list-item" style="font-size: 14px; padding: 6px 0 4px 0;"><strong><?= $license['title'] ?></strong></li>
-				<li class="c-sb-list-item" style="font-size: 85%!important;">
+				<li class="c-sb-list-item" style="font-size: 85%!important; display: block;">
 					<?php if (!empty($license['price_option'])): ?>
 						<?= $license['price_option'] ?>
 						<a href="<?= $license['url']?>" target="_blank"><span class="icon-gear" style="font-size: 16px; margin-left: 4px;"></span></a>
@@ -38,7 +38,7 @@
 					</li>
 				</ul>
 				<?php if ( $child_license['show_activations'] ): ?>
-					<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 14px;">
+					<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 10px;">
 						<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none;">
 							Active sites (<?= $child_license['activation_count'] ?>/<?= $child_license['limit'] ?>) <i class="caret sb-caret"></i>
 						</div>
@@ -56,7 +56,7 @@
 			<?php endforeach ?>
 			</div>
 			<?php if (!empty($license['upgrades'])): ?>
-				<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 14px;">
+				<div class="c-sb-section c-sb-section--toggle nested">
 					<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none;">
 						Upgrades <i class="caret sb-caret"></i>
 					</div>
@@ -65,10 +65,10 @@
 							<?php foreach ($license['upgrades'] as $upgrade_id => $upgrade): ?>
 								<li class="c-sb-timeline-item">
 									<span class="c-sb-timeline-item__text">
-										<a class="c-sb-timeline-item__link t-tx-blue-500" href="<?= $upgrade['url'] ?>">
+										<a class="c-sb-timeline-item__link t-tx-blue-500" href="<?= $upgrade['url'] ?>" style="font-size: 12px;">
 											<?= $upgrade['title'] ?> - <?= $upgrade['price_option'] ?>
 										</a>
-										<span class="c-sb-list-item__text__secondary t-tx-charcoal-400">
+										<span class="c-sb-list-item__text__secondary t-tx-charcoal-400" style="display: block; margin-top: 4px; font-size: 11px; color: #999!important;">
 											<?= $upgrade['price'] ?>
 										</span>
 									</span>
@@ -79,7 +79,7 @@
 				</div>
 			<?php endif ?>
 			<?php if ( $license['show_activations'] ): ?>
-				<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 14px;">
+				<div class="c-sb-section c-sb-section--toggle nested">
 					<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none;">
 						Active sites (<?= $license['activation_count'] ?>/<?= $license['limit'] ?>) <i class="caret sb-caret"></i>
 					</div>
@@ -95,11 +95,11 @@
 				</div>
 			<?php endif ?>
 			<?php if ( $license['is_expired'] ): ?>
-				<div class="c-sb-section" style="padding-bottom: 14px;">
+				<div class="c-sb-section">
 					<a href="<?= $license['renewal_url'] ?>"><?= __('Renew') ?></a>
 				</div>
 			<?php endif ?>
-			<div class="divider"></div>
+			<div class="divider" style="padding-top: 10px;"></div>
 		<?php endforeach ?>
 	</div>
 </div>
