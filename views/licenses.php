@@ -1,8 +1,8 @@
 <div class="c-sb-section c-sb-section--toggle nested open">
 	<div class="c-sb-section__title js-sb-toggle" style="font-size: 15px; padding: 6px 0 10px 0;">
-		<i class="icon-folder icon-sb" style="font-size: 19px; margin-right: 3px;"></i>Licenses<i class="caret sb-caret" style="margin-top: 4px;"></i>
+		<i class="icon-folder icon-sb" style="font-size: 19px; margin-right: 3px; top: 4px;"></i>Licenses<i class="caret sb-caret" style="margin-top: 4px;"></i>
 	</div>
-	<div class="c-sb-section__body" style="padding-top: 8px;">
+	<div class="c-sb-section__body" style="padding-top: 2px;">
 		<?php foreach ($licenses as $license_id => $license): ?>
 			<ul class="c-sb-list c-sb-list--compact" style="padding: 1em 0;">
 				<?php if ( $license['show_activations'] ): ?>
