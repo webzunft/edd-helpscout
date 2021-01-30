@@ -8,7 +8,12 @@
 				<li class="c-sb-list-item--bullet" style="list-style-type: none; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid rgba(193,203,212,.2);">
 					<span class="badge <?= $subscription['status_color'] ?>" style="font-size: 80%; padding: 3px 4px; margin-bottom: 3px;">
 						<a href="<?= $subscription['url'] ?>" class="t-tx-white" title="<?= $subscription['status_label'] ?>">#<?= $subscription_id ?></a>
-					</span><br><?= $subscription['title'] ?>
+					</span>
+					<span class="c-sb-list-item__label t-tx-charcoal-500" style="padding-bottom:4px;">
+						<span class="c-sb-list-item__text t-tx-charcoal-500" style=""><?= $subscription['title'] ?></span>
+						<span class="c-sb-list-item__text t-tx-charcoal-300" style="font-size:11px;">Created: <?= $subscription['created'] ?></span>
+						<span class="c-sb-list-item__text t-tx-charcoal-300" style="font-size:11px;">Expiration: <?= $subscription['expiration'] ?></span>
+					</span>
 				</li>
   			<?php endforeach ?>
 		</ul>

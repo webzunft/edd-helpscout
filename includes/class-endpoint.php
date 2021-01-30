@@ -425,6 +425,8 @@ class Endpoint {
 						'status'       => $subscription->get_status(),
 						'status_label' => $subscription->get_status_label(),
 						'status_color' => $status_color,
+						'created'      => !empty( $subscription->created ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->created ) ) : '-',
+						'expiration'   => !empty( $subscription->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->expiration ) ) : '-',
 					);
 				}
 			}
