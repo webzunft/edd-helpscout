@@ -8,7 +8,7 @@
 				<?php do_action( 'edd_helpscout_before_order_list_item', $order, $helpscout_data ); ?>
 				<li class="c-sb-list-item" style="padding-top: 16px;">
 					<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
-					Order: <a href="<?= $order['url'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?> <span class="badge <?= $order['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: -1px 0 0 4px;"><?= $order['status_label'] ?></span>
+					<a href="<?= $order['url'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?> <span class="badge <?= $order['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: -1px 0 0 4px;"><?= $order['status_label'] ?></span>
 					</span>
 				</li>
 				<?php foreach ($order['items'] as $item): ?>
