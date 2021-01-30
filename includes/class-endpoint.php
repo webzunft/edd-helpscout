@@ -460,7 +460,8 @@ class Endpoint {
 		}
 
 		// customer orders
-		$html .= $this->render_template_html( 'orders.php', compact( 'orders' ) );
+		$toggle = function_exists( 'edd_software_licensing' ) ? '' : 'open';
+		$html .= $this->render_template_html( 'orders.php', compact( 'orders', 'toggle' ) );
 
 		// customer subscriptions (EDD Recurring)
 		if ( function_exists('EDD_Recurring') ) {
