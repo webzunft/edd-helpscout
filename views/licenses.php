@@ -6,9 +6,11 @@
 		<?php foreach ($licenses as $license_id => $license): ?>
 			<ul class="c-sb-list c-sb-list--compact" style="padding: 1em 0;">
 				<?php if ( $license['show_activations'] ): ?>
-					<li class="c-sb-list-item" style="font-size: 85%!important; font-style: italic;">
-						<span class="badge <?= $license['status_color'] ?>" style="font-size: 10px; line-height: 14px; padding: 2px 4px;"><?= $license['status'] ?></span>&nbsp;
+					<li class="c-sb-list-item" style="font-style: italic;">
+						<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
+						<span class="badge <?= $license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $license['status'] ?></span>&nbsp;
 						<?= $license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $license['expires'] ?>
+						</span>
 					</li>
 				<?php endif ?>
 
@@ -26,8 +28,9 @@
 			<?php foreach ($license['children'] as $child_license_id => $child_license): ?>
 				<ul class="c-sb-list c-sb-list--compact" style="padding: 8px 0 4px 0;">
 					<?php if ( $child_license['show_activations'] ): ?>
-						<li class="c-sb-list-item" style="font-size: 85%!important; font-style: italic;">
-							<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 10px; line-height: 14px; padding: 2px 4px;"><?= $child_license['status'] ?></span>&nbsp;
+						<li class="c-sb-list-item" style="font-style: italic;">
+							<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
+							<span class="badge <?= $license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>&nbsp;
 							<?= $child_license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $child_license['expires'] ?>
 						</li>
 					<?php endif ?>
