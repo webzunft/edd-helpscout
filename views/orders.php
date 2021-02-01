@@ -12,7 +12,7 @@
 					</span>
 				</li>
 				<?php foreach ($order['items'] as $item): ?>
-					<li class="c-sb-list-item c-sb-list-item--bullet" style="list-style-type: none; font-size: 14px; padding: 4px 0 2px 0;">
+					<li class="c-sb-list-item c-sb-list-item--bullet" style="list-style-type: circle; list-style-position: outside; margin-left: 1.2em; font-size: 14px; padding: 4px 0 6px 0;">
 						<strong><?= $item['title'] ?></strong>
 					</li>
 				<?php endforeach ?>
