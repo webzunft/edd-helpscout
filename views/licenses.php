@@ -30,7 +30,7 @@
 					<?php if ( $child_license['show_activations'] ): ?>
 						<li class="c-sb-list-item" style="font-style: italic;">
 							<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
-							<span class="badge <?= $license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>&nbsp;
+							<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>&nbsp;
 							<?= $child_license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $child_license['expires'] ?>
 						</li>
 					<?php endif ?>
