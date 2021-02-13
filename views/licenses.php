@@ -24,40 +24,42 @@
 					<?= $license['key'] ?>
 				</li>
 			</ul>
-			<div style="margin-left: 18px">
-			<?php foreach ($license['children'] as $child_license_id => $child_license): ?>
-				<ul class="c-sb-list c-sb-list--compact" style="padding: 8px 0 4px 0;">
-					<?php if ( $child_license['show_activations'] ): ?>
-						<li class="c-sb-list-item" style="font-style: italic;">
-							<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
-							<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>&nbsp;
-							<?= $child_license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $child_license['expires'] ?>
+			<?php if (!empty($license['children'])): ?>
+				<div style="margin-left: 18px">
+				<?php foreach ($license['children'] as $child_license_id => $child_license): ?>
+					<ul class="c-sb-list c-sb-list--compact" style="padding: 8px 0 4px 0;">
+						<?php if ( $child_license['show_activations'] ): ?>
+							<li class="c-sb-list-item" style="font-style: italic;">
+								<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
+								<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>&nbsp;
+								<?= $child_license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $child_license['expires'] ?>
+							</li>
+						<?php endif ?>
+						<li class="c-sb-list-item" style="font-size: 12px; line-height: 16px; padding: 4px 10px 2px 0;"><strong><?= $child_license['title'] ?></strong></li>
+						<li class="c-sb-list-item" style="font-size: 80%!important;">
+							<?= $child_license['key'] ?>
+							<a href="<?= $child_license['url']?>" target="_blank"><span class="icon-gear" style="top: 1px; margin-left: 4px; font-size: 16px;"></span></a>
 						</li>
+					</ul>
+					<?php if ( $child_license['show_activations'] ): ?>
+						<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 10px;">
+							<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0;">
+								Active sites (<?= $child_license['activation_count'] ?>/<?= $child_license['limit'] ?>) <i class="caret sb-caret"></i>
+							</div>
+							<div class="c-sb-section__body">
+								<ul class="c-sb-list c-sb-list--compact">
+									<?php foreach ($child_license['sites'] as $site): ?>
+										<li class="c-sb-list-item--bullet" style="list-style-type: circle;">
+											<a class="c-sb-list-item__link t-tx-blue-500" href="https://<?= $site ?>"><?= $site ?></a>
+										</li>
+									<?php endforeach ?>
+								</ul>
+							</div>
+						</div>
 					<?php endif ?>
-					<li class="c-sb-list-item" style="font-size: 12px; line-height: 16px; padding: 4px 10px 2px 0;"><strong><?= $child_license['title'] ?></strong></li>
-					<li class="c-sb-list-item" style="font-size: 80%!important;">
-						<?= $child_license['key'] ?>
-						<a href="<?= $child_license['url']?>" target="_blank"><span class="icon-gear" style="top: 1px; margin-left: 4px; font-size: 16px;"></span></a>
-					</li>
-				</ul>
-				<?php if ( $child_license['show_activations'] ): ?>
-					<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 10px;">
-						<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0;">
-							Active sites (<?= $child_license['activation_count'] ?>/<?= $child_license['limit'] ?>) <i class="caret sb-caret"></i>
-						</div>
-						<div class="c-sb-section__body">
-							<ul class="c-sb-list c-sb-list--compact">
-								<?php foreach ($child_license['sites'] as $site): ?>
-									<li class="c-sb-list-item--bullet" style="list-style-type: circle;">
-										<a class="c-sb-list-item__link t-tx-blue-500" href="https://<?= $site ?>"><?= $site ?></a>
-									</li>
-								<?php endforeach ?>
-							</ul>
-						</div>
-					</div>
-				<?php endif ?>
-			<?php endforeach ?>
-			</div>
+				<?php endforeach ?>
+				</div>
+			<?php endif ?>
 			<?php if (!empty($license['upgrades'])): ?>
 				<div class="c-sb-section c-sb-section--toggle nested">
 					<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0 0 4px 0;">
