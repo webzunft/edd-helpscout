@@ -5,7 +5,7 @@ php:
   - hhvm
   - 7.0
 install:
-  - composer install --no-interaction --prefer-dist
+  - composer update --no-interaction --prefer-lowest
 script:
   - composer test
 before_script:
