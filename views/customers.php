@@ -8,7 +8,7 @@
 						<?php do_action( 'edd_helpscout_customer_list_item_start', $customer, $helpscout_data ); ?>
 						<strong><a href="<?= $customer['url'] ?>"><?= $customer['name'] ?> (#<?= $customer_id ?>)</a></strong>
 						<?php if ( intval( $customer['user_id'] ) > 0 ): ?>
-							<span class="c-sb-list-item__text t-tx-charcoal-200">WP User: <a href="<?= $customer['user_url'] ?>">#<?= $customer['user_id'] ?></a></span>
+							<span class="c-sb-list-item__text t-tx-charcoal-200"><?= __( 'WP User:', 'edd-helpscout' ); ?> <a href="<?= $customer['user_url'] ?>">#<?= $customer['user_id'] ?></a></span>
 						<?php endif ?>
 						<?php do_action( 'edd_helpscout_customer_list_item_end', $customer, $helpscout_data ); ?>
 					</span>

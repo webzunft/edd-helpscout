@@ -1,6 +1,6 @@
 <div class="c-sb-section c-sb-section--toggle nested open">
 	<div class="c-sb-section__title js-sb-toggle" style="font-size: 15px; padding: 6px 0 10px 0;">
-		<i class="icon-folder icon-sb" style="font-size: 19px; margin-right: 3px; top: 4px;"></i>Licenses<i class="caret sb-caret" style="margin-top: 4px;"></i>
+		<i class="icon-folder icon-sb" style="font-size: 19px; margin-right: 3px; top: 4px;"></i><?= __( 'Licenses', 'edd-helpscout' ); ?><i class="caret sb-caret" style="margin-top: 4px;"></i>
 	</div>
 	<div class="c-sb-section__body" style="padding-top: 2px;">
 		<?php foreach ($licenses as $license_id => $license): ?>
@@ -9,7 +9,7 @@
 					<li class="c-sb-list-item" style="font-style: italic;">
 						<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
 						<span class="badge <?= $license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $license['status'] ?></span>
-						<?= $license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $license['expires'] ?>
+						<?= $license['is_expired'] ? __( 'Expired', 'edd-helpscout' ) : __( 'Expires', 'edd-helpscout' ); ?>: <?= $license['expires'] ?>
 						</span>
 					</li>
 				<?php endif ?>
@@ -32,7 +32,7 @@
 							<li class="c-sb-list-item" style="font-style: italic;">
 								<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
 								<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>
-								<?= $child_license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $child_license['expires'] ?>
+								<?= $child_license['is_expired'] ? __( 'Expired', 'edd-helpscout' ) : __( 'Expires', 'edd-helpscout' ); ?>: <?= $child_license['expires'] ?>
 							</li>
 						<?php endif ?>
 						<li class="c-sb-list-item" style="font-size: 12px; line-height: 16px; padding: 4px 10px 2px 0;"><strong><?= $child_license['title'] ?></strong></li>
@@ -44,7 +44,7 @@
 					<?php if ( $child_license['show_activations'] ): ?>
 						<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 10px;">
 							<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0;">
-								Active sites (<?= $child_license['activation_count'] ?>/<?= $child_license['limit'] ?>) <i class="caret sb-caret"></i>
+								<?= __( 'Active sites', 'edd-helpscout' ); ?> (<?= $child_license['activation_count'] ?>/<?= $child_license['limit'] ?>) <i class="caret sb-caret"></i>
 							</div>
 							<div class="c-sb-section__body">
 								<ul class="c-sb-list c-sb-list--compact">
@@ -63,7 +63,7 @@
 			<?php if (!empty($license['upgrades'])): ?>
 				<div class="c-sb-section c-sb-section--toggle nested">
 					<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0 0 4px 0;">
-						Upgrades <i class="caret sb-caret"></i>
+						<?= __( 'Upgrades', 'edd-helpscout' ); ?> <i class="caret sb-caret"></i>
 					</div>
 					<div class="c-sb-section__body">
 						<ul class="c-sb-timeline c-sb-timeline--list u-mrg-0">
@@ -86,7 +86,7 @@
 			<?php if ( $license['show_activations'] ): ?>
 				<div class="c-sb-section c-sb-section--toggle nested">
 					<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0 0 4px 0;">
-						Active sites (<?= $license['activation_count'] ?>/<?= $license['limit'] ?>) <i class="caret sb-caret"></i>
+						<?= __( 'Active sites', 'edd-helpscout' ); ?> (<?= $license['activation_count'] ?>/<?= $license['limit'] ?>) <i class="caret sb-caret"></i>
 					</div>
 					<div class="c-sb-section__body">
 						<ul class="c-sb-list c-sb-list--compact">
@@ -101,7 +101,7 @@
 			<?php endif ?>
 			<?php if ( $license['is_expired'] ): ?>
 				<div class="c-sb-section">
-					<a href="<?= $license['renewal_url'] ?>"><?= __('Renew') ?></a>
+					<a href="<?= $license['renewal_url'] ?>"><?= __( 'Renew', 'edd-helpscout' ) ?></a>
 				</div>
 			<?php endif ?>
 			<div class="divider" style="padding-top: 10px; border-bottom: 1px solid rgba(181,186,191,.2); margin-bottom: -1px;"></div>
