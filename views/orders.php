@@ -12,13 +12,18 @@
 					</span>
 				</li>
 				<?php foreach ($order['items'] as $item): ?>
-					<li class="c-sb-list-item c-sb-list-item--bullet" style="list-style-type: circle; list-style-position: outside; margin-left: 1.2em;padding: 4px 0 6px 0;">
-						<span class="c-sb-list-item__label t-tx-charcoal-500" style="padding-bottom: 4px;">
+					<li class="c-sb-list-item c-sb-list-item--bullet" style="list-style-type: circle; list-style-position: outside; margin-left: 1.2em;padding: 4px 0 10px 0;">
+						<span class="c-sb-list-item__label t-tx-charcoal-500">
 							<strong style="font-size: 14px; line-height: 18px"><?= $item['title'] ?></strong>
 							<?php if (!empty($item['price_option'])): ?>
 								<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;"><?= $item['price_option'] ?></span>
 							<?php endif ?>
 						</span>
+						<?php if (!empty($item['is_upgrade'])): ?>
+							<span class="c-sb-list-item__label t-tx-charcoal-500">
+								<span class="badge purple" style="font-size: 85%; padding: 3px 4px; margin: -1px 4px 0 0;"><?= __( 'License upgrade', 'edd-helpscout' ); ?></span>
+							</span>
+						<?php endif ?>
 					</li>
 				<?php endforeach ?>
 				<li class="c-sb-list-item">

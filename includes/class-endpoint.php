@@ -256,6 +256,7 @@ class Endpoint {
 				$order_items[$key] = array(
 					'title'        => $download->get_name(),
 					'price_option' => isset( $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
+					'is_upgrade'   => ( ! empty( $item['options']['is_upgrade'] ) ),
 					'files'        => edd_get_download_files( $download->ID, $price_id ),
 				);
 			}
