@@ -311,7 +311,7 @@ class Endpoint {
 				'number'      => -1,
 				'customer_id' => $customer->id,
 				'orderby'     => 'id',
-				'order'       => 'ASC',
+				'order'       => 'ASC', // this will make sure we get parent licenses first, we sort later
 			) );
 			if ( !empty( $customer_licenses ) ) {
 				foreach ( $customer_licenses as $license ) {
@@ -332,21 +332,22 @@ class Endpoint {
 					}
 
 					$license_data = array(
-						'key'              => $license->key,
-						'url'              => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
-						'title'            => $license->get_download()->get_name(),
-						'price_option'     => '',
-						'status'           => $license->status,
-						'status_color'     => $status_color,
-						'expires'          => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
-						'is_expired'       => $license->is_expired(),
-						'is_lifetime'      => $license->is_lifetime,
-						'limit'            => $license->activation_limit,
-						'activation_count' => $license->activation_count,
-						'sites'            => $license->sites,
-						'upgrades'         => array(),
-						'renewal_url'      => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
-						'show_activations' => true,
+						'key'               => $license->key,
+						'url'               => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
+						'title'             => $license->get_download()->get_name(),
+						'price_option'      => '',
+						'status'            => $license->status,
+						'status_color'      => $status_color,
+						'expires'           => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
+						'expires_timestamp' => $license->expiration,
+						'is_expired'        => $license->is_expired(),
+						'is_lifetime'       => $license->is_lifetime,
+						'limit'             => $license->activation_limit,
+						'activation_count'  => $license->activation_count,
+						'sites'             => $license->sites,
+						'upgrades'          => array(),
+						'renewal_url'       => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
+						'show_activations'  => true,
 					);
 
 					if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
@@ -388,7 +389,11 @@ class Endpoint {
 			$licenses[$license_id]['show_activations'] = apply_filters( 'edd_helpscout_show_activations', empty( $license_data['children'] ), $license_data );
 		}
 
-		krsort( $licenses ); // sort new to old
+		// sort by expiration, descending
+		uasort( $licenses, function ($a, $b) {
+			return strcmp($a['expires_timestamp'], $b['expires_timestamp']);
+		});
+		$licenses = array_reverse( $licenses, true );
 
 		return $licenses;
 	}
