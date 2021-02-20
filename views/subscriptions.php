@@ -6,8 +6,8 @@
 		<ul class="c-sb-list c-sb-list--compact" style="padding-top: 16px;">
 			<?php foreach ($subscriptions as $subscription_id => $subscription): ?>
 				<li class="c-sb-list-item">
-					<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
-					<span class="badge <?= $subscription['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: -1px 4px 0 0;"><?= $subscription['status_label'] ?></span> <a href="<?= $subscription['url'] ?>" title="<?= $subscription['status_label'] ?>">#<?= $subscription_id ?></a>
+					<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
+					<span class="badge <?= $subscription['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: -1px 4px 0 0;"><?= $subscription['status_label'] ?></span> <a href="<?= $subscription['url'] ?>" title="<?= $subscription['status_label'] ?>">#<?= $subscription_id ?></a>
 					</span>
 				</li>
 				<li class="c-sb-list-item" style="font-size: 14px; padding: 4px 0 2px 0;">

@@ -7,15 +7,15 @@
 			<ul class="c-sb-list c-sb-list--compact" style="padding: 1em 0;">
 				<?php if ( $license['show_activations'] ): ?>
 					<li class="c-sb-list-item" style="font-style: italic;">
-						<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
-						<span class="badge <?= $license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $license['status'] ?></span>&nbsp;
+						<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
+						<span class="badge <?= $license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $license['status'] ?></span>
 						<?= $license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $license['expires'] ?>
 						</span>
 					</li>
 				<?php endif ?>
 
 				<li class="c-sb-list-item" style="font-size: 14px; padding: 6px 0 4px 0;"><strong><?= $license['title'] ?></strong></li>
-				<li class="c-sb-list-item" style="font-size: 85%!important; display: block;">
+				<li class="c-sb-list-item" style="font-size: 11px !important; display: block;">
 					<?php if (!empty($license['price_option'])): ?>
 						<?= $license['price_option'] ?>
 						<a href="<?= $license['url']?>" target="_blank"><span class="icon-gear" style="font-size: 16px; margin-left: 4px;"></span></a>
@@ -30,13 +30,13 @@
 					<ul class="c-sb-list c-sb-list--compact" style="padding: 8px 0 4px 0;">
 						<?php if ( $child_license['show_activations'] ): ?>
 							<li class="c-sb-list-item" style="font-style: italic;">
-								<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
-								<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>&nbsp;
+								<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
+								<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>
 								<?= $child_license['is_expired'] ? __('Expired') : __('Expires'); ?>: <?= $child_license['expires'] ?>
 							</li>
 						<?php endif ?>
 						<li class="c-sb-list-item" style="font-size: 12px; line-height: 16px; padding: 4px 10px 2px 0;"><strong><?= $child_license['title'] ?></strong></li>
-						<li class="c-sb-list-item" style="font-size: 80%!important;">
+						<li class="c-sb-list-item" style="font-size: 11px !important;">
 							<?= $child_license['key'] ?>
 							<a href="<?= $child_license['url']?>" target="_blank"><span class="icon-gear" style="top: 1px; margin-left: 4px; font-size: 16px;"></span></a>
 						</li>

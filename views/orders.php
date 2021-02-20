@@ -7,8 +7,8 @@
 			<?php foreach ($orders as $order_id => $order): ?>
 				<?php do_action( 'edd_helpscout_before_order_list_item', $order, $helpscout_data ); ?>
 				<li class="c-sb-list-item" style="padding-top: 16px;">
-					<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 85%;">
-					<span class="badge <?= $order['status_color'] ?>" style="font-size: 85%; padding: 3px 4px; margin: -1px 4px 0 0;"><?= $order['status_label'] ?></span> <a href="<?= $order['url'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?>
+					<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
+					<span class="badge <?= $order['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: -1px 4px 0 0;"><?= $order['status_label'] ?></span> <a href="<?= $order['url'] ?>">#<?= $order['id'] ?></a> - <?= $order['total'] ?>
 					</span>
 				</li>
 				<?php foreach ($order['items'] as $item): ?>
@@ -21,7 +21,7 @@
 						</span>
 						<?php if (!empty($item['is_upgrade'])): ?>
 							<span class="c-sb-list-item__label t-tx-charcoal-500">
-								<span class="badge purple" style="font-size: 85%; padding: 3px 4px; margin: -1px 4px 0 0;"><?= __( 'License upgrade', 'edd-helpscout' ); ?></span>
+								<span class="badge blue" style="font-size: 9px; padding: 3px 4px; margin: -1px 4px 0 0;"><?= __( 'License upgrade', 'edd-helpscout' ); ?></span>
 							</span>
 						<?php endif ?>
 					</li>
