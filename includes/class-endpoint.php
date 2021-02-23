@@ -303,7 +303,7 @@ class Endpoint {
 
 	private function get_customer_licenses() {
 		$licenses = array();
-		if ( !function_exists( 'edd_software_licensing' ) || empty( $this->edd_customers ) ) {
+		if ( !function_exists( 'edd_software_licensing' ) || version_compare( EDD_SL_VERSION, '3.6', '<' ) || empty( $this->edd_customers ) ) {
 			return $licenses;
 		}
 
@@ -401,7 +401,7 @@ class Endpoint {
 
 	private function get_customer_subscriptions() {
 		$subscriptions = array();
-		if ( !function_exists( 'EDD_Recurring' ) || empty( $this->edd_customers ) ) {
+		if ( !function_exists( 'EDD_Recurring' ) || version_compare( EDD_RECURRING_VERSION, '2.4', '<' ) || empty( $this->edd_customers ) ) {
 			return $subscriptions;
 		}
 
