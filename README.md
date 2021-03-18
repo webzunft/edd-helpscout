@@ -1,9 +1,6 @@
 EDD integration for HelpScout
 =============
 
-[![Build Status](https://api.travis-ci.org/dannyvankooten/edd-helpscout.png?branch=master)](https://travis-ci.org/dannyvankooten/edd-helpscout)
-
-
 > **Changed Callback URL**
 >
 > As of version 2.0, the Callback URL in HelpScout should be `https://your-site.com/edd-helpscout-api/customer_info`.
