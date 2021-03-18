@@ -345,7 +345,7 @@ class Endpoint {
 						'is_lifetime'       => $license->is_lifetime,
 						'limit'             => $license->activation_limit,
 						'activation_count'  => $license->activation_count,
-						'sites'             => $license->sites,
+						'sites'             => array(),
 						'upgrades'          => array(),
 						'renewal_url'       => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
 						'show_activations'  => true,
@@ -354,6 +354,25 @@ class Endpoint {
 					if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
 						$prices   = $license->get_download()->get_prices();
 						$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+					}
+
+					if ( ! empty( $license->sites ) ) {
+						foreach ( $license->sites as $site ) {
+							$args = array(
+								'license_id' => (string) $license->ID,
+								'site_url'   => $site,
+							);
+
+							// make sure site url is prefixed with "https://"
+							$site_url = strpos( $site, '://' ) !== false ? $site : 'https://' . $site;
+
+							$request = new Request( $args );
+							$license_data['sites'][] = array(
+								'site'            => $site,
+								'url'             => $site_url,
+								'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
+							);
+						}
 					}
 
 					if ( $license->status != 'expired' && empty( $license->parent ) ) {

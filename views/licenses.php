@@ -50,7 +50,8 @@
 								<ul class="c-sb-list c-sb-list--compact">
 									<?php foreach ($child_license['sites'] as $site): ?>
 										<li class="c-sb-list-item--bullet" style="list-style-type: circle;">
-											<a class="c-sb-list-item__link t-tx-blue-500" href="https://<?= $site ?>"><?= $site ?></a>
+											<a class="c-sb-list-item__link t-tx-blue-500" href="<?= esc_url( $site['url'] ) ?>"><?= $site['site'] ?></a>
+											<a href="<?= esc_url( $site['deactivate_link'] ); ?>" target="_blank"> <small style="color: red;">(<?= __( 'deactivate', 'edd-helpscout' ) ?>)</small></a>
 										</li>
 									<?php endforeach ?>
 								</ul>
