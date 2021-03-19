@@ -4,6 +4,9 @@ namespace EDD\HelpScout;
 
 use EDD_Customer;
 use EDD_Software_Licensing;
+use EDD_Download;
+use EDD_Payment;
+use EDD_Recurring_Subscriber;
 
 /**
  * This class takes care of requests coming from HelpScout App Integrations
@@ -37,7 +40,7 @@ class Endpoint {
 
 		// get request data
 		$this->data = $this->parse_data();
-                
+				
 		// validate request
 		if ( ! $this->validate() ) {
 			$this->respond( 'Invalid signature' );
@@ -45,14 +48,14 @@ class Endpoint {
 		}
 
 		// get EDD customer details
-		$this->edd_customer = $this->get_edd_customer();
-                
+		$this->edd_customers = $this->get_edd_customers();
+				
 		// get customer email(s)
 		$this->customer_emails = $this->get_customer_emails();
-                
+				
 		// get customer payment(s)
 		$this->customer_payments = $this->query_customer_payments();
-                
+				
 		// build the final response HTML for HelpScout
 		$html = $this->build_response_html();
 
@@ -65,36 +68,30 @@ class Endpoint {
 	 */
 	private function parse_data() {
 
-                /**
-                 * use dummy data, e.g. for local environments
-                 */
-                if( defined( 'HELPSCOUT_DUMMY_DATA' ) ){
-                        $email = defined( 'HELPSCOUT_DUMMY_DATA_EMAIL' ) ? HELPSCOUT_DUMMY_DATA_EMAIL : 'user@example.com';
-                    
-                        $data = array(
-                            'ticket' => array
-                                    (
-                                    'id'        => 123456789,
-                                    'number'    => 12345,
-                                    'subject'   => 'I need help using your plugin'
-                                    ),
-                            'customer' => array
-                                    (
-                                    'id' => 987654321,
-                                    'fname' => 'Firstname',
-                                    'lname' => 'Lastname',
-                                    'email' => $email,
-                                    'emails' => array
-                                        (
-                                            $email
-                                        )
-
-                                    ),
-                        );
-                } else {
-                        $data_string = file_get_contents( 'php://input' );
-                        $data        = json_decode( $data_string, true );
-                }
+		/**
+		 * use dummy data, e.g. for local environments
+		 */
+		if( defined( 'HELPSCOUT_DUMMY_DATA' ) ){
+			$email = defined( 'HELPSCOUT_DUMMY_DATA_EMAIL' ) ? HELPSCOUT_DUMMY_DATA_EMAIL : 'user@example.com';
+		
+			$data = array(
+				'ticket' => array(
+					'id'        => 123456789,
+					'number'    => 12345,
+					'subject'   => 'I need help using your plugin'
+				),
+				'customer' => array(
+					'id' => 987654321,
+					'fname' => 'Firstname',
+					'lname' => 'Lastname',
+					'email' => $email,
+					'emails' => array( $email ),
+				),
+			);
+		} else {
+			$data_string = file_get_contents( 'php://input' );
+			$data        = json_decode( $data_string, true );
+		}
 
 		return $data;
 	}
@@ -113,68 +110,36 @@ class Endpoint {
 		if ( ! isset( $this->data['customer']['email'] ) && ! isset( $this->data['customer']['emails'] ) ) {
 			return false;
 		}
-            
+			
 		// check request signature
 		$request = new Request( $this->data );
 
-		if ( defined( 'HELPSCOUT_DUMMY_DATA' ) 
-                        || ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) ) {
+		if ( defined( 'HELPSCOUT_DUMMY_DATA' ) || ( isset( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) && $request->signature_equals( $_SERVER['HTTP_X_HELPSCOUT_SIGNATURE'] ) ) ) {
 			return true;
 		}
 
 		return false;
 	}
-        
+
 	/**
-	 * Get customer details from EDD
+	 * Get customers from EDD by email addresses
 	 *
 	 * @return array
 	 */
-	private function get_edd_customer() {
+	private function get_edd_customers() {
+		$customers = array();
 
-                // this is the customer data received from Help Scout
-		$this->data['customer'];
-                
-                if ( ! isset( $this->data['customer']['email'] ) || ! class_exists( 'EDD_Customer', false ) ) {
-			return false;
-		}
-		
-                /**
-                 * returns Customer object or false
-                 */
-                return new EDD_Customer( $this->data['customer']['email'] );                
-	}        
-
-	/**
-	 * get customer mail address by license key, if added as the last word in the subject line
-         * this feature is not yet documented. Not sure if it is even practically useful, i.e. how to tell our clients about that?
-	 *
-	 * @return array
-	 */
-	private function get_customer_emails_by_license_key() {
-
-		if ( ! class_exists( 'EDD_Software_Licensing' ) || !isset( $this->data['ticket']['subject'] ) ) {
-			return array();
-		}
-
-		$subject_line = $this->data['ticket']['subject'];
-		$last_word    = substr( $subject_line, strrpos( $subject_line, ' ' ) + 1 );
-
-		// only search for license key if last word actually looks like a license key
-		// this check is dirty, as people could be using the filter in EDD for generating their own type of licenes key...
-		if ( strlen( $last_word ) === 32 ) {
-			$license_key = $last_word;
-			$edd_sl      = edd_software_licensing();
-			$license_id  = $edd_sl->get_license_by_key( $license_key );
-			$payment_id  = get_post_meta( $license_id, '_edd_sl_payment_id', true );
-			$user_info   = edd_get_payment_meta_user_info( $payment_id );
-
-			if ( ! empty( $user_info['email'] ) ) {
-				return array( $user_info['email'] );
+		$helpscout_emails = $this->data['customer']['emails'];
+		foreach ($helpscout_emails as $email) {
+			$customer = new EDD_Customer( $email );
+			if ( $customer->id == 0 || !empty($customers[$customer->id]) ) {
+				continue;
+			} else {
+				$customers[$customer->id] = $customer;
 			}
 		}
 
-		return array();
+		return $customers;
 	}
 
 	/**
@@ -183,32 +148,21 @@ class Endpoint {
 	 * @return array
 	 */
 	private function get_customer_emails() {
+		$emails = $this->data['customer']['emails'];
 
-		$customer_data = $this->data['customer'];
-		$emails        = array();
+		foreach ($this->edd_customers as $customer_id => $customer) {
+			/**
+			 * merge multiple emails from the EDD customer profile
+			 */
+			if ( isset( $customer->emails ) && is_array( $customer->emails ) && count( $customer->emails ) > 1 ) {
+				$emails = array_merge( $emails, $customer->emails );
+			}
+		}
 
-		$emails = array_merge( $emails, $this->get_customer_emails_by_license_key() );
-                
-                /**
-                 * merge multiple emails from the Help Scout customer details
-                 */
-		if ( isset( $customer_data['emails'] ) && is_array( $customer_data['emails'] ) && count( $customer_data['emails'] ) > 1 ) {
-			$emails = array_merge( $emails, $customer_data['emails'] );
-		} elseif ( isset( $customer_data['email'] ) ) {
-			$emails[] = $customer_data['email'];
-		}
-                
-                /**
-                 * merge multiple emails from the EDD customer profile
-                 */
-                if ( isset( $this->edd_customer->emails ) && is_array( $this->edd_customer->emails ) && count( $this->edd_customer->emails ) > 1 ) {
-			$emails = array_merge( $emails, $this->edd_customer->emails );
-		}
-                
-                /**
-                 * remove possible duplicates
-                 */
-                $emails = array_unique( $emails );
+		/**
+		 * remove possible duplicates
+		 */
+		$emails = array_unique( $emails );
 
 		/**
 		 * Filter email address of the customer
@@ -219,7 +173,7 @@ class Endpoint {
 		if ( count( $emails ) === 0 ) {
 			$this->respond( 'No customer email given.' );
 		}
-                
+
 		return $emails;
 	}
 
@@ -242,16 +196,16 @@ class Endpoint {
 		if ( ! empty( $payments ) ) {
 			return $payments;
 		}
-                
+				
 		global $wpdb;
 
 		/**
-                 * query by email(s)
-                 * should be replaced with another method at some point
-                 * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
-                 * we also find payments no longer attached to a customer
-                 */
-		$sql = "SELECT p.ID, p.post_status, p.post_date";
+		 * query by email(s)
+		 * should be replaced with another method at some point
+		 * using EDD_Customer->get_payments() would be the best choice, but we would need to guarantee that
+		 * we also find payments no longer attached to a customer
+		 */
+		$sql = "SELECT p.ID";
 		$sql .= " FROM {$wpdb->posts} p, {$wpdb->postmeta} pm";
 		$sql .= " WHERE p.post_type = 'edd_payment'";
 		$sql .= " AND p.ID = pm.post_id";
@@ -265,15 +219,247 @@ class Endpoint {
 		}
 
 		$sql .= " GROUP BY p.ID  ORDER BY p.ID DESC";
-                
+				
 		$query   = $wpdb->prepare( $sql, $this->customer_emails );
-		$results = $wpdb->get_results( $query );
+		$results = $wpdb->get_col( $query );
 
 		if ( is_array( $results ) ) {
 			return $results;
 		}
 
 		return array();
+	}
+
+	private function get_customer_data() {
+		$customers = array();
+		foreach ( $this->edd_customers as $customer_id => $edd_customer ) {
+			$customers[$customer_id] = array(
+				'name'      => $edd_customer->name,
+				'id'        => $customer_id,
+				'url'       => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $customer_id ) ),
+				'user_id'   => $edd_customer->user_id,
+				'user_url'  => esc_attr( admin_url( 'user-edit.php?user_id='. $edd_customer->user_id ) ),
+			);
+		}
+		return $customers;
+	}
+
+	private function get_customer_orders() {
+		$orders = array();
+		foreach ($this->query_customer_payments() as $payment_id) {
+			$payment = new EDD_Payment( $payment_id );
+			$order_items = array();
+			foreach ($payment->downloads as $key => $item) {
+				$download = new EDD_Download( $item['id'] );
+				$price_id = edd_get_cart_item_price_id( $item );
+
+				$order_items[$key] = array(
+					'title'        => $download->get_name(),
+					'price_option' => isset( $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
+					'is_upgrade'   => ( ! empty( $item['options']['is_upgrade'] ) ),
+					'files'        => edd_get_download_files( $download->ID, $price_id ),
+				);
+			}
+
+			switch ($payment->status) {
+				case 'edd_subscription':
+					$status_color = 'purple';
+					break;
+				case 'publish':
+					$status_color = 'green';
+					break;
+				case 'refunded':
+				case 'revoked':
+					$status_color = 'red';
+					break;
+				case 'cancelled':
+				case 'failed':
+				case 'preapproval':
+				case 'preapproval_pending':
+					$status_color = 'orange';
+					break;
+				case 'abandoned':
+				case 'pending':
+				case 'processing':
+				default:
+					$status_color = ''; // grey
+					break;
+			}
+
+			$orders[$payment_id] = array(
+				'id'             => $payment_id,
+				'total'          => edd_payment_amount( $payment_id ),
+				'items'          => $order_items,
+				'payment_method' => $this->get_payment_method( $payment ),
+				'date'           => !empty( $payment->completed_date ) ? $payment->completed_date : $payment->date,
+				'status'         => $payment->status,
+				'status_label'   => $payment->status_nicename,
+				'status_color'   => $status_color,
+				'url'            => esc_attr( admin_url( 'edit.php?post_type=download&page=edd-payment-history&view=view-order-details&id='. $payment_id ) ),
+			);
+		}
+		return $orders;
+	}
+
+	private function get_customer_licenses() {
+		$licenses = array();
+		if ( !function_exists( 'edd_software_licensing' ) || version_compare( EDD_SL_VERSION, '3.6', '<' ) || empty( $this->edd_customers ) ) {
+			return $licenses;
+		}
+
+		foreach ( $this->edd_customers as $customer_id => $customer ) {
+			$customer_licenses = edd_software_licensing()->licenses_db->get_licenses( array(
+				'number'      => -1,
+				'customer_id' => $customer->id,
+				'orderby'     => 'id',
+				'order'       => 'ASC', // this will make sure we get parent licenses first, we sort later
+			) );
+			if ( !empty( $customer_licenses ) ) {
+				foreach ( $customer_licenses as $license ) {
+					switch ($license->status) {
+						case 'active':
+							$status_color = 'green';
+							break;
+						case 'disabled':
+							$status_color = 'red';
+							break;
+						case 'expired':
+							$status_color = 'orange';
+							break;
+						case 'inactive':
+						default:
+							$status_color = ''; // grey
+							break;
+					}
+
+					$license_data = array(
+						'key'               => $license->key,
+						'url'               => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
+						'title'             => $license->get_download()->get_name(),
+						'price_option'      => '',
+						'status'            => $license->status,
+						'status_color'      => $status_color,
+						'expires'           => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
+						'expires_timestamp' => $license->expiration,
+						'is_expired'        => $license->is_expired(),
+						'is_lifetime'       => $license->is_lifetime,
+						'limit'             => $license->activation_limit,
+						'activation_count'  => $license->activation_count,
+						'sites'             => array(),
+						'upgrades'          => array(),
+						'renewal_url'       => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
+						'show_activations'  => true,
+					);
+
+					if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
+						$prices   = $license->get_download()->get_prices();
+						$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+					}
+
+					if ( ! empty( $license->sites ) ) {
+						foreach ( $license->sites as $site ) {
+							$args = array(
+								'license_id' => (string) $license->ID,
+								'site_url'   => $site,
+							);
+
+							// make sure site url is prefixed with "https://"
+							$site_url = strpos( $site, '://' ) !== false ? $site : 'https://' . $site;
+
+							$request = new Request( $args );
+							$license_data['sites'][] = array(
+								'site'            => $site,
+								'url'             => $site_url,
+								'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
+							);
+						}
+					}
+
+					if ( $license->status != 'expired' && empty( $license->parent ) ) {
+						if( $upgrades = edd_sl_get_license_upgrades( $license->ID ) ) {
+							foreach( $upgrades as $upgrade_id => $upgrade ) {
+								$license_data['upgrades'][$upgrade_id] = array(
+									'title'        =>  get_the_title( $upgrade['download_id'] ),
+									'price_option' => isset( $upgrade['price_id'] ) && edd_has_variable_prices( $upgrade['download_id'] ) ? edd_get_price_option_name( $upgrade['download_id'], $upgrade['price_id'] ) : '',
+									'price'        => edd_currency_filter( edd_sanitize_amount( edd_sl_get_license_upgrade_cost( $license->ID, $upgrade_id ) ) ),
+									'url'          => edd_sl_get_license_upgrade_url( $license->ID, $upgrade_id ),
+								);
+							}
+						}
+					}
+
+					// move child licenses to parent
+					if ( ! empty( $license->parent ) ) {
+						$children = ! empty( $licenses[$license->parent]['children'] ) ? $licenses[$license->parent]['children'] : array();
+						$children = $children + array( $license->ID => $license_data );
+						$licenses[$license->parent]['children'] = $children;
+					} else { // parent or regular
+						if (isset($licenses[$license->ID])) {
+							$licenses[$license->ID] = array_merge( $licenses[$license->ID], $license_data );
+						} else {
+							$licenses[$license->ID] = $license_data;
+						}
+					}
+				}
+			}
+		}
+
+		// determine whether to show activations
+		foreach ($licenses as $license_id => $license_data) {
+			$licenses[$license_id]['show_activations'] = apply_filters( 'edd_helpscout_show_activations', empty( $license_data['children'] ), $license_data );
+		}
+
+		// sort by expiration, descending
+		uasort( $licenses, function ($a, $b) {
+			return strcmp($a['expires_timestamp'], $b['expires_timestamp']);
+		});
+		$licenses = array_reverse( $licenses, true );
+
+		return $licenses;
+	}
+
+	private function get_customer_subscriptions() {
+		$subscriptions = array();
+		if ( !function_exists( 'EDD_Recurring' ) || version_compare( EDD_RECURRING_VERSION, '2.4', '<' ) || empty( $this->edd_customers ) ) {
+			return $subscriptions;
+		}
+
+		foreach ( $this->edd_customers as $customer_id => $customer ) {
+			$subscriber    = new EDD_Recurring_Subscriber( $customer->id );
+			if( $customer_subscriptions = $subscriber->get_subscriptions() ) {
+				foreach ( $customer_subscriptions as $subscription ) {
+					switch ($subscription->get_status()) {
+						case 'active':
+						case 'trialling':
+							$status_color = 'green';
+							break;
+						case 'cancelled':
+							$status_color = 'red';
+							break;
+						case 'expired':
+							$status_color = 'orange';
+							break;
+						default:
+							$status_color = '';
+							break;
+					}
+
+					$subscriptions[$subscription->id] = array(
+						'title'        => get_the_title( $subscription->product_id ),
+						'url'          => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
+						'status'       => $subscription->get_status(),
+						'status_label' => $subscription->get_status_label(),
+						'status_color' => $status_color,
+						'created'      => !empty( $subscription->created ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->created ) ) : '-',
+						'expiration'   => !empty( $subscription->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->expiration ) ) : '-',
+					);
+				}
+			}
+		}
+
+		krsort( $subscriptions ); // sort new to old
+
+		return $subscriptions;
 	}
 
 	/**
@@ -284,138 +470,28 @@ class Endpoint {
 	 * @return string
 	 */
 	private function build_response_html() {
-
-		if ( count( $this->customer_payments ) === 0 ) {
-
-			// No purchase data was found
+		$orders = $this->get_customer_orders();
+		if ( empty( $orders ) ) {
 			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
 		}
+		// general customer data
+		$customers = $this->get_customer_data();
+		$html = $this->render_template_html( 'customers.php', compact( 'customers' ) );
 
-		// build array of purchases
-		$orders = array();
-		foreach ( $this->customer_payments as $payment ) {
-
-			$order                        = array();
-			$order['payment_id']          = $payment->ID;
-			$order['date']                = $payment->post_date;
-			$order['amount']              = edd_get_payment_amount( $payment->ID );
-			$order['currency']            = edd_get_payment_currency_code( $payment->ID );
-			$order['status']              = $payment->post_status;
-			$order['payment_method']      = $this->get_payment_method( $payment->ID );
-			$order['downloads']           = array();
-			$order['resend_receipt_link'] = '';
-			$order['is_renewal']          = false;
-			$order['is_completed']        = ( $payment->post_status === 'publish' );
-
-			// do stuff for completed orders
-			if ( $payment->post_status === 'publish' ) {
-				$args                         = array(
-					'payment_id' => (string) $order['payment_id'],
-				);
-				$request                      = new Request( $args );
-				$order['resend_receipt_link'] = $request->get_signed_url( 'resend_purchase_receipt' );
-			}
-
-			// find purchased Downloads.
-			$order['downloads'] = (array) edd_get_payment_meta_downloads( $payment->ID );
-
-			// for each download, find license + sites
-			if ( function_exists( 'edd_software_licensing' ) ) {
-
-				/**
-				 * @var EDD_Software_Licensing
-				 */
-				$licensing = edd_software_licensing();
-
-				// was this order a renewal?
-				$order['is_renewal'] = ( (string) get_post_meta( $payment->ID, '_edd_sl_is_renewal', true ) !== '' );
-
-				if ( $order['is_completed'] ) {
-					foreach ( $order['downloads'] as $key => $download ) {
-
-						// only proceed if this download has EDD Software Licensing enabled
-						if ( '' === (string) get_post_meta( $download['id'], '_edd_sl_enabled', true ) ) {
-							continue;
-						}
-
-						// find license that was given out for this download purchase
-						$license = $licensing->get_license_by_purchase( $payment->ID, $download['id'] );
-
-						if ( is_object( $license ) ) {
-                                                        // make sure we are using the right version of EDD Software Licensing
-                                                        if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-                                                                $key = $licensing->get_license_key( $license->ID );
-                                                        } else {
-                                                                $key = (string) get_post_meta( $license->ID, '_edd_sl_key', true );
-                                                        }
-                                                    
-                                                        $expires_at = 0;
-
-							// add support for "lifetime" licenses
-							if ( method_exists( $licensing, 'is_lifetime_license' ) && $licensing->is_lifetime_license( $license->ID ) ) {
-								$is_expired = false;
-							} else {
-                                                                // make sure we are using the right version of EDD Software Licensing
-                                                                if( version_compare( 0 <= EDD_SL_VERSION, '3.6' ) ){
-                                                                        $expires_at = $licensing->get_license_expiration( $license->ID );
-                                                                } else {
-                                                                        $expires_at    = (string) get_post_meta( $license->ID, '_edd_sl_expiration', true );
-                                                                }
-								$is_expired = $expires_at < time();
-							}
-
-							$order['downloads'][ $key ]['license'] = array(
-								'limit'      => 0,
-								'key'        => $key,
-								'is_expired' => $is_expired,
-								'is_revoked' => $license->post_status !== 'publish',
-								'sites'      => array(),
-                                                                'expires_at' => $expires_at
-							);
-
-							// look-up active sites if license is not expired
-							if ( ! $is_expired ) {
-
-								// get license limit
-								$order['downloads'][ $key ]['license']['limit'] = $licensing->get_license_limit( $download['id'], $license->ID );
-								$sites                                          = (array) $licensing->get_sites( $license->ID );
-
-								foreach ( $sites as $site ) {
-									$args = array(
-										'license_id' => (string) $license->ID,
-										'site_url'   => $site,
-									);
-
-									// make sure site url is prefixed with "http://"
-									$site_url = strpos( $site, '://' ) !== false ? $site : 'http://' . $site;
-
-									$request                                          = new Request( $args );
-									$order['downloads'][ $key ]['license']['sites'][] = array(
-										'url'             => $site_url,
-										'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
-									);
-
-
-								}
-							} //endif not expired
-						} // endif license found
-					} // end foreach downloads
-				} // endif order completed
-			}
-
-			$orders[] = $order;
+		// customer licenses (EDD Software Licensing)
+		if ( function_exists( 'edd_software_licensing' ) ) {
+			$licenses = $this->get_customer_licenses();
+			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses' ) );
 		}
 
-		// build HTML output
-		$html = '';
-                
-                // add name of the customer at the top, since we only have one
-                if( $this->edd_customer ){
-                        $html .= '<strong><a target="_blank" href="' . esc_attr( admin_url( 'edit.php?post_type=download&page=edd-customers&view=overview&id='. $this->edd_customer->id ) ) . '">' . $this->edd_customer->name . '</a></strong>';
-                }
-                
-		foreach ( $orders as $order ) {
-			$html .= str_replace( '\t', '', $this->order_row( $order ) );
+		// customer orders
+		$toggle = function_exists( 'edd_software_licensing' ) ? '' : 'open';
+		$html .= $this->render_template_html( 'orders.php', compact( 'orders', 'toggle' ) );
+
+		// customer subscriptions (EDD Recurring)
+		if ( function_exists('EDD_Recurring') ) {
+			$subscriptions = $this->get_customer_subscriptions();
+			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
 		}
 
 		return $html;
@@ -426,13 +502,24 @@ class Endpoint {
 	 *
 	 * @return string
 	 */
-	public function order_row( array $order ) {
+	public function render_template_html( $file, $args = array() ) {
 		$helpscout_data = $this->data;
+		if ( ! empty( $args ) && is_array( $args ) ) {
+			extract( $args );
+		}
+		$path = $this->get_template_path( $file );
 		ob_start();
-		include dirname( EDD_HELPSCOUT_FILE ) . '/views/order-row.php';
-		$html = ob_get_clean();
+		if (file_exists($path)) {
+			include($path);
+		}
+		return ob_get_clean();
 
 		return $html;
+	}
+
+	public function get_template_path( $file ) {
+		$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
+		return "{$template_base_path}/{$file}";
 	}
 
 	/**
@@ -442,35 +529,36 @@ class Endpoint {
 	 *
 	 * @return string
 	 */
-	private function get_payment_method( $payment_id ) {
+	private function get_payment_method( $payment ) {
+		$gateway        = $payment->gateway;
+		$transaction_id = $payment->transaction_id;
 
-		$payment_method = edd_get_payment_gateway( $payment_id );
+		$payment_method = edd_get_gateway_admin_label( $gateway );
 
-		switch ( $payment_method ) {
+		switch ( $gateway ) {
 			case 'paypal':
 			case 'paypalexpress':
-				$notes = edd_get_payment_notes( $payment_id );
-				foreach ( $notes as $note ) {
-					if ( preg_match( '/^PayPal Transaction ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$payment_method = '<a href="https://www.paypal.com/us/vst/id=' . esc_attr( $transaction_id ) . '" target="_blank">PayPal</a>';
-						break 2;
-					}
+				if ( !empty($transaction_id) ) {
+					$url = 'https://www.paypal.com/us/vst/id='.esc_attr( $transaction_id );
+					$payment_method = sprintf('<a href="%s" target="_blank">%s</a>', $url, $payment_method );
 				}
 				break;
 
 			case 'stripe':
-				$notes = edd_get_payment_notes( $payment_id );
-				foreach ( $notes as $note ) {
-					if ( preg_match( '/^Stripe Charge ID: ([^\s]+)/', $note->comment_content, $match ) ) {
-						$transaction_id = $match[1];
-						$payment_method = '<a href="https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id ) . '" target="_blank">Stripe</a>';
-						break 2;
-					}
+				if ( !empty($transaction_id) ) {
+					$url = 'https://dashboard.stripe.com/payments/' . esc_attr( $transaction_id );
+					$payment_method = sprintf('<a href="%s" target="_blank">%s</a>', $url, $payment_method );
 				}
 				break;
 			case 'manual_purchases':
 				$payment_method = 'Manual';
+				break;
+			default:
+				if ( $transaction_link = apply_filters( 'edd_payment_details_transaction_id-'.$gateway, $transaction_id, $payment->ID ) ) {
+					// Always use payment method as link text
+					$payment_method = preg_replace('/<a(.+?)>.+?<\/a>/i',"<a$1>".$payment_method."</a>",$transaction_link);
+				}
+				
 				break;
 		}
 
@@ -491,10 +579,7 @@ class Endpoint {
 			ob_end_clean();
 		}
 
-		status_header( $code );
-		header( "Content-Type: application/json" );
-		echo json_encode( $response );
-		die();
+		wp_send_json( $response, $code );
 	}
 
 }
