@@ -609,6 +609,7 @@ class Endpoint {
 				}
 				break;
 			case 'manual_purchases':
+			case 'manual' :
 				$payment_method = 'Manual';
 				break;
 			default:
