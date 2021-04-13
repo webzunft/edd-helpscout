@@ -268,7 +268,7 @@ class Endpoint {
 					$order_items[ $order_item->cart_index ] = array(
 						'title'        => $order_item->product_name,
 						'price_option' => ! empty( $order_item->price_id ) ? edd_get_price_name( $order_item->price_id ) : '',
-						'is_upgrade'   => (bool) edd_get_order_item_meta( $order_item->id, 'is_upgrade', true ),
+						'is_upgrade'   => (bool) edd_get_order_item_meta( $order_item->id, '_option_is_upgrade', true ),
 						'files'        => edd_get_download_files( $order_item->product_id, $order_item->price_id )
 					);
 				}
