@@ -2,7 +2,7 @@
 Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
-Tested up to: 5.2
+Tested up to: 5.6
 Stable tag: 2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
