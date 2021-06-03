@@ -47,17 +47,32 @@ class Endpoint {
 			exit;
 		}
 
-		// get EDD customer details
-		$this->edd_customers = $this->get_edd_customers();
-				
-		// get customer email(s)
-		$this->customer_emails = $this->get_customer_emails();
-				
-		// get customer payment(s)
-		$this->customer_payments = $this->query_customer_payments();
-				
-		// build the final response HTML for HelpScout
-		$html = $this->build_response_html();
+        // Maybe lookup cache.
+        if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && HELPSCOUT_CACHE_DURATION > 0 ) {
+            $html = get_transient( 'edd_helpscout_cache_' . md5( $this->data['customer']['email'] ) );
+        }
+
+        if ( empty( $html ) ) {
+
+            //error_log( __CLASS__ . ' >> ' . __FUNCTION__ . ' >> NO cache' );
+
+            // get EDD customer details
+            $this->edd_customers = $this->get_edd_customers();
+
+            // get customer email(s)
+            $this->customer_emails = $this->get_customer_emails();
+
+            // get customer payment(s)
+            $this->customer_payments = $this->query_customer_payments();
+
+            // build the final response HTML for HelpScout
+            $html = $this->build_response_html();
+
+            // Maybe build cache.
+            if ( defined( 'HELPSCOUT_CACHE_DURATION' ) && HELPSCOUT_CACHE_DURATION > 0 ) {
+                set_transient( 'edd_helpscout_cache_' . md5( $this->data['customer']['email'] ), $html, HELPSCOUT_CACHE_DURATION * MINUTE_IN_SECONDS );
+            }
+        }
 
 		// respond with the built HTML string
 		$this->respond( $html );

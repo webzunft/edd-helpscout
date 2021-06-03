@@ -8,8 +8,12 @@
 				<?php if ( $license['show_activations'] ): ?>
 					<li class="c-sb-list-item" style="font-style: italic;">
 						<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
-						<span class="badge <?= $license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $license['status'] ?></span>
-						<?= $license['is_expired'] ? __( 'Expired', 'edd-helpscout' ) : __( 'Expires', 'edd-helpscout' ); ?>: <?= $license['expires'] ?>
+						    <span class="badge <?= $license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $license['status'] ?></span>
+                            <?php if ( ! empty( $license['is_lifetime'] ) ): ?>
+                                <span style="color: green;font-weight:bold;"><?= __( 'Lifetime', 'edd_sl' ); ?></span>
+                            <?php else:
+                                ( $license['is_expired'] ) ? _e( 'Expired', 'edd-helpscout' ) : _e( 'Expires', 'edd-helpscout' ); ?>: <?= $license['expires'];
+                            endif; ?>
 						</span>
 					</li>
 				<?php endif ?>
