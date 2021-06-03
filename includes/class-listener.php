@@ -45,7 +45,6 @@ class Listener {
 		}
 
 		// extract action argument
-
 		$url = substr( $url, strlen( $this->base_url ) );
 		$url = parse_url( $url, PHP_URL_PATH );
 		$pieces = explode( '/', $url );

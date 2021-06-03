@@ -509,6 +509,8 @@ class Endpoint {
 			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
 		}
 
+		//error_log( $html );
+
 		return $html;
 	}
 
