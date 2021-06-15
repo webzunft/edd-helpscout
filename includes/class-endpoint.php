@@ -351,104 +351,113 @@ class Endpoint {
 		return $orders;
 	}
 
-	private function get_customer_licenses() {
-		$licenses = array();
-		if ( !function_exists( 'edd_software_licensing' ) || version_compare( EDD_SL_VERSION, '3.6', '<' ) || empty( $this->edd_customers ) ) {
-			return $licenses;
-		}
-
+	private function query_customer_licenses() {
+		$found_licenses = array();
 		foreach ( $this->edd_customers as $customer_id => $customer ) {
 			$customer_licenses = edd_software_licensing()->licenses_db->get_licenses( array(
 				'number'      => -1,
 				'customer_id' => $customer->id,
 				'orderby'     => 'id',
 				'order'       => 'ASC', // this will make sure we get parent licenses first, we sort later
+				'fields'      => 'ids',
 			) );
-			if ( !empty( $customer_licenses ) ) {
-				foreach ( $customer_licenses as $license ) {
-					switch ($license->status) {
-						case 'active':
-							$status_color = 'green';
-							break;
-						case 'disabled':
-							$status_color = 'red';
-							break;
-						case 'expired':
-							$status_color = 'orange';
-							break;
-						case 'inactive':
-						default:
-							$status_color = ''; // grey
-							break;
+			$found_licenses = array_merge( $found_licenses, $customer_licenses );
+		}
+		return apply_filters( 'edd_helpscout_customer_licenses', $found_licenses, $this->edd_customers, $this->data );
+	}
+
+	private function get_customer_licenses() {
+		$licenses = array();
+		if ( !function_exists( 'edd_software_licensing' ) || version_compare( EDD_SL_VERSION, '3.6', '<' ) || empty( $this->edd_customers ) ) {
+			return $licenses;
+		}
+
+		$customer_licenses = $this->query_customer_licenses();
+		if ( !empty( $customer_licenses ) ) {
+			foreach ( $customer_licenses as $license_id ) {
+				$license = edd_software_licensing()->get_license( (int) $license_id );
+				switch ($license->status) {
+					case 'active':
+						$status_color = 'green';
+						break;
+					case 'disabled':
+						$status_color = 'red';
+						break;
+					case 'expired':
+						$status_color = 'orange';
+						break;
+					case 'inactive':
+					default:
+						$status_color = ''; // grey
+						break;
+				}
+
+				$license_data = array(
+					'key'               => $license->key,
+					'url'               => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
+					'title'             => $license->get_download()->get_name(),
+					'price_option'      => '',
+					'status'            => $license->status,
+					'status_color'      => $status_color,
+					'expires'           => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
+					'expires_timestamp' => $license->expiration,
+					'is_expired'        => $license->is_expired(),
+					'is_lifetime'       => $license->is_lifetime,
+					'limit'             => $license->activation_limit,
+					'activation_count'  => $license->activation_count,
+					'sites'             => array(),
+					'upgrades'          => array(),
+					'renewal_url'       => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
+					'show_activations'  => true,
+				);
+
+				if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
+					$prices   = $license->get_download()->get_prices();
+					$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+				}
+
+				if ( ! empty( $license->sites ) ) {
+					foreach ( $license->sites as $site ) {
+						$args = array(
+							'license_id' => (string) $license->ID,
+							'site_url'   => $site,
+						);
+
+						// make sure site url is prefixed with "https://"
+						$site_url = strpos( $site, '://' ) !== false ? $site : 'https://' . $site;
+
+						$request = new Request( $args );
+						$license_data['sites'][] = array(
+							'site'            => $site,
+							'url'             => $site_url,
+							'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
+						);
 					}
+				}
 
-					$license_data = array(
-						'key'               => $license->key,
-						'url'               => esc_url( admin_url( 'edit.php?post_type=download&page=edd-licenses&view=overview&license_id=' . $license->ID ) ),
-						'title'             => $license->get_download()->get_name(),
-						'price_option'      => '',
-						'status'            => $license->status,
-						'status_color'      => $status_color,
-						'expires'           => !empty( $license->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), $license->expiration ) : '-',
-						'expires_timestamp' => $license->expiration,
-						'is_expired'        => $license->is_expired(),
-						'is_lifetime'       => $license->is_lifetime,
-						'limit'             => $license->activation_limit,
-						'activation_count'  => $license->activation_count,
-						'sites'             => array(),
-						'upgrades'          => array(),
-						'renewal_url'       => ( edd_sl_renewals_allowed() && ! $license->is_lifetime ) ? $license->get_renewal_url() : '',
-						'show_activations'  => true,
-					);
-
-					if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
-						$prices   = $license->get_download()->get_prices();
-						$license_data['price_option'] = $prices[ $license->price_id ]['name'];
-					}
-
-					if ( ! empty( $license->sites ) ) {
-						foreach ( $license->sites as $site ) {
-							$args = array(
-								'license_id' => (string) $license->ID,
-								'site_url'   => $site,
+				if ( $license->status != 'expired' && empty( $license->parent ) ) {
+					if( $upgrades = edd_sl_get_license_upgrades( $license->ID ) ) {
+						foreach( $upgrades as $upgrade_id => $upgrade ) {
+							$license_data['upgrades'][$upgrade_id] = array(
+								'title'        =>  get_the_title( $upgrade['download_id'] ),
+								'price_option' => isset( $upgrade['price_id'] ) && edd_has_variable_prices( $upgrade['download_id'] ) ? edd_get_price_option_name( $upgrade['download_id'], $upgrade['price_id'] ) : '',
+								'price'        => edd_currency_filter( edd_sanitize_amount( edd_sl_get_license_upgrade_cost( $license->ID, $upgrade_id ) ) ),
+								'url'          => edd_sl_get_license_upgrade_url( $license->ID, $upgrade_id ),
 							);
-
-							// make sure site url is prefixed with "https://"
-							$site_url = strpos( $site, '://' ) !== false ? $site : 'https://' . $site;
-
-							$request = new Request( $args );
-							$license_data['sites'][] = array(
-								'site'            => $site,
-								'url'             => $site_url,
-								'deactivate_link' => $request->get_signed_url( 'deactivate_site_license' )
-							);
 						}
 					}
+				}
 
-					if ( $license->status != 'expired' && empty( $license->parent ) ) {
-						if( $upgrades = edd_sl_get_license_upgrades( $license->ID ) ) {
-							foreach( $upgrades as $upgrade_id => $upgrade ) {
-								$license_data['upgrades'][$upgrade_id] = array(
-									'title'        =>  get_the_title( $upgrade['download_id'] ),
-									'price_option' => isset( $upgrade['price_id'] ) && edd_has_variable_prices( $upgrade['download_id'] ) ? edd_get_price_option_name( $upgrade['download_id'], $upgrade['price_id'] ) : '',
-									'price'        => edd_currency_filter( edd_sanitize_amount( edd_sl_get_license_upgrade_cost( $license->ID, $upgrade_id ) ) ),
-									'url'          => edd_sl_get_license_upgrade_url( $license->ID, $upgrade_id ),
-								);
-							}
-						}
-					}
-
-					// move child licenses to parent
-					if ( ! empty( $license->parent ) ) {
-						$children = ! empty( $licenses[$license->parent]['children'] ) ? $licenses[$license->parent]['children'] : array();
-						$children = $children + array( $license->ID => $license_data );
-						$licenses[$license->parent]['children'] = $children;
-					} else { // parent or regular
-						if (isset($licenses[$license->ID])) {
-							$licenses[$license->ID] = array_merge( $licenses[$license->ID], $license_data );
-						} else {
-							$licenses[$license->ID] = $license_data;
-						}
+				// move child licenses to parent
+				if ( ! empty( $license->parent ) ) {
+					$children = ! empty( $licenses[$license->parent]['children'] ) ? $licenses[$license->parent]['children'] : array();
+					$children = $children + array( $license->ID => $license_data );
+					$licenses[$license->parent]['children'] = $children;
+				} else { // parent or regular
+					if (isset($licenses[$license->ID])) {
+						$licenses[$license->ID] = array_merge( $licenses[$license->ID], $license_data );
+					} else {
+						$licenses[$license->ID] = $license_data;
 					}
 				}
 			}
