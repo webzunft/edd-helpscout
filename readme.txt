@@ -80,7 +80,9 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Screenshots ==
 
-1. Purchases and other information related to the customer in the bottom right corner of your Help Scout interface.
+1. Customer overview with Licenses area opened by default
+2. Orders with status, links to the store and payment provider
+3. Subscriptions with status and links to the store
 
 == Changelog ==
 
