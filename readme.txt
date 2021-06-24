@@ -16,15 +16,18 @@ Help Scout integration for Easy Digital Downloads is a WordPress plugin that wil
 Activating the plugin and configuring the integration will add the following information to your Help Scout dashboard:
 
 - The name of the customer and link to the profile page in EDD
-- All payments by the customer (email address must match)
-- A link to resent purchase receipts
 - All purchased "downloads"
-- The used payment method. Links to the transaction in PayPal or Stripe.
+- Orders with status and link to payment providers
 
 If using the Software Licensing add-on, the following information is shown as well:
 
-- License keys. Links to the Site Manager in Easy Digital Downloads.
+- License keys. Links to the site manager in Easy Digital Downloads.
 - Active sites, with a link to deactivate the license for the given site.
+- Links to purchase an upgrade directly
+
+When using Easy Digital Downloads with Recurring Payments:
+
+- Subscriptions and their status
 
 **How to install and configure**
 
@@ -77,7 +80,7 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Screenshots ==
 
-1. Purchases and other information related to the customer is shown in the bottom right corner of your Help Scout interface.
+1. Purchases and other information related to the customer in the bottom right corner of your Help Scout interface.
 
 == Changelog ==
 
