@@ -10,7 +10,7 @@ use EDD_Payment;
 use EDD_Recurring_Subscriber;
 
 /**
- * This class takes care of requests coming from HelpScout App Integrations
+ * This class takes care of requests coming from Help Scout App Integrations
  */
 class Endpoint {
 
@@ -57,7 +57,7 @@ class Endpoint {
 		// get customer payment(s)
 		$this->customer_payments = $this->query_customer_payments();
 				
-		// build the final response HTML for HelpScout
+		// build the final response HTML for Help Scout
 		$html = $this->build_response_html();
 
 		// respond with the built HTML string
