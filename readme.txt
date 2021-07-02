@@ -1,30 +1,33 @@
-=== HelpScout integration for Easy Digital Downloads ===
+=== Help Scout integration for Easy Digital Downloads ===
 Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
-Tested up to: 5.6
-Stable tag: 2.0
+Tested up to: 5.7
+Stable tag: 2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Easy Digital Downloads integration for HelpScout. Shows purchase information right from your HelpScout interface.
+Easy Digital Downloads integration for Help Scout. Shows purchase information right from your Help Scout interface.
 
 == Description ==
 
-HelpScout integration for Easy Digital Downloads is a WordPress plugin that will show customer information right from your HelpScout dashboard.
+Help Scout integration for Easy Digital Downloads is a WordPress plugin that will show customer information right from your Help Scout dashboard.
 
-Activating the plugin and configuring the integration will add the following information to your HelpScout dashboard:
+Activating the plugin and configuring the integration will add the following information to your Help Scout dashboard:
 
 - The name of the customer and link to the profile page in EDD
-- All payments by the customer (email address must match)
-- A link to resent purchase receipts
 - All purchased "downloads"
-- The used payment method. Links to the transaction in PayPal or Stripe.
+- Orders with status and link to payment providers
 
 If using the Software Licensing add-on, the following information is shown as well:
 
-- License keys. Links to the Site Manager in Easy Digital Downloads.
+- License keys. Links to the site manager in Easy Digital Downloads.
 - Active sites, with a link to deactivate the license for the given site.
+- Links to purchase an upgrade directly
+
+When using Easy Digital Downloads with Recurring Payments:
+
+- Subscriptions and their status
 
 **How to install and configure**
 
@@ -39,12 +42,12 @@ Have a look at the [installation instructions](https://wordpress.org/plugins/edd
 
 == Installation ==
 
-To get this up an running, you'll need to configure a few things in WordPress and HelpScout.
+To get this up an running, you'll need to configure a few things in WordPress and Help Scout.
 
 = WordPress =
 
 1. Upload the contents of **edd-helpscout.zip** to your plugins directory, which usually is `/wp-content/plugins/`.
-1. Activate the **HelpScout integration for Easy Digital Downloads** plugin
+1. Activate the **Help Scout integration for Easy Digital Downloads** plugin
 1. Set the **HELPSCOUT_SECRET_KEY** constant in your `/wp-config.php` file. This should be a random string of 40 characters.
 
 
@@ -53,9 +56,9 @@ _Example_
 define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 `
 
-= HelpScout =
+= Help Scout =
 
-1. Go to the [HelpScout custom app interface](https://secure.helpscout.net/apps/custom/).
+1. Go to the [Help Scout custom app interface](https://secure.helpscout.net/apps/custom/).
 1. Enter the following settings.
 
 **App Name:** Easy Digital Downloads<br />
@@ -71,23 +74,29 @@ You can then call https://your-site.com/edd-helpscout-api/customer_info directly
 
 == Frequently Asked Questions ==
 
-= HelpScout just shows "Invalid Signature" =
+= Help Scout just shows "Invalid Signature" =
 
-Make sure the "Secret Key" setting for your HelpScout application matches the value of your `HELPSCOUT_SECRET_KEY` constant. This key is used to authorize requests coming from HelpScout.
+Make sure the "Secret Key" setting for your Help Scout application matches the value of your `HELPSCOUT_SECRET_KEY` constant. This key is used to authorize requests coming from HelpScout.
 
 == Screenshots ==
 
-1. Purchases and other information related to the customer is shown in the bottom right corner of your HelpScout interface.
+1. Customer overview with Licenses area opened by default
+2. Orders with status, links to the store and payment provider
+3. Subscriptions with status and links to the store
 
 == Changelog ==
 
-= untagged =
+= 2.1 =
 
-- extended hooks for order rows with a parameter that contains the data from Help Scout
+- complete template refactoring, e.g., to show Customer, Licenses, Orders and Subscriptions separately, props @Spreeuw
+- refactor data collection, props @Spreeuw
+- support EDD 3.0 and newer add-on versions, props @ashleyfae, @Spreeuw
+- edd_helpscout_customer_licenses to filter license query response, props @Spreeuw
+- changed "HelpScout" to "Help Scout" where technically reasonable
 
 = 2.0 =
 
-The original developer Danny van Kooten stopped working on EDD HelpScout since he no longer uses it.
+The original developer Danny van Kooten stopped working on EDD Help Scout since he no longer uses it.
 The development of the plugin was taken over by Thomas Maier from https://wpadvancedads.com, who continues using the plugin.
 Danny left in the middle of developing a better version 2.0. I decided to build in top of that because the changes show a lot potential and fixed some issues.
 Please test carefully and let me know in case something is missing or not working as expected.
@@ -159,8 +168,3 @@ Please test carefully and let me know in case something is missing or not workin
 **Additions**
 
 - Added "renewal" label to renewals
-
-= 1.0 =
-Initial release.
-
-

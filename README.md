@@ -1,14 +1,14 @@
-EDD integration for HelpScout
+EDD integration for Help Scout
 =============
 
 > **Changed Callback URL**
 >
-> As of version 2.0, the Callback URL in HelpScout should be `https://your-site.com/edd-helpscout-api/customer_info`.
+> As of version 2.0, the Callback URL in Help Scout should be `https://your-site.com/edd-helpscout-api/customer_info`.
 
 
-Easy Digital Downloads integration for HelpScout is a WordPress plugin that will show customer information right from your HelpScout dashboard.
+Easy Digital Downloads integration for Help Scout is a WordPress plugin that will show customer information right from your Help Scout dashboard.
 
-Activating the plugin and configuring the integration will add the following information to your HelpScout dashboard:
+Activating the plugin and configuring the integration will add the following information to your Help Scout dashboard:
 
 - The name of the customer and link to the profile page in EDD
 - All payments by the customer (email address must match)
@@ -24,12 +24,12 @@ If using the Software Licensing add-on, the following information is shown as we
 
 ## Installation
 
-To get this up an running, you'll need to configure a few things in WordPress and HelpScout.
+To get this up an running, you'll need to configure a few things in WordPress and Help Scout.
 
 #### WordPress
 
 1. Upload the contents of **edd-helpscout.zip** to your plugins directory, which usually is `/wp-content/plugins/`.
-1. Activate the **HelpScout integration for Easy Digital Downloads** plugin
+1. Activate the **Help Scout integration for Easy Digital Downloads** plugin
 1. Set the **HELPSCOUT_SECRET_KEY** constant in your `/wp-config.php` file. This should be a random string of 40 characters.
 
 
@@ -39,9 +39,9 @@ _Example_
 define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-fourty-characters!' );
 ```
 
-#### HelpScout
+#### Help Scout
 
-1. Go to the [HelpScout custom app interface](https://secure.helpscout.net/apps/custom/).
+1. Go to the [Help Scout custom app interface](https://secure.helpscout.net/apps/custom/).
 1. Enter the following settings.
 
 | Setting     	| Value						                               	|
