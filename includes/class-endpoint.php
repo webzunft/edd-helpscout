@@ -130,7 +130,7 @@ class Endpoint {
 	private function get_edd_customers() {
 		$customers = array();
 
-		$helpscout_emails = $this->data['customer']['emails'];
+		$helpscout_emails = apply_filters( 'edd_helpscout_customer_emails', $this->data['customer']['emails'], $this->data );
 		foreach ($helpscout_emails as $email) {
 			$customer = new EDD_Customer( $email );
 			if ( $customer->id == 0 || !empty($customers[$customer->id]) ) {
