@@ -92,6 +92,11 @@ class Endpoint {
 		} else {
 			$data_string = file_get_contents( 'php://input' );
 			$data        = json_decode( $data_string, true );
+
+			// populate the "emails" array if only "email" is given
+			if ( isset( $data['customer']['email'] ) && ! isset( $data['customer']['emails'] ) ) {
+				$data['customer']['emails'] = array( $data['customer']['email'] );
+			}
 		}
 
 		return $data;
@@ -108,7 +113,7 @@ class Endpoint {
 	private function validate() {
 
 		// we need at least this
-		if ( ! isset( $this->data['customer']['email'] ) && ! isset( $this->data['customer']['emails'] ) ) {
+		if ( empty( $this->data['customer']['emails'] ) || ! is_array( $this->data['customer']['emails'] ) ) {
 			return false;
 		}
 			
