@@ -86,6 +86,10 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Changelog ==
 
+= untagged =
+
+- Improvement: check if emails field is empty and handle fallback to email field
+
 = 2.1 =
 
 - complete template refactoring, e.g., to show Customer, Licenses, Orders and Subscriptions separately, props @Spreeuw
