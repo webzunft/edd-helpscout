@@ -3,7 +3,7 @@ Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
 Tested up to: 5.8
-Stable tag: 2.1
+Stable tag: 2.1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -86,7 +86,7 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Changelog ==
 
-= untagged =
+= 2.1.1 =
 
 - Improvement: check if emails field is empty and handle fallback to email field
 

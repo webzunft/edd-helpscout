@@ -3,7 +3,7 @@
 Plugin Name: Easy Digital Downloads integration for Help Scout
 Plugin URI: https://webgilde.com
 Description: Easy Digital Downloads integration for Help Scout
-Version: 2.1
+Version: 2.1.1
 Author: Thomas Maier
 Author URI: https://webgilde.com
 Text Domain: edd-helpscout
@@ -33,7 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 defined( 'ABSPATH' ) or exit;
 
 // define some useful constants
-define( 'EDD_HELPSCOUT_VERSION', '2.1' );
+define( 'EDD_HELPSCOUT_VERSION', '2.1.1' );
 define( 'EDD_HELPSCOUT_FILE', __FILE__ );
 
 
