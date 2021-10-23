@@ -86,6 +86,10 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Changelog ==
 
+= untagged =
+
+- Improvement: show "Lifetime" label for lifetime licenses, props @nosilver4u on github
+
 = 2.1.1 =
 
 - Improvement: check if emails field is empty and handle fallback to email field
