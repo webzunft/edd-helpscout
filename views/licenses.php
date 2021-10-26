@@ -9,7 +9,11 @@
 					<li class="c-sb-list-item" style="font-style: italic;">
 						<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
 						<span class="badge <?= $license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $license['status'] ?></span>
-						<?= $license['is_expired'] ? __( 'Expired', 'edd-helpscout' ) : __( 'Expires', 'edd-helpscout' ); ?>: <?= $license['expires'] ?>
+						<?php if ( ! empty( $license['is_lifetime'] ) ) : ?>
+							<?= __( 'Lifetime', 'edd-helpscout' ); ?>
+						<?php else : ?>
+							<?= $license['is_expired'] ? __( 'Expired', 'edd-helpscout' ) : __( 'Expires', 'edd-helpscout' ); ?>: <?= $license['expires'] ?>
+						<?php endif; ?>
 						</span>
 					</li>
 				<?php endif ?>
@@ -32,7 +36,11 @@
 							<li class="c-sb-list-item" style="font-style: italic;">
 								<span class="c-sb-list-item__text t-tx-charcoal-500" style="font-size: 11px;">
 								<span class="badge <?= $child_license['status_color'] ?>" style="font-size: 10px; padding: 3px 4px; margin: 0 4px 0 0;"><?= $child_license['status'] ?></span>
-								<?= $child_license['is_expired'] ? __( 'Expired', 'edd-helpscout' ) : __( 'Expires', 'edd-helpscout' ); ?>: <?= $child_license['expires'] ?>
+								<?php if ( ! empty( $child_license['is_lifetime'] ) ) : ?>
+									<?= __( 'Lifetime', 'edd-helpscout' ); ?>
+								<?php else : ?>
+									<?= $child_license['is_expired'] ? __( 'Expired', 'edd-helpscout' ) : __( 'Expires', 'edd-helpscout' ); ?>: <?= $child_license['expires'] ?>
+								<?php endif; ?>
 							</li>
 						<?php endif ?>
 						<li class="c-sb-list-item" style="font-size: 12px; line-height: 16px; padding: 4px 10px 2px 0;"><strong><?= $child_license['title'] ?></strong></li>
