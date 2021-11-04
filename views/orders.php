@@ -1,6 +1,6 @@
-<div class="c-sb-section c-sb-section--toggle <?= $toggle ?> is-persisted">
+<div class="c-sb-section c-sb-section--toggle <?= $toggle ?>">
 	<div class="c-sb-section__title js-sb-toggle" style="font-size: 15px; padding: 6px 0 10px 0;">
-		<i class="icon-cart icon-sb" style="font-size: 19px; margin-right: 3px; top: 4px;"></i><?= __( 'Orders', 'edd-helpscout' ); ?> <?= '(' . count( $orders ) . ')'; ?><i class="caret sb-caret" style="margin-top: 4px;"></i>
+		<i class="icon-cart icon-sb" style="font-size: 19px; margin-right: 3px; top: 4px;"></i><?= __( 'Orders', 'edd-helpscout' ); ?><i class="caret sb-caret" style="margin-top: 4px;"></i>
 	</div>
 	<div class="c-sb-section__body">
 		<ul class="c-sb-list c-sb-list--compact" style="padding-bottom: 0;">
