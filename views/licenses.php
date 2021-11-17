@@ -22,10 +22,10 @@
 				<li class="c-sb-list-item" style="font-size: 11px !important; display: block;">
 					<?php if (!empty($license['price_option'])): ?>
 						<?= $license['price_option'] ?>
-						<a href="<?= $license['url']?>" target="_blank"><span class="icon-gear" style="font-size: 16px; margin-left: 4px;"></span></a>
 						<br>
 					<?php endif ?>
 					<?= $license['key'] ?>
+					<a href="<?= $license['url']?>" target="_blank"><span class="icon-gear" style="font-size: 16px; margin-left: 4px;"></span></a>
 				</li>
 			</ul>
 			<?php if (!empty($license['children'])): ?>
