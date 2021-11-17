@@ -88,6 +88,8 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 = untagged =
 
+- Feature: the toggle state for Licenses, Orders, and Subscriptons sections is now persistent, props @nosilver4u on github
+- Feature: display the number of items found for each section in the heading, props @nosilver4u on github
 - Improvement: show "Lifetime" label for lifetime licenses, props @nosilver4u on github
 
 = 2.1.1 =
