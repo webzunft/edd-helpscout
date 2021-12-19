@@ -347,6 +347,8 @@ class Endpoint {
 
 			$orders[ $payment->ID ] = array(
 				'id'             => $payment->ID,
+				'key'            => $payment instanceof Order ? $payment->payment_key : $payment->key,
+				'email'          => $payment->email,
 				'total'          => edd_payment_amount( $payment->ID ),
 				'items'          => $order_items,
 				'payment_method' => $this->get_payment_method( $payment ),
