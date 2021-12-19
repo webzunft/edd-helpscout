@@ -561,9 +561,9 @@ class Endpoint {
 			$html_sections['subscriptions'] = $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
 		}
 
-		$html_sections = apply_filters( 'edd_helpscout_endpoint_html_sections', $html_sections );
+		$html_sections = apply_filters( 'edd_helpscout_endpoint_html_sections', $html_sections, $this->edd_customers, $this->data );
 
-		return apply_filters( 'edd_helpscout_endpoint_html', implode( '', $html_sections ) );
+		return apply_filters( 'edd_helpscout_endpoint_html', implode( '', $html_sections ), $this->edd_customers, $this->data );
 	}
 
 	/**
