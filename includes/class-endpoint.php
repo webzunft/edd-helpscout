@@ -587,8 +587,16 @@ class Endpoint {
 	}
 
 	public function get_template_path( $file ) {
-		$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
-		return "{$template_base_path}/{$file}";
+		// check for theme overrides first
+		$template_path = locate_template( 'edd-helpscout/' . $file );
+
+		// fallback to bundled templates
+		if ( empty( $template_path ) ) {
+			$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
+			$template_path = "{$template_base_path}/{$file}";
+		}
+
+		return $template_path;
 	}
 
 	/**
