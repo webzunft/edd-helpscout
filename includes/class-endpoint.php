@@ -274,7 +274,9 @@ class Endpoint {
 						'title'        => $order_item->product_name,
 						'price_option' => ! empty( $order_item->price_id ) ? edd_get_price_name( $order_item->price_id ) : '',
 						'is_upgrade'   => (bool) edd_get_order_item_meta( $order_item->id, '_option_is_upgrade', true ),
-						'files'        => edd_get_download_files( $order_item->product_id, $order_item->price_id )
+						'files'        => edd_get_download_files( $order_item->product_id, $order_item->price_id ),
+						'product_id'   => $order_item->product_id,
+						'price_id'     => $order_item->price_id,
 					);
 				}
 			} else {
@@ -288,6 +290,8 @@ class Endpoint {
 						'price_option' => isset( $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
 						'is_upgrade'   => ( ! empty( $item['options']['is_upgrade'] ) ),
 						'files'        => edd_get_download_files( $download->ID, $price_id ),
+						'product_id'   => $download->ID,
+						'price_id'     => $price_id,
 					);
 				}
 			}
