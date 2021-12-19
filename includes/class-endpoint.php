@@ -538,27 +538,32 @@ class Endpoint {
 		if ( empty( $orders ) ) {
 			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
 		}
+
+		$html_sections = [];
+
 		// general customer data
 		$customers = $this->get_customer_data();
-		$html = $this->render_template_html( 'customers.php', compact( 'customers' ) );
+		$html_sections['customers'] = $this->render_template_html( 'customers.php', compact( 'customers' ) );
 
 		// customer licenses (EDD Software Licensing)
 		if ( function_exists( 'edd_software_licensing' ) ) {
 			$licenses = $this->get_customer_licenses();
-			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses' ) );
+			$html_sections['licenses'] = $this->render_template_html( 'licenses.php', compact( 'licenses' ) );
 		}
 
 		// customer orders
 		$toggle = function_exists( 'edd_software_licensing' ) ? '' : 'open';
-		$html .= $this->render_template_html( 'orders.php', compact( 'orders', 'toggle' ) );
+		$html_sections['orders'] = $this->render_template_html( 'orders.php', compact( 'orders', 'toggle' ) );
 
 		// customer subscriptions (EDD Recurring)
 		if ( function_exists('EDD_Recurring') ) {
 			$subscriptions = $this->get_customer_subscriptions();
-			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
+			$html_sections['subscriptions'] = $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
 		}
 
-		return $html;
+		$html_sections = apply_filters( 'edd_helpscout_endpoint_html_sections', $html_sections );
+
+		return apply_filters( 'edd_helpscout_endpoint_html', implode( '', $html_sections ) );
 	}
 
 	/**
