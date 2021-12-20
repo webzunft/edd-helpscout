@@ -544,18 +544,23 @@ class Endpoint {
 
 		// customer licenses (EDD Software Licensing)
 		if ( function_exists( 'edd_software_licensing' ) ) {
+			$toggle = apply_filters( 'edd_helpscout_default_section_toggle', 'open', 'licenses' );
+			$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'licenses' ) ? 'is-persisted' : '';
 			$licenses = $this->get_customer_licenses();
-			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses' ) );
+			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses', 'toggle', 'persist' ) );
 		}
 
 		// customer orders
-		$toggle = function_exists( 'edd_software_licensing' ) ? '' : 'open';
-		$html .= $this->render_template_html( 'orders.php', compact( 'orders', 'toggle' ) );
+		$toggle = apply_filters( 'edd_helpscout_default_section_toggle', function_exists( 'edd_software_licensing' ) ? '' : 'open', 'orders' );
+		$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'orders' ) ? 'is-persisted' : '';
+		$html .= $this->render_template_html( 'orders.php', compact( 'orders', 'toggle', 'persist' ) );
 
 		// customer subscriptions (EDD Recurring)
 		if ( function_exists('EDD_Recurring') ) {
+			$toggle = apply_filters( 'edd_helpscout_default_section_toggle', '', 'subscriptions' );
+			$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'subscriptions' ) ? 'is-persisted' : '';
 			$subscriptions = $this->get_customer_subscriptions();
-			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
+			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions', 'toggle', 'persist' ) );
 		}
 
 		return $html;
