@@ -32,7 +32,6 @@ To get this up an running, you'll need to configure a few things in WordPress an
 1. Activate the **Help Scout integration for Easy Digital Downloads** plugin
 1. Set the **HELPSCOUT_SECRET_KEY** constant in your `/wp-config.php` file. This should be a random string of 40 characters.
 
-
 _Example_
 
 ```php

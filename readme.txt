@@ -52,6 +52,9 @@ To get this up an running, you'll need to configure a few things in WordPress an
 
 
 _Example_
+
+Replace `your-random-string` with your own random string.
+
 `
 define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 `
@@ -59,11 +62,11 @@ define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 = Help Scout =
 
 1. Go to the [Help Scout custom app interface](https://secure.helpscout.net/apps/custom/).
-1. Enter the following settings.
+1. Enter the following settings with adjustments according to your site’s URL and the secret key.
 
 **App Name:** Easy Digital Downloads<br />
 **Content Type:** Dynamic Content<br />
-**Callback URL:** https://your-site.com/edd-helpscout-api/customer_info _(I recommend using HTTPS)_ <br />
+**Callback URL:** https://YOUR-SITE.COM/edd-helpscout-api/customer_info _(I recommend using HTTPS)_ <br />
 **Secret Key:** The value of your **HELPSCOUT_SECRET_KEY** constant.
 
 = Testing the plugin locally =
