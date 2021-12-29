@@ -97,6 +97,7 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 - Improvement: override section templates by hosting your own version of them under `wp-content/themes/{THEME}/edd-helpscout/`
 - Improvement: added the `edd_helpscout_endpoint_html_sections` and `edd_helpscout_endpoint_html` filters to customize existing section templates
 - Improvement: added the `edd_helpscout_order_list_item_download_details_start` and `edd_helpscout_order_list_item_download_details_end` actions to order template
+- Improvement: the added `edd_helpscout_default_section_toggle` and `edd_helpscout_persist_section_toggle` filters to force a specific persistant state, props @Spreeuw
 
 = 2.1.1 =
 
