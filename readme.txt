@@ -52,6 +52,9 @@ To get this up an running, you'll need to configure a few things in WordPress an
 
 
 _Example_
+
+Replace `your-random-string` with your own random string.
+
 `
 define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 `
@@ -59,11 +62,11 @@ define( 'HELPSCOUT_SECRET_KEY', 'your-random-string' );
 = Help Scout =
 
 1. Go to the [Help Scout custom app interface](https://secure.helpscout.net/apps/custom/).
-1. Enter the following settings.
+1. Enter the following settings with adjustments according to your site’s URL and the secret key.
 
 **App Name:** Easy Digital Downloads<br />
 **Content Type:** Dynamic Content<br />
-**Callback URL:** https://your-site.com/edd-helpscout-api/customer_info _(I recommend using HTTPS)_ <br />
+**Callback URL:** https://YOUR-SITE.COM/edd-helpscout-api/customer_info _(I recommend using HTTPS)_ <br />
 **Secret Key:** The value of your **HELPSCOUT_SECRET_KEY** constant.
 
 = Testing the plugin locally =
@@ -91,6 +94,9 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 - Feature: the toggle state for Licenses, Orders, and Subscriptons sections is now persistent, props @nosilver4u on github
 - Feature: display the number of items found for each section in the heading, props @nosilver4u on github
 - Improvement: show "Lifetime" label for lifetime licenses, props @nosilver4u on github
+- Improvement: override section templates by hosting your own version of them under `wp-content/themes/{THEME}/edd-helpscout/`
+- Improvement: added the `edd_helpscout_endpoint_html_sections` and `edd_helpscout_endpoint_html` filters to customize existing section templates
+- Improvement: added the `edd_helpscout_order_list_item_download_details_start` and `edd_helpscout_order_list_item_download_details_end` actions to order template
 
 = 2.1.1 =
 

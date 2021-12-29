@@ -274,7 +274,9 @@ class Endpoint {
 						'title'        => $order_item->product_name,
 						'price_option' => ! empty( $order_item->price_id ) ? edd_get_price_name( $order_item->price_id ) : '',
 						'is_upgrade'   => (bool) edd_get_order_item_meta( $order_item->id, '_option_is_upgrade', true ),
-						'files'        => edd_get_download_files( $order_item->product_id, $order_item->price_id )
+						'files'        => edd_get_download_files( $order_item->product_id, $order_item->price_id ),
+						'product_id'   => $order_item->product_id,
+						'price_id'     => $order_item->price_id,
 					);
 				}
 			} else {
@@ -288,6 +290,8 @@ class Endpoint {
 						'price_option' => isset( $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
 						'is_upgrade'   => ( ! empty( $item['options']['is_upgrade'] ) ),
 						'files'        => edd_get_download_files( $download->ID, $price_id ),
+						'product_id'   => $download->ID,
+						'price_id'     => $price_id,
 					);
 				}
 			}
@@ -343,6 +347,8 @@ class Endpoint {
 
 			$orders[ $payment->ID ] = array(
 				'id'             => $payment->ID,
+				'key'            => $payment instanceof Order ? $payment->payment_key : $payment->key,
+				'email'          => $payment->email,
 				'total'          => edd_payment_amount( $payment->ID ),
 				'items'          => $order_items,
 				'payment_method' => $this->get_payment_method( $payment ),
@@ -538,32 +544,37 @@ class Endpoint {
 		if ( empty( $orders ) ) {
 			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
 		}
+
+		$html_sections = [];
+
 		// general customer data
 		$customers = $this->get_customer_data();
-		$html = $this->render_template_html( 'customers.php', compact( 'customers' ) );
+		$html_sections['customers'] = $this->render_template_html( 'customers.php', compact( 'customers' ) );
 
 		// customer licenses (EDD Software Licensing)
 		if ( function_exists( 'edd_software_licensing' ) ) {
 			$toggle = apply_filters( 'edd_helpscout_default_section_toggle', 'open', 'licenses' );
 			$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'licenses' ) ? 'is-persisted' : '';
 			$licenses = $this->get_customer_licenses();
-			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses', 'toggle', 'persist' ) );
+			$html_sections['licenses'] = $this->render_template_html( 'licenses.php', compact( 'licenses', 'toggle', 'persist' ) );
 		}
 
 		// customer orders
 		$toggle = apply_filters( 'edd_helpscout_default_section_toggle', function_exists( 'edd_software_licensing' ) ? '' : 'open', 'orders' );
 		$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'orders' ) ? 'is-persisted' : '';
-		$html .= $this->render_template_html( 'orders.php', compact( 'orders', 'toggle', 'persist' ) );
+		$html_sections['orders'] = $this->render_template_html( 'orders.php', compact( 'orders', 'toggle', 'persist' ) );
 
 		// customer subscriptions (EDD Recurring)
 		if ( function_exists('EDD_Recurring') ) {
 			$toggle = apply_filters( 'edd_helpscout_default_section_toggle', '', 'subscriptions' );
 			$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'subscriptions' ) ? 'is-persisted' : '';
 			$subscriptions = $this->get_customer_subscriptions();
-			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions', 'toggle', 'persist' ) );
+			$html_sections['subscriptions'] = $this->render_template_html( 'subscriptions.php', compact( 'subscriptions', 'toggle', 'persist' ) );
 		}
 
-		return $html;
+		$html_sections = apply_filters( 'edd_helpscout_endpoint_html_sections', $html_sections, $this->edd_customers, $this->data );
+
+		return apply_filters( 'edd_helpscout_endpoint_html', implode( '', $html_sections ), $this->edd_customers, $this->data );
 	}
 
 	/**
@@ -587,8 +598,16 @@ class Endpoint {
 	}
 
 	public function get_template_path( $file ) {
-		$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
-		return "{$template_base_path}/{$file}";
+		// check for theme overrides first
+		$template_path = locate_template( 'edd-helpscout/' . $file );
+
+		// fallback to bundled templates
+		if ( empty( $template_path ) ) {
+			$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
+			$template_path = "{$template_base_path}/{$file}";
+		}
+
+		return $template_path;
 	}
 
 	/**
