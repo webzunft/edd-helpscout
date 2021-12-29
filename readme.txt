@@ -94,6 +94,9 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 - Feature: the toggle state for Licenses, Orders, and Subscriptons sections is now persistent, props @nosilver4u on github
 - Feature: display the number of items found for each section in the heading, props @nosilver4u on github
 - Improvement: show "Lifetime" label for lifetime licenses, props @nosilver4u on github
+- Improvement: override section templates by hosting your own version of them under `wp-content/themes/{THEME}/edd-helpscout/`
+- Improvement: added the `edd_helpscout_endpoint_html_sections` and `edd_helpscout_endpoint_html` filters to customize existing section templates
+- Improvement: added the `edd_helpscout_order_list_item_download_details_start` and `edd_helpscout_order_list_item_download_details_end` actions to order template
 
 = 2.1.1 =
 
