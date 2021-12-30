@@ -52,7 +52,7 @@
 					<?php if ( $child_license['show_activations'] ): ?>
 						<div class="c-sb-section c-sb-section--toggle nested" style="padding-bottom: 10px;">
 							<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0;">
-								<?= __( 'Active sites', 'edd-helpscout' ); ?> (<?= $child_license['activation_count'] ?>/<?= $child_license['limit'] ?>) <i class="caret sb-caret"></i>
+								<?= __( 'Active sites', 'edd-helpscout' ); ?> (<?= $child_license['activation_count'] ?>/<?= intval( $child_license['limit'] ) > 0 ? $child_license['limit'] : __( 'Unlimited', 'edd-helpscout' ); ?>) <i class="caret sb-caret"></i>
 							</div>
 							<div class="c-sb-section__body">
 								<ul class="c-sb-list c-sb-list--compact">
@@ -95,7 +95,7 @@
 			<?php if ( $license['show_activations'] ): ?>
 				<div class="c-sb-section c-sb-section--toggle nested">
 					<div class="c-sb-section__title js-sb-toggle" style="font-size: 12px; border: none; padding: 0 0 4px 0;">
-						<?= __( 'Active sites', 'edd-helpscout' ); ?> (<?= $license['activation_count'] ?>/<?= $license['limit'] ?>) <i class="caret sb-caret"></i>
+						<?= __( 'Active sites', 'edd-helpscout' ); ?> (<?= $license['activation_count'] ?>/<?= intval( $license['limit'] ) > 0 ? $license['limit'] : __( 'Unlimited', 'edd-helpscout' ); ?>) <i class="caret sb-caret"></i>
 					</div>
 					<div class="c-sb-section__body">
 						<ul class="c-sb-list c-sb-list--compact">
