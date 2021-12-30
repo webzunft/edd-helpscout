@@ -424,7 +424,9 @@ class Endpoint {
 
 				if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
 					$prices   = $license->get_download()->get_prices();
-					$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+					if ( isset( $prices[ $license->price_id ] ) ) {
+						$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+					}
 				}
 
 				if ( ! empty( $license->sites ) ) {
