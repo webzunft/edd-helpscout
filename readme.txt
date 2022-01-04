@@ -3,7 +3,8 @@ Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
 Tested up to: 5.8
-Stable tag: 2.1.1
+Requires PHP: 5.6
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,7 +90,7 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Changelog ==
 
-= untagged =
+= 2.2.0 =
 
 - Feature: the toggle state for Licenses, Orders, and Subscriptons sections is now persistent, props @nosilver4u on github
 - Feature: display the number of items found for each section in the heading, props @nosilver4u on github
@@ -98,6 +99,7 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 - Improvement: added the `edd_helpscout_endpoint_html_sections` and `edd_helpscout_endpoint_html` filters to customize existing section templates, props @Spreeuw on github
 - Improvement: added the `edd_helpscout_order_list_item_download_details_start` and `edd_helpscout_order_list_item_download_details_end` actions to order template, props @Spreeuw on github
 - Improvement: added the `edd_helpscout_default_section_toggle` and `edd_helpscout_persist_section_toggle` filters to force a specific toggle state for sections, props @Spreeuw on github
+- Improvement: increased required PHP version to 5.6 to sync with WordPress core
 
 = 2.1.1 =
 
