@@ -35,7 +35,7 @@ To get this up an running, you'll need to configure a few things in WordPress an
 _Example_
 
 ```php
-define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-fourty-characters!' );
+define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-forty-characters!' );
 ```
 
 #### Help Scout
