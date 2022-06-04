@@ -32,11 +32,10 @@ To get this up an running, you'll need to configure a few things in WordPress an
 1. Activate the **Help Scout integration for Easy Digital Downloads** plugin
 1. Set the **HELPSCOUT_SECRET_KEY** constant in your `/wp-config.php` file. This should be a random string of 40 characters.
 
-
 _Example_
 
 ```php
-define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-fourty-characters!' );
+define( 'HELPSCOUT_SECRET_KEY', 'your-random-string-of-forty-characters!' );
 ```
 
 #### Help Scout
@@ -57,20 +56,9 @@ You can set the plugin in some test mode.
 Set `HELPSCOUT_DUMMY_DATA` to `true` and `HELPSCOUT_DUMMY_DATA_EMAIL` to an email address in `wp-config.php` to let the plugin use dummy data.
 You can then call https://your-site.com/edd-helpscout-api/customer_info directly and get a reply based on the value of `HELPSCOUT_DUMMY_DATA_EMAIL`.
 
-## Running Tests
+## Customization
 
-First, make sure all developer dependencies are installed.
+The source code comes with plenty of hooks to add and change output and behavior.
 
-```
-composer install
-```
-
-Then, run the following command.
-
-```
-composer test
-```
-
-## License
-
-GPL v2
+You can also override section templates by hosting your own version of them under `wp-content/themes/{THEME}/edd-helpscout/`.
+E.g., copy `views/orders.php` to `wp-content/themes/{THEME}/edd-helpscout/orders.php` to change the output of the orders in Help Scout.

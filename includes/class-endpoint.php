@@ -107,6 +107,11 @@ class Endpoint {
 		} else {
 			$data_string = file_get_contents( 'php://input' );
 			$data        = json_decode( $data_string, true );
+
+			// populate the "emails" array if only "email" is given
+			if ( isset( $data['customer']['email'] ) && ! isset( $data['customer']['emails'] ) ) {
+				$data['customer']['emails'] = array( $data['customer']['email'] );
+			}
 		}
 
 		return $data;
@@ -123,7 +128,7 @@ class Endpoint {
 	private function validate() {
 
 		// we need at least this
-		if ( ! isset( $this->data['customer']['email'] ) && ! isset( $this->data['customer']['emails'] ) ) {
+		if ( empty( $this->data['customer']['emails'] ) || ! is_array( $this->data['customer']['emails'] ) ) {
 			return false;
 		}
 			
@@ -145,7 +150,7 @@ class Endpoint {
 	private function get_edd_customers() {
 		$customers = array();
 
-		$helpscout_emails = $this->data['customer']['emails'];
+		$helpscout_emails = apply_filters( 'edd_helpscout_customer_emails', $this->data['customer']['emails'], $this->data );
 		foreach ($helpscout_emails as $email) {
 			$customer = new EDD_Customer( $email );
 			if ( $customer->id == 0 || !empty($customers[$customer->id]) ) {
@@ -284,7 +289,9 @@ class Endpoint {
 						'title'        => $order_item->product_name,
 						'price_option' => ! empty( $order_item->price_id ) ? edd_get_price_name( $order_item->price_id ) : '',
 						'is_upgrade'   => (bool) edd_get_order_item_meta( $order_item->id, '_option_is_upgrade', true ),
-						'files'        => edd_get_download_files( $order_item->product_id, $order_item->price_id )
+						'files'        => edd_get_download_files( $order_item->product_id, $order_item->price_id ),
+						'product_id'   => $order_item->product_id,
+						'price_id'     => $order_item->price_id,
 					);
 				}
 			} else {
@@ -298,6 +305,8 @@ class Endpoint {
 						'price_option' => isset( $price_id ) ? edd_get_price_option_name( $item['id'], $price_id, $payment->ID ) : '',
 						'is_upgrade'   => ( ! empty( $item['options']['is_upgrade'] ) ),
 						'files'        => edd_get_download_files( $download->ID, $price_id ),
+						'product_id'   => $download->ID,
+						'price_id'     => $price_id,
 					);
 				}
 			}
@@ -353,6 +362,8 @@ class Endpoint {
 
 			$orders[ $payment->ID ] = array(
 				'id'             => $payment->ID,
+				'key'            => $payment instanceof Order ? $payment->payment_key : $payment->key,
+				'email'          => $payment->email,
 				'total'          => edd_payment_amount( $payment->ID ),
 				'items'          => $order_items,
 				'payment_method' => $this->get_payment_method( $payment ),
@@ -428,7 +439,9 @@ class Endpoint {
 
 				if( $license->get_download()->has_variable_prices() && empty( $license->parent ) ) {
 					$prices   = $license->get_download()->get_prices();
-					$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+					if ( isset( $prices[ $license->price_id ] ) ) {
+						$license_data['price_option'] = $prices[ $license->price_id ]['name'];
+					}
 				}
 
 				if ( ! empty( $license->sites ) ) {
@@ -548,27 +561,37 @@ class Endpoint {
 		if ( empty( $orders ) ) {
 			return sprintf( '<p>No payments found for %s.</p>', '<strong>' . join( '</strong> or <strong>', $this->customer_emails ) . '</strong>' );
 		}
+
+		$html_sections = [];
+
 		// general customer data
 		$customers = $this->get_customer_data();
-		$html = $this->render_template_html( 'customers.php', compact( 'customers' ) );
+		$html_sections['customers'] = $this->render_template_html( 'customers.php', compact( 'customers' ) );
 
 		// customer licenses (EDD Software Licensing)
 		if ( function_exists( 'edd_software_licensing' ) ) {
+			$toggle = apply_filters( 'edd_helpscout_default_section_toggle', 'open', 'licenses' );
+			$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'licenses' ) ? 'is-persisted' : '';
 			$licenses = $this->get_customer_licenses();
-			$html .= $this->render_template_html( 'licenses.php', compact( 'licenses' ) );
+			$html_sections['licenses'] = $this->render_template_html( 'licenses.php', compact( 'licenses', 'toggle', 'persist' ) );
 		}
 
 		// customer orders
-		$toggle = function_exists( 'edd_software_licensing' ) ? '' : 'open';
-		$html .= $this->render_template_html( 'orders.php', compact( 'orders', 'toggle' ) );
+		$toggle = apply_filters( 'edd_helpscout_default_section_toggle', function_exists( 'edd_software_licensing' ) ? '' : 'open', 'orders' );
+		$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'orders' ) ? 'is-persisted' : '';
+		$html_sections['orders'] = $this->render_template_html( 'orders.php', compact( 'orders', 'toggle', 'persist' ) );
 
 		// customer subscriptions (EDD Recurring)
 		if ( function_exists('EDD_Recurring') ) {
+			$toggle = apply_filters( 'edd_helpscout_default_section_toggle', '', 'subscriptions' );
+			$persist = apply_filters( 'edd_helpscout_persist_section_toggle', true, 'subscriptions' ) ? 'is-persisted' : '';
 			$subscriptions = $this->get_customer_subscriptions();
-			$html .= $this->render_template_html( 'subscriptions.php', compact( 'subscriptions' ) );
+			$html_sections['subscriptions'] = $this->render_template_html( 'subscriptions.php', compact( 'subscriptions', 'toggle', 'persist' ) );
 		}
 
-		return $html;
+		$html_sections = apply_filters( 'edd_helpscout_endpoint_html_sections', $html_sections, $this->edd_customers, $this->data );
+
+		return apply_filters( 'edd_helpscout_endpoint_html', implode( '', $html_sections ), $this->edd_customers, $this->data );
 	}
 
 	/**
@@ -592,8 +615,16 @@ class Endpoint {
 	}
 
 	public function get_template_path( $file ) {
-		$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
-		return "{$template_base_path}/{$file}";
+		// check for theme overrides first
+		$template_path = locate_template( 'edd-helpscout/' . $file );
+
+		// fallback to bundled templates
+		if ( empty( $template_path ) ) {
+			$template_base_path = dirname( EDD_HELPSCOUT_FILE ) . '/views';
+			$template_path = "{$template_base_path}/{$file}";
+		}
+
+		return $template_path;
 	}
 
 	/**
