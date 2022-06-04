@@ -531,14 +531,23 @@ class Endpoint {
 							break;
 					}
 
+                    $currency_code = edd_get_payment_currency_code( $subscription->parent_payment_id );
+                    $frequency     = EDD_Recurring()->get_pretty_subscription_frequency( $subscription->period );
+                    $initial       = edd_currency_filter( edd_format_amount( $subscription->initial_amount ), $currency_code );
+                    $billing       = edd_currency_filter( edd_format_amount( $subscription->recurring_amount ), $currency_code ) . ' / ' . $frequency;
+
 					$subscriptions[$subscription->id] = array(
-						'title'        => get_the_title( $subscription->product_id ),
-						'url'          => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
-						'status'       => $subscription->get_status(),
-						'status_label' => $subscription->get_status_label(),
-						'status_color' => $status_color,
-						'created'      => !empty( $subscription->created ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->created ) ) : '-',
-						'expiration'   => !empty( $subscription->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->expiration ) ) : '-',
+						'title'         => get_the_title( $subscription->product_id ),
+						'url'           => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
+						'status'        => $subscription->get_status(),
+						'status_label'  => $subscription->get_status_label(),
+						'status_color'  => $status_color,
+						'created'       => !empty( $subscription->created ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->created ) ) : '-',
+						'expiration'    => !empty( $subscription->expiration ) ? date_i18n( get_option( 'date_format', 'Y-m-d' ), strtotime( $subscription->expiration ) ) : '-',
+                        'billing_cycle' => sprintf(
+                        /* translators: %1$s Initial subscription amount. %2$s Billing cycle amount and cycle length */
+                            _x( '%1$s then %2$s', 'edd-recurring' ), esc_html( $initial ), esc_html( $billing )
+                        )
 					);
 				}
 			}

@@ -17,6 +17,7 @@
 					<span class="c-sb-list-item__label t-tx-charcoal-500" style="padding-bottom: 4px;">
 						<span class="c-sb-list-item__text t-tx-charcoal-300" style="font-size: 11px;"><?= __( 'Created:', 'edd-helpscout' ); ?> <?= $subscription['created'] ?></span>
 						<span class="c-sb-list-item__text t-tx-charcoal-300" style="font-size:11px;"><?= __( 'Expiration:', 'edd-helpscout' ); ?> <?= $subscription['expiration'] ?></span>
+						<span class="c-sb-list-item__text t-tx-charcoal-300" style="font-size:11px;"><?= __( 'Billing Cycle:', 'edd-recurring' ); ?> <?= $subscription['billing_cycle'] ?></span>
 					</span>
 				</li>
 			<?php endforeach ?>
