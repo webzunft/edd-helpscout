@@ -19,7 +19,7 @@
 						<span class="c-sb-list-item__text t-tx-charcoal-300" style="font-size:11px;"><?= __( 'Expiration:', 'edd-helpscout' ); ?> <?= $subscription['expiration'] ?></span>
 					</span>
 				</li>
-				<?php do_action( 'edd_helpscout_after_subscription_list_item', $subscription, $helpscout_data ); ?>
+				<?php do_action( 'edd_helpscout_after_subscription_list_item', $subscription ); ?>
 			<?php endforeach ?>
 		</ul>
 	</div>
