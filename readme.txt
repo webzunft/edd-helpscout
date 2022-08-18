@@ -3,8 +3,8 @@ Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,helpscout,edd,support,help scout
 Requires at least: 3.8
 Tested up to: 6.0
-Requires PHP: 5.6
-Stable tag: 2.2.0
+Requires PHP: 7.2
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,12 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 3. Subscriptions with status and links to the store
 
 == Changelog ==
+
+= 2.2.1 =
+
+- Improvement: added the `edd_helpscout_after_subscription_list_item` action hook to allow adding elements to the Subscriptions view
+- Improvement: increased required PHP version to 7.2
+- Fix: typo in the installation instructions
 
 = 2.2.0 =
 
