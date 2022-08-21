@@ -517,6 +517,7 @@ class Endpoint {
 					}
 
 					$subscriptions[$subscription->id] = array(
+						'id'	       => $subscription->id,
 						'title'        => get_the_title( $subscription->product_id ),
 						'url'          => esc_url( admin_url( 'edit.php?post_type=download&page=edd-subscriptions&id=' . $subscription->id ) ),
 						'status'       => $subscription->get_status(),
