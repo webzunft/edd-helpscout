@@ -1,10 +1,10 @@
 === Help Scout integration for Easy Digital Downloads ===
 Contributors: webzunft, DvanKooten, Ibericode
-Tags: easy-digital-downloads,helpscout,edd,support,help scout
-Requires at least: 3.8
-Tested up to: 6.0
+Tags: easy-digital-downloads,edd,helpscout,support,help scout
+Requires at least: 5.0
+Tested up to: 6.1
 Requires PHP: 7.2
-Stable tag: 2.2.1
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,8 +90,10 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Changelog ==
 
-= untagged =
+= 2.3.0 =
 
+- Improvement: added the `edd_helpscout_after_licenses_active_site_list_item` filter to extend output of activated sites
+- Improvement: added the subscription id to endpoint data
 - Fix: status badge of completed orders is now also green
 
 = 2.2.1 =
