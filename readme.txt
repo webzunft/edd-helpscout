@@ -90,6 +90,10 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 
 == Changelog ==
 
+= untagged =
+
+- Fix: status badge of completed orders is now also green
+
 = 2.2.1 =
 
 - Improvement: added the `edd_helpscout_after_subscription_list_item` action hook to allow adding elements to the Subscriptions view

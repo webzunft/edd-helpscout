@@ -301,6 +301,7 @@ class Endpoint {
 					$status_color = 'purple';
 					break;
 				case 'publish':
+				case 'complete':
 					$status_color = 'green';
 					break;
 				case 'refunded':
