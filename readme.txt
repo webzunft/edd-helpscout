@@ -14,6 +14,8 @@ Easy Digital Downloads integration for Help Scout. Shows purchase information ri
 
 Help Scout integration for Easy Digital Downloads is a WordPress plugin that will show customer information right from your Help Scout dashboard.
 
+Please note that Help Scout changed their App interface. **This plugin uses legacy apps**, which the Help Scout support will enable for you on request. See [this post](https://wordpress.org/support/topic/ask-help-scout-to-enable-legacy-apps/) for more information.
+
 Activating the plugin and configuring the integration will add the following information to your Help Scout dashboard:
 
 - The name of the customer and link to the profile page in EDD
