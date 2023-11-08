@@ -2,7 +2,7 @@
 Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,edd,helpscout,support,help scout
 Requires at least: 5.0
-Tested up to: 6.3
+Tested up to: 6.4
 Requires PHP: 7.2
 Stable tag: 2.3.0
 License: GPLv2 or later
@@ -13,8 +13,6 @@ Easy Digital Downloads integration for Help Scout. Shows purchase information ri
 == Description ==
 
 Help Scout integration for Easy Digital Downloads is a WordPress plugin that will show customer information right from your Help Scout dashboard.
-
-Please note that Help Scout changed their App interface. **This plugin uses legacy apps**, which the Help Scout support will enable for you on request. See [this post](https://wordpress.org/support/topic/ask-help-scout-to-enable-legacy-apps/) for more information.
 
 Activating the plugin and configuring the integration will add the following information to your Help Scout dashboard:
 
@@ -36,7 +34,7 @@ When using Easy Digital Downloads with Recurring Payments:
 
 Have a look at the [installation instructions](https://wordpress.org/plugins/edd-helpscout/installation/).
 
-> Please note that this plugin requires PHP 5.3 or higher.
+Please note that Help Scout changed their App interface. This plugin uses custom legacy apps, which you can learn more about [here](https://secure.helpscout.net/apps/custom).
 
 **More information**
 
@@ -45,7 +43,7 @@ Have a look at the [installation instructions](https://wordpress.org/plugins/edd
 
 == Installation ==
 
-To get this up an running, you'll need to configure a few things in WordPress and Help Scout.
+To get this up and running, you'll need to configure a few things in WordPress and Help Scout.
 
 = WordPress =
 
