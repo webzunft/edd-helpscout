@@ -27,6 +27,11 @@ class Endpoint {
 	/**
 	 * @var array
 	 */
+	private $edd_customers = array();
+
+	/**
+	 * @var array
+	 */
 	private $customer_emails = array();
 
 	/**
