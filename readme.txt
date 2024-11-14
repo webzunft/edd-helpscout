@@ -1,10 +1,10 @@
 === Help Scout integration for Easy Digital Downloads ===
 Contributors: webzunft, DvanKooten, Ibericode
 Tags: easy-digital-downloads,edd,helpscout,support,help scout
-Requires at least: 5.0
-Tested up to: 6.4
-Requires PHP: 7.2
-Stable tag: 2.3.0
+Requires at least: 6.0
+Tested up to: 6.7
+Requires PHP: 7.4
+Stable tag: 2.4.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -89,6 +89,12 @@ Make sure the "Secret Key" setting for your Help Scout application matches the v
 3. Subscriptions with status and links to the store
 
 == Changelog ==
+
+= 2.4.0 =
+
+- Increased required PHP version to 7.4
+- Increased required WordPress version to 6.0
+- Fix: PHP 8.2 deprecation notice, props @slaFFik
 
 = 2.3.0 =
 
